@@ -281,15 +281,16 @@ sequence = {}
 
 sequence.mt = {__index = sequence}
 
+--proxy missing table fns to table
+sequence._mt = {__index = table}
+setmetatable(sequence, sequence._mt)
+
 --upgrade a table into a functional sequence
 function sequence:new(t)
 	return setmetatable(t or {}, sequence.mt)
 end
 
 --import table functions to sequence as-is
-sequence.insert = table.insert
-sequence.remove = table.remove
-sequence.concat = table.concat
 sequence.join = table.concat                --alias
 
 --sorting
@@ -297,7 +298,7 @@ sequence.sort = table.stable_sort           --(default stable)
 sequence.stable_sort = table.stable_sort
 sequence.unstable_sort = table.sort
 
---import functional interface to sequence
+--import functional interface to sequence in a sequence preserving way
 function sequence:keys()
 	return sequence:new(table.keys(self))
 end
@@ -346,22 +347,6 @@ end
 function sequence:copy(deep)
 	return sequence:new(table.copy(self, deep))
 end
-
---
-
-sequence.any = table.any
-sequence.none = table.none
-sequence.all = table.all
-sequence.count = table.count
-sequence.contains = table.contains
-sequence.sum = table.sum
-sequence.mean = table.mean
-sequence.minmax = table.minmax
-sequence.max = table.max
-sequence.min = table.min
-sequence.find_best = table.find_best
-sequence.find_nearest = table.find_nearest
-sequence.find_match = table.find_match
 
 --generate a mapping from unique values to plain numbers
 --useful for arbitrarily ordering things that don't have

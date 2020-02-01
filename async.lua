@@ -18,7 +18,7 @@ function async:new()
 end
 
 --add a task to the kernel
-function async:run(f, args, cb, error_cb)
+function async:call(f, args, cb, error_cb)
 	table.insert(self.tasks, {
 		coroutine.create(f),
 		args,
@@ -36,7 +36,12 @@ function async:update()
 	end
 	--run a step
 	local co, args, cb, error_cb = td[1], td[2], td[3], td[4]
-	local success, a, b, c, d, e, f, g, h = coroutine.resume(co, unpack(args))
+	--(reuse these 8 temps)
+	local a, b, c, d, e, f, g, h
+	if args then
+		a, b, c, d, e, f, g, h = unpack(args)
+	end
+	local success, a, b, c, d, e, f, g, h = coroutine.resume(co, a, b, c, d, e, f, g, h)
 	--error?
 	if not success then
 		if error_cb then
@@ -46,12 +51,12 @@ function async:update()
 		end
 	end
 	--check done
-	if coroutine.status(task) == "dead" then
+	if coroutine.status(co) == "dead" then
 		--done? run callback with result
 		cb(a, b, c, d, e, f, g, h)
 	else
 		--if not done, re-add
-		table.insert(self.tasks, taskdef)
+		table.insert(self.tasks, td)
 	end
 
 	return true

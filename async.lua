@@ -1,5 +1,12 @@
 --[[
 	simple kernel for async tasks running in the background
+	
+	todo: 
+		multiple types of callbacks
+			finish, error, step
+		getting a reference to the task for manipulation
+			attaching multiple callbacks
+			cancelling
 ]]
 
 local async = class()

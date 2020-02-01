@@ -30,3 +30,5 @@ intersect = require(relative_file("intersect"))
 state_machine = require(relative_file("state_machine"))
 
 async = require(relative_file("async"))
+
+manual_gc = require(relative_file("manual_gc"))

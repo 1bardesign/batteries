@@ -83,6 +83,16 @@ function table.shuffle(t, r)
 		local j = _random(1, #t, r)
 		t[i], t[j] = t[j], t[i]
 	end
+	return t
+end
+
+--reverse the order of a table
+function table.reverse(t)
+	for i = 1, #t / 2 do
+		local j = #t - i + 1
+		t[i], t[j] = t[j], t[i]
+	end
+	return t
 end
 
 --(might already exist depending on luajit)

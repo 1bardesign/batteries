@@ -25,6 +25,7 @@ sequence = require(relative_file("sequence"))
 unique_mapping = require(relative_file("unique_mapping"))
 
 vec2 = require(relative_file("vec2"))
+vec3 = require(relative_file("vec3"))
 intersect = require(relative_file("intersect"))
 
 state_machine = require(relative_file("state_machine"))

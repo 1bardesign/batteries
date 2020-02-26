@@ -25,15 +25,17 @@ vec3.type = "vec3"
 
 --probably-too-flexible ctor
 function vec3:new(x, y, z)
-	if x and y then
+	if x and y and z then
 		return vec3:xyz(x, y, z)
 	elseif x then
 		if type(x) == "number" then
 			return vec3:filled(x)
-		elseif x.type == "vec3" then
-			return x:copy()
-		elseif type(x) == "table" and x[1] and x[2] and x[3] then
-			return vec3:xyz(x[1], x[2], x[3])
+		elseif type(x) == "table" then
+			if x.type == "vec3" then
+				return x:copy()
+			elseif x[1] and x[2] and x[3] then
+				return vec3:xyz(x[1], x[2], x[3])
+			end
 		end
 	end
 	return vec3:zero()

@@ -101,13 +101,14 @@ if table.clear == nil then
 	--useful when multiple references are floating around
 	--so you cannot just pop a new table out of nowhere
 	function table.clear(t)
-		assert(type(to) == "table", "table.overlay - argument 'to' must be a table")
+		assert(type(to) == "table", "table.clear - argument 't' must be a table")
 		while t[1] ~= nil do
 			table.remove(t)
 		end
 	end
 end
 
+--overlay one table directly onto another, shallow only
 function table.overlay(to, from)
 	assert(type(to) == "table", "table.overlay - argument 'to' must be a table")
 	assert(type(from) == "table", "table.overlay - argument 'from' must be a table")
@@ -116,3 +117,34 @@ function table.overlay(to, from)
 	end
 	return to
 end
+
+--copy a table
+--	deep_or_into is either:
+--		a boolean value, used as deep flag directly
+--		or a table to copy into, which implies a deep copy
+--	if deep specified:
+--		calls copy method of member directly if it exists
+--		and recurses into all "normal" table children
+--	if into specified, copies into that table
+--		but doesn't clear anything out
+--		(useful for deep overlays and avoiding garbage)
+function table.copy(t, deep_or_into)
+	assert(type(t) == "table", "table.copy - argument 't' must be a table")
+	local is_bool = type(deep_or_into) == "boolean"
+	local is_table = type(deep_or_into) == "table"
+
+	local deep = (is_bool and deep_or_into) or is_table
+	local into = is_table and deep_or_into or {}
+	for k,v in pairs(t) do
+		if deep and type(v) == "table" then
+			if type(v.copy) == "function" then
+				v = v:copy()
+			else
+				v = table.copy(v, deep)
+			end
+		end
+		into[k] = v
+	end
+	return into
+end
+

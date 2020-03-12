@@ -128,25 +128,6 @@ function table.append(t1, t2)
 	return r
 end
 
---copy a table
---	if deep specified:
---		calls copy method of member directly if it exists
---		and recurses into all "normal" table children
-function table.copy(t, deep)
-	local r = {}
-	for k,v in pairs(t) do
-		if deep and type(v) == "table" then
-			if type(v.copy) == "function" then
-				v = v:copy()
-			else
-				v = table.copy(v, deep)
-			end
-		end
-		r[k] = v
-	end
-	return r
-end
-
 -----------------------------------------------------------
 --common queries and reductions
 -----------------------------------------------------------

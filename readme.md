@@ -1,29 +1,33 @@
-# batteries
+# ⚡ Batteries for Lua
 
 Core dependencies for making games with lua, especially with [love](https://love2d.org).
 
 Does a lot to get projects off the ground faster, filling out lua's standard library and providing implementations of common algorithms and data structures useful for games.
 
+It's a bit of a grab bag of functionality, but quite extensively documented, and currently still under a hundred kb uncompressed, including the license and readme, so you get quite a lot per byte! Of course, feel free to trim it down for your use case as required. Many of the modules are "mostly" standalone.
+
 # Module Overview
 
-- `class` - single-inheritance oo in a single function
-- `math` - mathematical extensions
-- `table` - table handling extensions
-- `stable_sort` - a stable sorting algorithm that is also faster than table.sort under luajit
-- `functional` - functional programming facilities. `map`, `reduce`, `any`, `match`, `minmax`, `mean`...
-- `sequence` - an oo wrapper on sequential tables so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports the functional interfance.
-- `vec2` - 2d vectors with method chaining, garbage saving interface
-- `vec3` - 3d vectors as above
+- `class` - Single-inheritance oo in a single function.
+- `math` - Mathematical extensions.
+- `table` - Table handling extensions.
+- `stable_sort` - A stable sorting algorithm that is also, as a bonus, faster than table.sort under luajit.
+- `functional` - Functional programming facilities. `map`, `reduce`, `any`, `match`, `minmax`, `mean`...
+- `sequence` - An oo wrapper on sequential tables so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports the functional interfance.
+- `vec2` - 2d vectors with method chaining, garbage saving interface. A bit of a mouthful at times.
+- `vec3` - 3d vectors as above.
 - `intersect` - 2d intersection routines, a bit sparse at the moment
-- `unique_mapping` - generate a unique mapping from arbitrary lua values to numeric keys - essentially making up a consistent ordering for unordered data. niche, but useful for optimising draw batches for example, as you can't sort on textures without it.
-- `state_machine` - finite state machine implementation with state transitions and all the rest. useful for game states, ai, cutscenes...
-- `async` - async operations as coroutines. 
-- `manual_gc` - get gc out of your update/draw calls. really good when trying to get accurate profiling information. requires you to think a bit about your garbage budgets though.
-- `colour` - colour conversion routines. can also be spelled `color` if you're into that.
+- `unique_mapping` - Generate a unique mapping from arbitrary lua values to numeric keys - essentially making up a consistent ordering for unordered data. Niche, but useful for optimising draw batches for example, as you can't sort on textures without it.
+- `state_machine` - Finite state machine implementation with state transitions and all the rest. Useful for game states, ai, cutscenes...
+- `async` - Async operations as coroutines. 
+- `manual_gc` - Get GC out of your update/draw calls. Really good when trying to get accurate profiling information; no more spikes. Requires you to think a bit about your garbage budgets though.
+- `colour` - Colour conversion routines. Can also be spelled `color` if you're into that.
 
 # PRs
 
-Pull requests are welcome. If you have something "big" to add please get in touch before starting work, but I'm quite open minded!
+Pull requests are welcome!
+
+If you have something "big" to contribute please get in touch before starting work so we can make sure it fits, but I'm quite open minded!
 
 # Globals?
 
@@ -35,7 +39,7 @@ I'd strongly recommend that if you find yourself defining the above, stop and th
 
 Some folks will have good reasons, which is why the functionality is present!
 
-Others may wish to reconsider and save themselves typing batteries a few hundred times :)
+Others may wish to reconsider, and save themselves typing `batteries` a few hundred times :)
 
 # License
 

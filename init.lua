@@ -89,4 +89,5 @@ return {
 	async = _async,
 	manual_gc = _manual_gc,
 	colour = _colour,
+	color = _colour,
 }

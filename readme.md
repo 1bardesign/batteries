@@ -2,7 +2,7 @@
 
 Core dependencies for making games with lua, especially with [love](https://love2d.org).
 
-Does a lot to get projects off the ground faster, filling out lua's standard library and providing implementations of common algorithms and data structures useful for games.
+Does a lot to get projects off the ground faster, filling out lua's sparse standard library a little and providing implementations of common algorithms and data structures useful for games.
 
 It's a bit of a grab bag of functionality, but quite extensively documented, and currently still under a hundred kb uncompressed, including the license and readme, so you get quite a lot per byte! Of course, feel free to trim it down for your use case as required. Many of the modules are "mostly" standalone.
 
@@ -23,9 +23,30 @@ It's a bit of a grab bag of functionality, but quite extensively documented, and
 - `manual_gc` - Get GC out of your update/draw calls. Really good when trying to get accurate profiling information; no more spikes. Requires you to think a bit about your garbage budgets though.
 - `colour` - Colour conversion routines. Can also be spelled `color` if you're into that.
 
+# Todo/WIP list
+
+Endless, of course :)
+
+- `string` - As for table and math, would be good to have a more filled out string handling API.
+- `colour` - Bidirectional hsv conversion and friends would fit nicely here.
+- Geometry:
+	- `vec3` - Needs more fleshing out for serious use.
+	- `matrix` - A geometry focussed matrix module would made 3d work nicer.
+	- `intersect` - More routines, more optimisation :)
+- Network:
+	- Various helpers for networked systems, game focus of course.
+	- `rpc` - Remote procedure call system on top of `enet` or `socket`.
+	- `delta` - Detect and sync changes to objects.
+- Broadphase:
+	- Spatial simplification systems for different needs. Probably AABB insertion of data.
+	- `bucket_grid` - Dumb 2d bucket broadphase.
+	- `quadtree`/`octree` - Everyone's favourite ;)
+- UI
+	- Maybe adopt 1bardesign/partner in here, maybe not?
+
 # PRs
 
-Pull requests are welcome!
+Pull requests are welcome for anything!
 
 If you have something "big" to contribute please get in touch before starting work so we can make sure it fits, but I'm quite open minded!
 
@@ -43,7 +64,9 @@ Others may wish to reconsider, and save themselves typing `batteries` a few hund
 
 # Why aren't various types using `class`?
 
-To avoid a dependency on class.lua for those modules
+To avoid a dependency on class.lua for those modules when used in isolation.
+
+Makes them a little bit more of a pain internally and requires more lines of code, but means you can vendor in just the code you need with very little effort.
 
 # License
 

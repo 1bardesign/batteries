@@ -1,11 +1,15 @@
 --[[
 	extra mathematical functions
+
+	optional:
+		set BATTERIES_MATH_MODULE to a table before requiring
+		if you don't want this to modify the global `math` table
 ]]
 
-local bit = require("bit")
+local _math = BATTERIES_MATH_MODULE or math
 
 --wrap v around range [lo, hi)
-function math.wrap(v, lo, hi)
+function _math.wrap(v, lo, hi)
 	local range = hi - lo
 	local relative = v - lo
 	local relative_wrapped = relative % range
@@ -15,51 +19,51 @@ function math.wrap(v, lo, hi)
 end
 
 --clamp v to range [lo, hi]
-function math.clamp(v, lo, hi)
+function _math.clamp(v, lo, hi)
 	return math.max(lo, math.min(v, hi))
 end
 
-function math.clamp01(v)
-	return math.clamp(v, 0, 1)
+function _math.clamp01(v)
+	return _math.clamp(v, 0, 1)
 end
 
 --round v to nearest whole
-function math.round(v)
+function _math.round(v)
 	return math.floor(v + 0.5)
 end
 
 --round v to one-in x
 -- (eg x = 2, v rounded to increments of 0.5)
-function math.to_one_in(v, x)
-	return math.round(v * x) / x
+function _math.to_one_in(v, x)
+	return _math.round(v * x) / x
 end
 
 --round v to a given decimal precision
-function math.to_precision(v, decimal_points)
-	return math.to_one_in(v, math.pow(10, decimal_points))
+function _math.to_precision(v, decimal_points)
+	return _math.to_one_in(v, math.pow(10, decimal_points))
 end
 
 --0, 1, -1 sign of a scalar
-function math.sign(v)
+function _math.sign(v)
 	if v < 0 then return -1 end
 	if v > 0 then return 1 end
 	return 0
 end
 
 --linear interpolation between a and b
-function math.lerp(a, b, t)
+function _math.lerp(a, b, t)
 	return a * (1.0 - t) + b * t
 end
 
 --classic smoothstep
 --(only "safe" for 0-1 range)
-function math.smoothstep(v)
+function _math.smoothstep(v)
 	return v * v * (3 - 2 * v)
 end
 
 --classic smootherstep; zero 2nd order derivatives at 0 and 1
 --(only safe for 0-1 range)
-function math.smootherstep(v)
+function _math.smootherstep(v)
 	return v * v * v * (v * (v * 6 - 15) + 10)
 end
 
@@ -125,7 +129,7 @@ local sparse_primes_1k = {
 	6689, 7039, 7307, 7559, 7573, 7919,
 }
 
-function math.first_above(v, t)
+function _math.first_above(v, t)
 	for _,p in ipairs(t) do
 		if p > v then
 			return p
@@ -134,79 +138,30 @@ function math.first_above(v, t)
 	return t[#t]
 end
 
-function math.next_prime_1k(v)
-	return math.first_above(v, primes_1k)
+function _math.next_prime_1k(v)
+	return _math.first_above(v, primes_1k)
 end
 
-function math.next_prime_1k_sparse(v)
-	return math.first_above(v, sparse_primes_1k)
-end
-
---color handling stuff
-local band, bor = bit.band, bit.bor
-local lshift, rshift = bit.lshift, bit.rshift
-
-function math.colorToRGB(r, g, b)
-	local br = lshift(band(0xff, r * 255), 16)
-	local bg = lshift(band(0xff, g * 255), 8)
-	local bb = lshift(band(0xff, b * 255), 0)
-	return bor( br, bg, bb )
-end
-
-function math.colorToARGB(r, g, b, a)
-	local ba = lshift(band(0xff, a * 255), 24)
-	local br = lshift(band(0xff, r * 255), 16)
-	local bg = lshift(band(0xff, g * 255), 8)
-	local bb = lshift(band(0xff, b * 255), 0)
-	return bor( br, bg, bb, ba )
-end
-
-function math.colorToRGBA(r, g, b, a)
-	local br = lshift(band(0xff, r * 255), 24)
-	local bg = lshift(band(0xff, g * 255), 16)
-	local bb = lshift(band(0xff, b * 255), 8)
-	local ba = lshift(band(0xff, a * 255), 0)
-	return bor( br, bg, bb, ba )
-end
-
-function math.ARGBToColor(argb)
-	local r = rshift(band(argb, 0x00ff0000), 16) / 255.0
-	local g = rshift(band(argb, 0x0000ff00), 8)  / 255.0
-	local b = rshift(band(argb, 0x000000ff), 0)  / 255.0
-	local a = rshift(band(argb, 0xff000000), 24) / 255.0
-	return r, g, b, a
-end
-
-function math.RGBAToColor(rgba)
-	local r = rshift(band(rgba, 0xff000000), 24) / 255.0
-	local g = rshift(band(rgba, 0x00ff0000), 16) / 255.0
-	local b = rshift(band(rgba, 0x0000ff00), 8)  / 255.0
-	local a = rshift(band(rgba, 0x000000ff), 0)  / 255.0
-	return r, g, b, a
-end
-
-function math.RGBToColor(rgb)
-	local r = rshift(band(rgb, 0x00ff0000), 16) / 255.0
-	local g = rshift(band(rgb, 0x0000ff00), 8)  / 255.0
-	local b = rshift(band(rgb, 0x000000ff), 0)  / 255.0
-	local a = 1.0
-	return r, g, b, a
+function _math.next_prime_1k_sparse(v)
+	return _math.first_above(v, sparse_primes_1k)
 end
 
 --angle handling stuff
-function math.normalise_angle(a)
-	return math.wrap(a, -math.pi, math.pi)
+function _math.normalise_angle(a)
+	return _math.wrap(a, -math.pi, math.pi)
 end
 
-function math.relative_angle(a1, a2)
-	a1 = math.normalise_angle(a1)
-	a2 = math.normalise_angle(a2)
-	return math.normalise_angle(a1 - a2)
+function _math.relative_angle(a1, a2)
+	a1 = _math.normalise_angle(a1)
+	a2 = _math.normalise_angle(a2)
+	return _math.normalise_angle(a1 - a2)
 end
 
 --geometric rotation multi-return
-function math.rotate(x, y, r)
+function _math.rotate(x, y, r)
 	local s = math.sin(r)
 	local c = math.cos(r)
 	return c * x - s * y, s * x + c * y
 end
+
+return _math

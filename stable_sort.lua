@@ -1,6 +1,6 @@
 -- stable sorting routines for lua
 --
---	modifies the global table namespace so you don't have
+--	by default modifies the global table namespace so you don't have
 --	to re-require it everywhere.
 --
 --		table.stable_sort
@@ -9,6 +9,11 @@
 --			alias for the builtin unstable table.sort
 --		table.insertion_sort
 --			an insertion sort, should you prefer it
+--
+--	alternatively, adds them to either BATTERIES_SORT_MODULE or
+--	BATTERIES_TABLE_MODULE if defined
+--
+--	also returns just the interface above as a module either way
 --
 
 --this is based on MIT licensed code from Dirk Laurie and Steve Fisher
@@ -36,14 +41,15 @@
 	DEALINGS IN THE SOFTWARE.
 ]]
 
--- (modifications by Max Cahill 2018)
+-- (modifications by Max Cahill 2018, 2020)
 
 local _sort_core = {}
 
---tunable size for
-_sort_core.max_chunk_size = 24
+--tunable size for insertion sort "bottom out"
+_sort_core.max_chunk_size = 32
 
-function _sort_core.insertion_sort_impl(array, first, last, less)
+--insertion sort on a section of array
+function _sort_core._insertion_sort_impl(array, first, last, less)
 	for i = first + 1, last do
 		local k = first
 		local v = array[i]
@@ -59,7 +65,8 @@ function _sort_core.insertion_sort_impl(array, first, last, less)
 	end
 end
 
-function _sort_core.merge(array, workspace, low, middle, high, less)
+--merge sorted adjacent sections of array
+function _sort_core._merge(array, workspace, low, middle, high, less)
 	local i, j, k
 	i = 1
 	-- copy first half of array to auxiliary array
@@ -91,24 +98,25 @@ function _sort_core.merge(array, workspace, low, middle, high, less)
 	end
 end
 
-
-function _sort_core.merge_sort_impl(array, workspace, low, high, less)
+--implementation for the merge sort
+function _sort_core._merge_sort_impl(array, workspace, low, high, less)
 	if high - low <= _sort_core.max_chunk_size then
-		_sort_core.insertion_sort_impl(array, low, high, less)
+		_sort_core._insertion_sort_impl(array, low, high, less)
 	else
 		local middle = math.floor((low + high) / 2)
-		_sort_core.merge_sort_impl(array, workspace, low, middle, less)
-		_sort_core.merge_sort_impl(array, workspace, middle + 1, high, less)
-		_sort_core.merge(array, workspace, low, middle, high, less)
+		_sort_core._merge_sort_impl(array, workspace, low, middle, less)
+		_sort_core._merge_sort_impl(array, workspace, middle + 1, high, less)
+		_sort_core._merge(array, workspace, low, middle, high, less)
 	end
 end
 
-function default_less(a, b)
+--default comparison; hoisted for clarity
+local function default_less(a, b)
 	return a < b
 end
 
 --inline common setup stuff
-function _sort_core.sort_setup(array, less)
+function _sort_core._sort_setup(array, less)
 	--default less
 	less = less or default_less
 	--
@@ -127,28 +135,35 @@ end
 
 function _sort_core.stable_sort(array, less)
 	--setup
-	local trivial, n, less = _sort_core.sort_setup(array, less)
+	local trivial, n, less = _sort_core._sort_setup(array, less)
 	if not trivial then
 		--temp storage; allocate ahead of time
 		local workspace = {}
 		local middle = math.ceil(n / 2)
 		workspace[middle] = array[1]
 		--dive in
-		_sort_core.merge_sort_impl( array, workspace, 1, n, less )
+		_sort_core._merge_sort_impl( array, workspace, 1, n, less )
 	end
 	return array
 end
 
 function _sort_core.insertion_sort(array, less)
 	--setup
-	local trivial, n, less = _sort_core.sort_setup(array, less)
+	local trivial, n, less = _sort_core._sort_setup(array, less)
 	if not trivial then
-		_sort_core.insertion_sort_impl(array, 1, n, less)
+		_sort_core._insertion_sort_impl(array, 1, n, less)
 	end
 	return array
 end
 
+_sort_core.unstable_sort = table.sort
+
 --export sort core
-table.insertion_sort = _sort_core.insertion_sort
-table.stable_sort = _sort_core.stable_sort
-table.unstable_sort = table.sort
+
+local _table = BATTERIES_SORT_MODULE or BATTERIES_TABLE_MODULE or table
+
+_table.insertion_sort = _sort_core.insertion_sort
+_table.stable_sort = _sort_core.stable_sort
+_table.unstable_sort = _sort_core.unstable_sort
+
+return _sort_core

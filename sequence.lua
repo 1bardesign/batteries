@@ -7,6 +7,7 @@
 	in that case, you can still use the table methods that accept a table
 	first as method calls.
 ]]
+
 local sequence = {}
 
 sequence.mt = {__index = sequence}
@@ -20,52 +21,59 @@ function sequence:new(t)
 	return setmetatable(t or {}, sequence.mt)
 end
 
---import table functions to sequence as-is
-sequence.join = table.concat                --alias
+--alias
+sequence.join = table.concat
 
 --sorting default to stable if present
 sequence.sort = table.stable_sort or table.sort
 
---import functional interface to sequence in a sequence preserving way
+--(handle functional module delegation correctly)
+local _func = BATTERIES_FUNCTIONAL_MODULE or table
+
+--import functional interface to sequence in a type preserving way
 function sequence:keys()
-	return sequence:new(table.keys(self))
+	return sequence:new(_func.keys(self))
 end
 
 function sequence:values()
-	return sequence:new(table.values(self))
+	return sequence:new(_func.values(self))
 end
 
 function sequence:foreach(f)
-	return table.foreach(self, f)
+	return _func.foreach(self, f)
 end
 
 function sequence:reduce(f, o)
-	return table.foreach(self, f, o)
+	return _func.foreach(self, f, o)
 end
 
 function sequence:map(f)
-	return sequence:new(table.map(self, f))
+	return sequence:new(_func.map(self, f))
+end
+
+function sequence:remap(f)
+	return _func.remap(self, f)
 end
 
 function sequence:filter(f)
-	return sequence:new(table.filter(self, f))
+	return sequence:new(_func.filter(self, f))
 end
 
 function sequence:partition(f)
-	local a, b = table.partition(self, f)
+	local a, b = _func.partition(self, f)
 	return sequence:new(a), sequence:new(b)
 end
 
 function sequence:zip(other, f)
-	return sequence:new(table.zip(self, other, f))
+	return sequence:new(_func.zip(self, other, f))
 end
 
 function sequence:dedupe()
-	return table.dedupe(self)
+	return _func.dedupe(self)
 end
 
 function sequence:append_inplace(other)
-	return table.append_inplace(self, other)
+	return _func.append_inplace(self, other)
 end
 
 function sequence:append(other)
@@ -73,7 +81,7 @@ function sequence:append(other)
 end
 
 function sequence:copy(deep)
-	return sequence:new(table.copy(self, deep))
+	return sequence:new(_func.copy(self, deep))
 end
 
 return sequence

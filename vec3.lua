@@ -5,7 +5,7 @@
 --[[
 	notes:
 
-	depends on a class() function as in oo.lua
+	depends on a class() function as in batteries class.lua
 
 	some methods depend on math library extensions
 

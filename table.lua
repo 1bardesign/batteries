@@ -1,36 +1,52 @@
 --[[
 	extra table routines
+
+	optional:
+		set BATTERIES_TABLE_MODULE to a table before requiring
+		if you don't want this to modify the global `table` table
 ]]
 
+local _table = BATTERIES_TABLE_MODULE or table
+
+--apply prototype to module if it isn't the global table
+if BATTERIES_TABLE_MODULE ~= table then
+	setmetatable(BATTERIES_TABLE_MODULE, {
+		__index = table,
+	})
+end
+
+--alias
+_table.join = _table.concat
+
 --return the back element of a table
-function table.back(t)
+function _table.back(t)
 	return t[#t]
 end
 
 --remove the back element of a table and return it
-function table.pop(t)
+function _table.pop(t)
 	return table.remove(t)
 end
 
 --insert to the back of a table
-function table.push(t, v)
+function _table.push(t, v)
 	return table.insert(t, v)
 end
 
 --remove the front element of a table and return it
-function table.shift(t)
+function _table.shift(t)
 	return table.remove(t, 1)
 end
 
 --insert to the front of a table
-function table.unshift(t, v)
+function _table.unshift(t, v)
 	return table.insert(t, 1, v)
 end
 
 --find the index in a sequential table that a resides at
 --or nil if nothing was found
 --(todo: consider pairs version?)
-function table.index_of(t, a)
+function _table.index_of(t, a)
 	if a == nil then return nil end
 	for i,b in ipairs(t) do
 		if a == b then
@@ -42,8 +58,8 @@ end
 
 --remove the first instance of value from a table (linear search)
 --returns true if the value was removed, else false
-function table.remove_value(t, a)
-	local i = table.index_of(t, a)
+function _table.remove_value(t, a)
+	local i = _table.index_of(t, a)
 	if i then
 		table.remove(t, i)
 		return true
@@ -53,8 +69,8 @@ end
 
 --add a value to a table if it doesn't already exist (linear search)
 --returns true if the value was added, else false
-function table.add_value(t, a)
-	local i = table.index_of(t, a)
+function _table.add_value(t, a)
+	local i = _table.index_of(t, a)
 	if not i then
 		table.insert(t, a)
 		return true
@@ -70,7 +86,7 @@ local function _random(min, max, r)
 end
 
 --pick a random value from a table (or nil if it's empty)
-function table.pick_random(t, r)
+function _table.pick_random(t, r)
 	if #t == 0 then
 		return nil
 	end
@@ -78,7 +94,7 @@ function table.pick_random(t, r)
 end
 
 --shuffle the order of a table
-function table.shuffle(t, r)
+function _table.shuffle(t, r)
 	for i = 1, #t do
 		local j = _random(1, #t, r)
 		t[i], t[j] = t[j], t[i]
@@ -87,7 +103,7 @@ function table.shuffle(t, r)
 end
 
 --reverse the order of a table
-function table.reverse(t)
+function _table.reverse(t)
 	for i = 1, #t / 2 do
 		local j = #t - i + 1
 		t[i], t[j] = t[j], t[i]
@@ -95,28 +111,57 @@ function table.reverse(t)
 	return t
 end
 
+--collect all keys of a table into a sequential table
+--(useful if you need to iterate non-changing keys often and want an nyi tradeoff;
+--	this call will be slow but then following iterations can use ipairs)
+function _table.keys(t)
+	local r = {}
+	for k,v in pairs(t) do
+		table.insert(r, k)
+	end
+	return r
+end
+
+--collect all values of a keyed table into a sequential table
+--(shallow copy if it's already sequential)
+function _table.values(t)
+	local r = {}
+	for k,v in pairs(t) do
+		table.insert(r, v)
+	end
+	return r
+end
+
 --(might already exist depending on luajit)
-if table.clear == nil then
-	--destructively clear a numerically keyed table
-	--useful when multiple references are floating around
-	--so you cannot just pop a new table out of nowhere
-	function table.clear(t)
-		assert(type(to) == "table", "table.clear - argument 't' must be a table")
-		while t[1] ~= nil do
-			table.remove(t)
+if _table.clear == nil then
+	if _table ~= table and table.clear then
+		--import from global if it exists
+		_table.clear = table.clear
+	else
+		--remove all values from a table
+		--useful when multiple references are floating around
+		--so you cannot just pop a new table out of nowhere
+		function _table.clear(t)
+			assert(type(to) == "table", "table.clear - argument 't' must be a table")
+			local k = next(t)
+			while k ~= nil do
+				t[k] = nil
+				k = next(t)
+			end
 		end
 	end
 end
 
---overlay one table directly onto another, shallow only
-function table.overlay(to, from)
-	assert(type(to) == "table", "table.overlay - argument 'to' must be a table")
-	assert(type(from) == "table", "table.overlay - argument 'from' must be a table")
-	for k,v in pairs(from) do
-		to[k] = v
-	end
-	return to
-end
+--note: 
+--	copies and overlays are currently not satisfactory
+--
+--	i feel that copy especially tries to do too much and
+--	probably they should be split into separate functions
+--	to be both more explicit and performant, ie
+--
+--	shallow_copy, deep_copy, shallow_overlay, deep_overlay
+--
+--	input is welcome on this :)
 
 --copy a table
 --	deep_or_into is either:
@@ -128,7 +173,7 @@ end
 --	if into specified, copies into that table
 --		but doesn't clear anything out
 --		(useful for deep overlays and avoiding garbage)
-function table.copy(t, deep_or_into)
+function _table.copy(t, deep_or_into)
 	assert(type(t) == "table", "table.copy - argument 't' must be a table")
 	local is_bool = type(deep_or_into) == "boolean"
 	local is_table = type(deep_or_into) == "table"
@@ -140,7 +185,7 @@ function table.copy(t, deep_or_into)
 			if type(v.copy) == "function" then
 				v = v:copy()
 			else
-				v = table.copy(v, deep)
+				v = _table.copy(v, deep)
 			end
 		end
 		into[k] = v
@@ -148,3 +193,45 @@ function table.copy(t, deep_or_into)
 	return into
 end
 
+--overlay one table directly onto another, shallow only
+function _table.overlay(to, from)
+	assert(type(to) == "table", "table.overlay - argument 'to' must be a table")
+	assert(type(from) == "table", "table.overlay - argument 'from' must be a table")
+	for k,v in pairs(from) do
+		to[k] = v
+	end
+	return to
+end
+
+--faster unpacking for known-length tables up to 8
+--gets around nyi in luajit
+--note: you can use a larger unpack than you need as the rest
+--		can be discarded, but it "feels dirty" :)
+
+function _table.unpack2(t)
+	return t[1], t[2],
+end
+
+function _table.unpack3(t)
+	return t[1], t[2], t[3]
+end
+
+function _table.unpack4(t)
+	return t[1], t[2], t[3], t[4]
+end
+
+function _table.unpack5(t)
+	return t[1], t[2], t[3], t[4], t[5]
+end
+
+function _table.unpack6(t)
+	return t[1], t[2], t[3], t[4], t[5], t[6]
+end
+
+function _table.unpack7(t)
+	return t[1], t[2], t[3], t[4], t[5], t[6], t[7]
+end
+
+function _table.unpack8(t)
+	return t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8]
+end

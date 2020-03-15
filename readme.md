@@ -13,7 +13,7 @@ It's a bit of a grab bag of functionality, but quite extensively documented, and
 - `table` - Table handling extensions.
 - `stable_sort` - A stable sorting algorithm that is also, as a bonus, faster than table.sort under luajit.
 - `functional` - Functional programming facilities. `map`, `reduce`, `any`, `match`, `minmax`, `mean`...
-- `sequence` - An oo wrapper on sequential tables so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports the functional interfance.
+- `sequence` - An oo wrapper on sequential tables so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports chaining the functional interface above.
 - `vec2` - 2d vectors with method chaining, garbage saving interface. A bit of a mouthful at times.
 - `vec3` - 3d vectors as above.
 - `intersect` - 2d intersection routines, a bit sparse at the moment

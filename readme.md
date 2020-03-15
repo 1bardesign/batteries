@@ -36,3 +36,7 @@ I'd strongly recommend that if you find yourself defining the above, stop and th
 Some folks will have good reasons, which is why the functionality is present!
 
 Others may wish to reconsider and save themselves typing batteries a few hundred times :)
+
+# License
+
+MIT, see [here](license.txt)

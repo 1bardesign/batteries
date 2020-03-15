@@ -3,7 +3,7 @@
 --a natural ordering implied (eg textures for batching)
 
 local unique_mapping = {}
-unique_mapping.mt = {
+unique_mapping._mt = {
 	__index = unique_mapping,
 	__mode = "kv", --weak refs
 }
@@ -14,7 +14,7 @@ local _MAP_VARS = setmetatable({}, {
 })
 
 function unique_mapping:new()
-	local r =  setmetatable({}, unique_mapping.mt)
+	local r =  setmetatable({}, self._mt)
 	--set up the actual vars
 	_MAP_VARS[r] = {
 		current_index = 0,

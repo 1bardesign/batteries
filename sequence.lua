@@ -10,15 +10,15 @@
 
 local sequence = {}
 
-sequence.mt = {__index = sequence}
+sequence._mt = {__index = sequence}
 
---proxy missing table fns to table
-sequence._mt = {__index = table}
-setmetatable(sequence, sequence._mt)
+--proxy missing table fns to global table api
+sequence.__mt = {__index = table}
+setmetatable(sequence, sequence.__mt)
 
---upgrade a table into a functional sequence
+--upgrade a table into a sequence, or create a new sequence
 function sequence:new(t)
-	return setmetatable(t or {}, sequence.mt)
+	return setmetatable(t or {}, sequence._mt)
 end
 
 --alias

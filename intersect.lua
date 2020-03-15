@@ -2,15 +2,26 @@
 	geometric intersection routines
 	from simple point tests to shape vs shape tests
 
+	optimised pretty well in most places.
+
 	options for boolean or minimum separating vector results
 
 	continuous sweeps (where provided) also return the
 	time-domain position of first intersection
 
-	TODO: refactor storage to be pooled rather than fully local
+	TODO: refactor vector storage to be pooled rather than fully local
 	      so these functions can be reentrant
 ]]
 
+--import vec2 if not defined globally
+local global_vec2 = vec2
+local vec2 = global_vec2
+if not vec2 then
+	local vec2_path = (...):gsub("intersect", "vec2")
+	vec2 = require(vec2_path)
+end
+
+--module storage
 local intersect = {}
 
 --epsilon for collisions

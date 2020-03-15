@@ -5,17 +5,20 @@
 --[[
 	notes:
 
-	depends on a class() function as in batteries class.lua
-
 	some methods depend on math library extensions
 
 		math.clamp(v, min, max) - return v clamped between min and max
 		math.round(v) - round v downwards if fractional part is < 0.5
 ]]
 
-local vec2 = class()
-
+local vec2 = {}
 vec2.type = "vec2"
+
+--class
+vec2._mt = {__index = vec2}
+function vec2:init(t)
+	return setmetatable(t, self._mt)
+end
 
 --probably-too-flexible ctor
 function vec2:new(x, y)
@@ -24,10 +27,12 @@ function vec2:new(x, y)
 	elseif x then
 		if type(x) == "number" then
 			return vec2:filled(x)
-		elseif x.type == "vec2" then
-			return x:copy()
-		elseif type(x) == "table" and x[1] and x[2] then
-			return vec2:xy(x[1], x[2])
+		elseif type(x) == "table" then
+			if x.type == "vec2" then
+				return x:copy()
+			elseif x[1] and x[2] then
+				return vec2:xy(x[1], x[2])
+			end
 		end
 	end
 	return vec2:zero()

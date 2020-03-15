@@ -41,6 +41,10 @@ Some folks will have good reasons, which is why the functionality is present!
 
 Others may wish to reconsider, and save themselves typing `batteries` a few hundred times :)
 
+# Why aren't various types using `class`?
+
+To avoid a dependency on class.lua for those modules
+
 # License
 
 MIT, see [here](license.txt)

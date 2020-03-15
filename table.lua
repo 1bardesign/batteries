@@ -9,8 +9,10 @@
 local _table = BATTERIES_TABLE_MODULE or table
 
 --apply prototype to module if it isn't the global table
-if BATTERIES_TABLE_MODULE ~= table then
-	setmetatable(BATTERIES_TABLE_MODULE, {
+--so it works "as if" it was the global table api
+--upgraded with these routines
+if _table ~= table then
+	setmetatable(_table, {
 		__index = table,
 	})
 end
@@ -209,7 +211,7 @@ end
 --		can be discarded, but it "feels dirty" :)
 
 function _table.unpack2(t)
-	return t[1], t[2],
+	return t[1], t[2]
 end
 
 function _table.unpack3(t)

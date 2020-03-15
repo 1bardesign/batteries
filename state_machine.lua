@@ -12,17 +12,16 @@
 	on draw, the current state's draw callback is called
 
 	TODO: consider coroutine friendliness
-
-	depends on oo.lua supplying class()
 ]]
 
-local state_machine = class()
+local state_machine = {}
+state_machine._mt = {__index = state_machine}
 
 function state_machine:new(states, start)
-	local ret = self:init({
+	local ret = setmetatable({
 		states = states or {},
 		current_state = ""
-	})
+	}, self._mt)
 
 	if start then
 		ret:set_state(start)

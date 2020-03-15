@@ -5,7 +5,7 @@
 	todo: collect some stats on classes/optional global class registry
 ]]
 
-return local function class(inherits)
+local function class(inherits)
 	local c = {}
 	c.__mt = {__index = c}
 	--handle single inheritence
@@ -41,3 +41,5 @@ return local function class(inherits)
 	--done
 	return c
 end
+
+return class

@@ -9,12 +9,13 @@
 			cancelling
 ]]
 
-local async = class()
+local async = {}
+async._mt = {__index = async}
 
 function async:new()
-	return self:init({
+	return setmetatable({
 		tasks = {},
-	})
+	}, self._mt)
 end
 
 --add a task to the kernel

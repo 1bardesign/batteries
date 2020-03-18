@@ -32,6 +32,8 @@ function vec2:new(x, y)
 				return x:copy()
 			elseif x[1] and x[2] then
 				return vec2:xy(x[1], x[2])
+			elseif x.x and x.y then
+				return vec2:xy(x.x, x.y)
 			end
 		end
 	end

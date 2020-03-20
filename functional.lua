@@ -248,7 +248,7 @@ function _table.find_best(t, f)
 	local current_best = -math.huge
 	for k,e in pairs(t) do
 		local v = f(e, k)
-		if v > current_best then
+		if v and v > current_best then
 			current_best = v
 			current = e
 		end

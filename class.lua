@@ -19,8 +19,12 @@ local function class(inherits)
 	--performing a super construction if necessary and assigning the right metatable
 	function c:init(t, ...)
 		if inherits then
-			--super ctor, then overlay args table
-			t = table.overlay(inherits:new(...), t)
+			--construct superclass instance, then overlay args table
+			local ct = inherits:new(...)
+			for k,v in pairs(t) do
+				ct[k] = v
+			end
+			t = ct
 		end
 		--upgrade to this class and return
 		return setmetatable(t, self.__mt)

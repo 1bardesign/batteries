@@ -144,7 +144,7 @@ if _table.clear == nil then
 		--useful when multiple references are floating around
 		--so you cannot just pop a new table out of nowhere
 		function _table.clear(t)
-			assert(type(to) == "table", "table.clear - argument 't' must be a table")
+			assert(type(t) == "table", "table.clear - argument 't' must be a table")
 			local k = next(t)
 			while k ~= nil do
 				t[k] = nil

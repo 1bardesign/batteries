@@ -556,6 +556,17 @@ function vec3:lerp(other, amount)
 	return self:copy():lerpi(other, amount)
 end
 
+function vec3:lerp_epsi(other, amount, eps)
+	self.x = math.lerp_eps(self.x, other.x, amount, eps)
+	self.y = math.lerp_eps(self.y, other.y, amount, eps)
+	self.z = math.lerp_eps(self.z, other.z, amount, eps)
+	return self
+end
+
+function vec3:lerp_eps(other, amount, eps)
+	return self:copy():lerp_epsi(other, amount, eps)
+end
+
 -----------------------------------------------------------
 -- vector products and projections
 -----------------------------------------------------------

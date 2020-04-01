@@ -484,6 +484,16 @@ function vec2:lerp(other, amount)
 	return self:copy():lerpi(other, amount)
 end
 
+function vec2:lerp_epsi(other, amount, eps)
+	self.x = math.lerp_eps(self.x, other.x, amount, eps)
+	self.y = math.lerp_eps(self.y, other.y, amount, eps)
+	return self
+end
+
+function vec2:lerp_eps(other, amount, eps)
+	return self:copy():lerp_epsi(other, amount, eps)
+end
+
 -----------------------------------------------------------
 -- vector products and projections
 -----------------------------------------------------------

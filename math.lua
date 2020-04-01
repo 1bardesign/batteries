@@ -55,6 +55,16 @@ function _math.lerp(a, b, t)
 	return a * (1.0 - t) + b * t
 end
 
+--linear interpolation with a minimum "final step" distance
+--useful for making sure dynamic lerps do actually reach their final destination
+function _math.lerp_eps(a, b, t, eps)
+	local v = math.lerp(a, b, t)
+	if math.abs(v - b) < eps then
+		v = b
+	end
+	return v
+end
+
 --classic smoothstep
 --(only "safe" for 0-1 range)
 function _math.smoothstep(v)

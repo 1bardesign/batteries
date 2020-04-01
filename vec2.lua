@@ -532,6 +532,17 @@ function vec2.vrej(a, b)
 	return a:copy():vreji(b)
 end
 
+--get the winding side of p, relative to the line a-b
+-- (this is based on the signed area of the triangle a-b-p)
+-- return value:
+--	>0 when p left of line
+--	=0 when p on line
+--	<0 when p right of line
+function vec2.winding_side(a, b, p)
+	return (b.x - a.x) * (p.y - a.y)
+		 - (p.x - a.x) * (b.y - a.y)
+end
+
 -----------------------------------------------------------
 -- vector extension methods for special purposes
 --   (any common vector ops worth naming)

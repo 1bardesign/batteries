@@ -241,13 +241,28 @@ function _table.min(t)
 	return min
 end
 
+--return the element of the table that results in the lowest numeric value
+--(function receives element and index respectively)
+function _table.find_min(t, f)
+	local current = nil
+	local current_best = math.huge
+	for i, v in ipairs(t) do
+		v = f(v, i)
+		if v and v < current_best then
+			current_best = v
+			current = e
+		end
+	end
+	return current
+end
+
 --return the element of the table that results in the greatest numeric value
---(function receives element and key respectively, table evaluated in pairs order)
-function _table.find_best(t, f)
+--(function receives element and index respectively)
+function _table.find_max(t, f)
 	local current = nil
 	local current_best = -math.huge
-	for k,e in pairs(t) do
-		local v = f(e, k)
+	for i, v in ipairs(t) do
+		v = f(v, i)
 		if v and v > current_best then
 			current_best = v
 			current = e
@@ -255,6 +270,9 @@ function _table.find_best(t, f)
 	end
 	return current
 end
+
+--alias
+_table.find_best = _table.find_max
 
 --return the element of the table that results in the value nearest to the passed value
 --todo: optimise as this generates a closure each time

@@ -4,7 +4,7 @@ Core dependencies for making games with lua, especially with [love](https://love
 
 Does a lot to get projects off the ground faster, filling out lua's sparse standard library a little and providing implementations of common algorithms and data structures useful for games.
 
-It's a bit of a grab bag of functionality, but quite extensively documented, and currently still under a hundred kb uncompressed, including the license and readme, so you get quite a lot per byte! Of course, feel free to trim it down for your use case as required (see [below](#stripping-down-batteries).
+It's a bit of a grab bag of functionality, but quite extensively documented, and currently still under a hundred kb uncompressed, including the license and readme, so you get quite a lot per byte! Of course, feel free to trim it down for your use case as required (see [below](#stripping-down-batteries)).
 
 # Module Overview
 

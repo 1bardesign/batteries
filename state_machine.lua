@@ -14,20 +14,21 @@
 	TODO: consider coroutine friendliness
 ]]
 
-local state_machine = {}
-state_machine._mt = {__index = state_machine}
+local path = (...):gsub("state_machine", "")
+local class = require(path .. "class")
 
+local state_machine = class()
 function state_machine:new(states, start)
-	local ret = setmetatable({
+	self = self:init({
 		states = states or {},
 		current_state = ""
-	}, self._mt)
+	})
 
 	if start then
-		ret:set_state(start)
+		self:set_state(start)
 	end
 
-	return ret
+	return self
 end
 
 -------------------------------------------------------------------------------

@@ -13,13 +13,8 @@
 	      so these functions can be reentrant
 ]]
 
---import vec2 if not defined globally
-local global_vec2 = vec2
-local vec2 = global_vec2
-if not vec2 then
-	local vec2_path = (...):gsub("intersect", "vec2")
-	vec2 = require(vec2_path)
-end
+local path = (...):gsub("intersect", "")
+local vec2 = require(path .. "vec2")
 
 --module storage
 local intersect = {}

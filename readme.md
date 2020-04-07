@@ -27,18 +27,18 @@ It's a bit of a grab bag of functionality, but quite extensively documented, and
 
 Endless, of course :)
 
-- `string` - As for tablex and mathx, would be good to have a more filled out string handling API.
+- `stringx` - As for `tablex` and `mathx`, would be good to have a more filled out string handling API.
 - `colour` - Bidirectional hsv conversion and friends would fit nicely here.
 - Geometry:
 	- `vec3` - Needs more fleshing out for serious use.
-	- `matrix` - A geometry focussed matrix module would made 3d work nicer.
+	- `matrix` - A geometry focussed matrix module would made 3d work nicer. Possibly just `mat4`.
 	- `intersect` - More routines, more optimisation :)
 - Network:
 	- Various helpers for networked systems, game focus of course.
 	- `rpc` - Remote procedure call system on top of `enet` or `socket`.
 	- `delta` - Detect and sync changes to objects.
 - Broadphase:
-	- Spatial simplification systems for different needs. Probably AABB insertion of data.
+	- Spatial simplification systems for different needs. Probably AABB or point insertion of data.
 	- `bucket_grid` - Dumb 2d bucket broadphase.
 	- `quadtree`/`octree` - Everyone's favourite ;)
 - UI
@@ -68,7 +68,7 @@ Many of the modules "just work" on their own if you just want to vendor in somet
 
 There are some inter-dependencies in the more complex modules, which should be straightforward to detect and figure out the best course of action (include or strip out) if you want to make a stripped-down version for distribution.
 
-Currently the lib is 30kb or so compressed, including the readme.
+Currently the lib is 30kb or so compressed, including the readme, so think carefully whether you really need to worry!
 
 # License
 

@@ -1,7 +1,7 @@
 --[[
 	colour handling stuff
 
-	feel free to alias to colour
+	feel free to alias to `color` :)
 ]]
 
 local bit = require("bit")

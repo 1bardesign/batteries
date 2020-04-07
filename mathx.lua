@@ -1,15 +1,13 @@
 --[[
 	extra mathematical functions
-
-	optional:
-		set BATTERIES_MATH_MODULE to a table before requiring
-		if you don't want this to modify the global `math` table
 ]]
 
-local _math = BATTERIES_MATH_MODULE or math
+local mathx = setmetatable({}, {
+	__index = math,
+})
 
 --wrap v around range [lo, hi)
-function _math.wrap(v, lo, hi)
+function mathx.wrap(v, lo, hi)
 	local range = hi - lo
 	local relative = v - lo
 	local relative_wrapped = relative % range
@@ -19,46 +17,47 @@ function _math.wrap(v, lo, hi)
 end
 
 --clamp v to range [lo, hi]
-function _math.clamp(v, lo, hi)
+function mathx.clamp(v, lo, hi)
 	return math.max(lo, math.min(v, hi))
 end
 
-function _math.clamp01(v)
-	return _math.clamp(v, 0, 1)
+--clamp v to range [0, 1]
+function mathx.clamp01(v)
+	return mathx.clamp(v, 0, 1)
 end
 
 --round v to nearest whole
-function _math.round(v)
+function mathx.round(v)
 	return math.floor(v + 0.5)
 end
 
 --round v to one-in x
 -- (eg x = 2, v rounded to increments of 0.5)
-function _math.to_one_in(v, x)
-	return _math.round(v * x) / x
+function mathx.to_one_in(v, x)
+	return mathx.round(v * x) / x
 end
 
 --round v to a given decimal precision
-function _math.to_precision(v, decimal_points)
-	return _math.to_one_in(v, math.pow(10, decimal_points))
+function mathx.to_precision(v, decimal_points)
+	return mathx.to_one_in(v, math.pow(10, decimal_points))
 end
 
 --0, 1, -1 sign of a scalar
-function _math.sign(v)
+function mathx.sign(v)
 	if v < 0 then return -1 end
 	if v > 0 then return 1 end
 	return 0
 end
 
 --linear interpolation between a and b
-function _math.lerp(a, b, t)
+function mathx.lerp(a, b, t)
 	return a * (1.0 - t) + b * t
 end
 
 --linear interpolation with a minimum "final step" distance
 --useful for making sure dynamic lerps do actually reach their final destination
-function _math.lerp_eps(a, b, t, eps)
-	local v = math.lerp(a, b, t)
+function mathx.lerp_eps(a, b, t, eps)
+	local v = mathx.lerp(a, b, t)
 	if math.abs(v - b) < eps then
 		v = b
 	end
@@ -67,13 +66,13 @@ end
 
 --classic smoothstep
 --(only "safe" for 0-1 range)
-function _math.smoothstep(v)
+function mathx.smoothstep(v)
 	return v * v * (3 - 2 * v)
 end
 
 --classic smootherstep; zero 2nd order derivatives at 0 and 1
 --(only safe for 0-1 range)
-function _math.smootherstep(v)
+function mathx.smootherstep(v)
 	return v * v * v * (v * (v * 6 - 15) + 10)
 end
 
@@ -139,7 +138,7 @@ local sparse_primes_1k = {
 	6689, 7039, 7307, 7559, 7573, 7919,
 }
 
-function _math.first_above(v, t)
+function mathx.first_above(v, t)
 	for _,p in ipairs(t) do
 		if p > v then
 			return p
@@ -148,30 +147,30 @@ function _math.first_above(v, t)
 	return t[#t]
 end
 
-function _math.next_prime_1k(v)
-	return _math.first_above(v, primes_1k)
+function mathx.next_prime_1k(v)
+	return mathx.first_above(v, primes_1k)
 end
 
-function _math.next_prime_1k_sparse(v)
-	return _math.first_above(v, sparse_primes_1k)
+function mathx.next_prime_1k_sparse(v)
+	return mathx.first_above(v, sparse_primes_1k)
 end
 
 --angle handling stuff
-function _math.normalise_angle(a)
-	return _math.wrap(a, -math.pi, math.pi)
+function mathx.normalise_angle(a)
+	return mathx.wrap(a, -math.pi, math.pi)
 end
 
-function _math.relative_angle(a1, a2)
-	a1 = _math.normalise_angle(a1)
-	a2 = _math.normalise_angle(a2)
-	return _math.normalise_angle(a1 - a2)
+function mathx.relative_angle(a1, a2)
+	a1 = mathx.normalise_angle(a1)
+	a2 = mathx.normalise_angle(a2)
+	return mathx.normalise_angle(a1 - a2)
 end
 
 --geometric rotation multi-return
-function _math.rotate(x, y, r)
+function mathx.rotate(x, y, r)
 	local s = math.sin(r)
 	local c = math.cos(r)
 	return c * x - s * y, s * x + c * y
 end
 
-return _math
+return mathx

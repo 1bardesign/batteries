@@ -2,32 +2,14 @@
 	3d vector type
 ]]
 
---[[
-	notes:
-
-	some methods depend on math library extensions
-
-		math.clamp(v, min, max) - return v clamped between min and max
-		math.round(v) - round v downwards if fractional part is < 0.5
-]]
-
 --import vec2 if not defined globally
-local global_vec2 = vec2
-local vec2 = global_vec2
-if not vec2 then
-	local path = ...
-	local vec2_path = path:sub(1, path:len() - 1) .. "2"
-	vec2 = require(vec2_path)
-end
+local path = (...):gsub("vec3", "")
+local class = require(path .. "class")
+local vec2 = require(path .. "vec2")
+local math = require(path .. "mathx") --shadow global math module
 
-local vec3 = {}
+local vec3 = class()
 vec3.type = "vec3"
-
---class
-vec3._mt = {__index = vec3}
-function vec3:init(t)
-	return setmetatable(t, self._mt)
-end
 
 --probably-too-flexible ctor
 function vec3:new(x, y, z)

@@ -8,17 +8,18 @@
 	first as method calls.
 ]]
 
-local sequence = {}
+local path = (...):gsub("sequence", "")
+local class = require(path .. "class")
+local table = require(path .. "tablex") --shadow global table module
+local functional = require(path .. "functional")
 
-sequence._mt = {__index = sequence}
-
+local sequence = class()
 --proxy missing table fns to global table api
-sequence.__mt = {__index = table}
-setmetatable(sequence, sequence.__mt)
+setmetatable(sequence, {__index = table})
 
 --upgrade a table into a sequence, or create a new sequence
 function sequence:new(t)
-	return setmetatable(t or {}, sequence._mt)
+	return self:init(t or {})
 end
 
 --alias
@@ -27,53 +28,50 @@ sequence.join = table.concat
 --sorting default to stable if present
 sequence.sort = table.stable_sort or table.sort
 
---(handle functional module delegation correctly)
-local _func = BATTERIES_FUNCTIONAL_MODULE or table
-
---import functional interface to sequence in a type preserving way
+--import functional interface to sequence in a type-preserving way, for method chaining
 function sequence:keys()
-	return sequence:new(_func.keys(self))
+	return sequence:new(functional.keys(self))
 end
 
 function sequence:values()
-	return sequence:new(_func.values(self))
+	return sequence:new(functional.values(self))
 end
 
 function sequence:foreach(f)
-	return _func.foreach(self, f)
+	return functional.foreach(self, f)
 end
 
 function sequence:reduce(f, o)
-	return _func.foreach(self, f, o)
+	return functional.foreach(self, f, o)
 end
 
 function sequence:map(f)
-	return sequence:new(_func.map(self, f))
+	return sequence:new(functional.map(self, f))
 end
 
 function sequence:remap(f)
-	return _func.remap(self, f)
+	return functional.remap(self, f)
 end
 
 function sequence:filter(f)
-	return sequence:new(_func.filter(self, f))
+	return sequence:new(functional.filter(self, f))
 end
 
 function sequence:partition(f)
-	local a, b = _func.partition(self, f)
+	local a, b = functional.partition(self, f)
 	return sequence:new(a), sequence:new(b)
 end
 
 function sequence:zip(other, f)
-	return sequence:new(_func.zip(self, other, f))
+	return sequence:new(functional.zip(self, other, f))
 end
 
 function sequence:dedupe()
-	return _func.dedupe(self)
+	return functional.dedupe(self)
 end
 
 function sequence:append_inplace(other)
-	return _func.append_inplace(self, other)
+	return functional.append_inplace(self, other)
 end
 
 function sequence:append(other)
@@ -81,7 +79,7 @@ function sequence:append(other)
 end
 
 function sequence:copy(deep)
-	return sequence:new(_func.copy(self, deep))
+	return sequence:new(functional.copy(self, deep))
 end
 
 return sequence

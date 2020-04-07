@@ -24,18 +24,11 @@ local function require_relative(p)
 	return require(table.concat({path, p}, "."))
 end
 
-if BATTERIES_NO_GLOBALS then
-	--define local tables for everything to go into
-	BATTERIES_MATH_MODULE = {}
-	BATTERIES_TABLE_MODULE = {}
-	BATTERIES_FUNCTIONAL_MODULE = {}
-end
-
 local _class = require_relative("class")
 
-local _math = require_relative("math")
+local _mathx = require_relative("mathx")
 
-local _table = require_relative("table")
+local _tablex = require_relative("tablex")
 local _stable_sort = require_relative("stable_sort")
 
 local _functional = require_relative("functional")
@@ -54,15 +47,63 @@ local _manual_gc = require_relative("manual_gc")
 
 local _colour = require_relative("colour")
 
---export globally if required
-if not BATTERIES_NO_GLOBALS then
+--build the module
+local _batteries = {
+	--fire and forget mode function
+	export = export,
+	--
+	class = _class,
+	--support x and non-x naming
+	math = _mathx,
+	mathx = _mathx,
+	--
+	table = _tablex,
+	tablex = _tablex,
+	--sorting routines
+	stable_sort = _stable_sort,
+	sort = _stable_sort,
+	--
+	functional = _functional,
+	--
+	sequence = _sequence,
+	--
+	vec2 = _vec2,
+	vec3 = _vec3,
+	intersect = _intersect,
+	--
+	unique_mapping = _unique_mapping,
+	state_machine = _state_machine,
+	async = _async,
+	manual_gc = _manual_gc,
+	colour = _colour,
+	color = _colour,
+}
+
+--easy export globally if required
+function _batteries:export(self)
+	--export oo
 	class = _class
-	sequence = _sequence
+
+	--overlay tablex and functional and sort routines onto table
+	_tablex.overlay(table, _tablex)
+	_tablex.overlay(table, _functional)
+	_stable_sort:export()
 	
+	--functional module also available separate from table
+	functional = _functional
+
+	--export sequence
+	sequence = _sequence
+
+	--overlay onto math
+	_tablex.overlay(math, _mathx)
+
+	--export geom
 	vec2 = _vec2
 	vec3 = _vec3
 	intersect = _intersect
 
+	--misc :)
 	unique_mapping = _unique_mapping
 	state_machine = _state_machine
 	async = _async
@@ -71,23 +112,11 @@ if not BATTERIES_NO_GLOBALS then
 	--support both spellings
 	colour = _colour
 	color = _colour
+
+	--export top level module as well for ease of migration for code
+	batteries = _batteries
+
+	return self
 end
 
---either way, export to package registry
-return {
-	class = _class,
-	math = _math,
-	table = _table,
-	stable_sort = _stable_sort,
-	functional = _functional,
-	sequence = _sequence,
-	vec2 = _vec2,
-	vec3 = _vec3,
-	intersect = _intersect,
-	unique_mapping = _unique_mapping,
-	state_machine = _state_machine,
-	async = _async,
-	manual_gc = _manual_gc,
-	colour = _colour,
-	color = _colour,
-}
+return _batteries

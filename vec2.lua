@@ -2,23 +2,12 @@
 	2d vector type
 ]]
 
---[[
-	notes:
+local path = (...):gsub("vec2", "")
+local class = require(path .. "class")
+local math = require(path .. "mathx") --shadow global math module
 
-	some methods depend on math library extensions
-
-		math.clamp(v, min, max) - return v clamped between min and max
-		math.round(v) - round v downwards if fractional part is < 0.5
-]]
-
-local vec2 = {}
+local vec2 = class()
 vec2.type = "vec2"
-
---class
-vec2._mt = {__index = vec2}
-function vec2:init(t)
-	return setmetatable(t, self._mt)
-end
 
 --probably-too-flexible ctor
 function vec2:new(x, y)

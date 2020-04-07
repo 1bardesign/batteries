@@ -9,17 +9,18 @@
 
 		reduce has a similar problem, but at least arguments
 		there are clear!
-
-	optional:
-		set BATTERIES_FUNCTIONAL_MODULE to a table before requiring
-		if you don't want this to modify the global `table` table
 ]]
 
-local _table = BATTERIES_FUNCTIONAL_MODULE or table
+local path = (...):gsub("functional", "")
+local tablex = require(path .. "tablex")
+
+local functional = setmetatable({}, {
+	__index = tablex,
+})
 
 --simple sequential iteration, f is called for all elements of t
 --f can return non-nil to break the loop (and return the value)
-function _table.foreach(t, f)
+function functional.foreach(t, f)
 	for i,v in ipairs(t) do
 		local r = f(v, i)
 		if r ~= nil then
@@ -31,7 +32,7 @@ end
 --performs a left to right reduction of t using f, with o as the initial value
 -- reduce({1, 2, 3}, f, 0) -> f(f(f(0, 1), 2), 3)
 -- (but performed iteratively, so no stack smashing)
-function _table.reduce(t, f, o)
+function functional.reduce(t, f, o)
 	for i,v in ipairs(t) do
 		o = f(o, v)
 	end
@@ -40,7 +41,7 @@ end
 
 --maps a sequence {a, b, c} -> {f(a), f(b), f(c)}
 -- (automatically drops any nils due to table.insert, which can be used to simultaneously map and filter)
-function _table.map(t, f)
+function functional.map(t, f)
 	local r = {}
 	for i,v in ipairs(t) do
 		local mapped = f(v, i)
@@ -54,7 +55,7 @@ end
 --maps a sequence inplace, modifying it {a, b, c} -> {f(a), f(b), f(c)}
 -- (automatically drops any nils, which can be used to simultaneously map and filter,
 --	but this results in a linear table.remove so "careful" for big working sets)
-function _table.remap(t, f)
+function functional.remap(t, f)
 	local i = 1
 	while i <= #t do
 		local mapped = f(t[i])
@@ -69,7 +70,7 @@ function _table.remap(t, f)
 end
 
 --filters a sequence
-function _table.filter(t, f)
+function functional.filter(t, f)
 	local r = {}
 	for i,v in ipairs(t) do
 		if f(v, i) then
@@ -80,7 +81,7 @@ function _table.filter(t, f)
 end
 
 --partitions a sequence based on filter criteria
-function _table.partition(t, f)
+function functional.partition(t, f)
 	local a = {}
 	local b = {}
 	for i,v in ipairs(t) do
@@ -97,7 +98,7 @@ end
 --iteration limited by min(#t1, #t2)
 --function receives arguments (t1, t2, i)
 --nil results ignored
-function _table.zip(t1, t2, f)
+function functional.zip(t1, t2, f)
 	local ret = {}
 	local limit = math.min(#t2, #t2)
 	for i=1, limit do
@@ -114,9 +115,9 @@ end
 --return a copy of a sequence with all duplicates removed
 --	causes a little "extra" gc churn; one table and one closure
 --	as well as the copied deduped table
-function _table.dedupe(t)
+function functional.dedupe(t)
 	local seen = {}
-	return _table.filter(t, function(v)
+	return functional.filter(t, function(v)
 		if seen[v] then
 			return false
 		end
@@ -126,7 +127,7 @@ function _table.dedupe(t)
 end
 
 --append sequence t2 into t1, modifying t1
-function _table.append_inplace(t1, t2)
+function functional.append_inplace(t1, t2)
 	for i,v in ipairs(t2) do
 		table.insert(t1, v)
 	end
@@ -134,10 +135,10 @@ function _table.append_inplace(t1, t2)
 end
 
 --return a new sequence with the elements of both t1 and t2
-function _table.append(t1, t2)
+function functional.append(t1, t2)
 	local r = {}
-	append_inplace(r, t1)
-	append_inplace(r, t2)
+	functional.append_inplace(r, t1)
+	functional.append_inplace(r, t2)
 	return r
 end
 
@@ -146,7 +147,7 @@ end
 -----------------------------------------------------------
 
 --true if any element of the table matches f
-function _table.any(t, f)
+function functional.any(t, f)
 	for i,v in ipairs(t) do
 		if f(v) then
 			return true
@@ -156,7 +157,7 @@ function _table.any(t, f)
 end
 
 --true if no element of the table matches f
-function _table.none(t, f)
+function functional.none(t, f)
 	for i,v in ipairs(t) do
 		if f(v) then
 			return false
@@ -166,7 +167,7 @@ function _table.none(t, f)
 end
 
 --true if all elements of the table match f
-function _table.all(t, f)
+function functional.all(t, f)
 	for i,v in ipairs(t) do
 		if not f(v) then
 			return false
@@ -176,7 +177,7 @@ function _table.all(t, f)
 end
 
 --counts the elements of t that match f
-function _table.count(t, f)
+function functional.count(t, f)
 	local c = 0
 	for i,v in ipairs(t) do
 		if f(v) then
@@ -187,7 +188,7 @@ function _table.count(t, f)
 end
 
 --true if the table contains element e
-function _table.contains(t, e)
+function functional.contains(t, e)
 	for i, v in ipairs(t) do
 		if v == e then
 			return true
@@ -197,26 +198,26 @@ function _table.contains(t, e)
 end
 
 --return the numeric sum of all elements of t
-function _table.sum(t)
-	return _table.reduce(t, function(a, b)
+function functional.sum(t)
+	return functional.reduce(t, function(a, b)
 		return a + b
 	end, 0)
 end
 
 --return the numeric mean of all elements of t
-function _table.mean(t)
+function functional.mean(t)
 	local len = #t
 	if len == 0 then
 		return 0
 	end
-	return _table.sum(t) / len
+	return functional.sum(t) / len
 end
 
 --return the minimum and maximum of t in one pass
 --or zero for both if t is empty
 --	(would perhaps more correctly be math.huge, -math.huge
 --	 but that tends to be surprising/annoying in practice)
-function _table.minmax(t)
+function functional.minmax(t)
 	local max, min
 	for i,v in ipairs(t) do
 		min = not min and v or math.min(min, v)
@@ -230,26 +231,26 @@ function _table.minmax(t)
 end
 
 --return the maximum element of t or zero if t is empty
-function _table.max(t)
-	local min, max = _table.minmax(t)
+function functional.max(t)
+	local min, max = functional.minmax(t)
 	return max
 end
 
 --return the minimum element of t or zero if t is empty
-function _table.min(t)
-	local min, max = _table.minmax(t)
+function functional.min(t)
+	local min, max = functional.minmax(t)
 	return min
 end
 
 --return the element of the table that results in the lowest numeric value
 --(function receives element and index respectively)
-function _table.find_min(t, f)
+function functional.find_min(t, f)
 	local current = nil
-	local current_best = math.huge
-	for i, v in ipairs(t) do
-		v = f(v, i)
-		if v and v < current_best then
-			current_best = v
+	local current_min = math.huge
+	for i, e in ipairs(t) do
+		local v = f(e, i)
+		if v and v < current_min then
+			current_min = v
 			current = e
 		end
 	end
@@ -258,13 +259,13 @@ end
 
 --return the element of the table that results in the greatest numeric value
 --(function receives element and index respectively)
-function _table.find_max(t, f)
+function functional.find_max(t, f)
 	local current = nil
-	local current_best = -math.huge
-	for i, v in ipairs(t) do
-		v = f(v, i)
-		if v and v > current_best then
-			current_best = v
+	local current_max = -math.huge
+	for i, e in ipairs(t) do
+		local v = f(e, i)
+		if v and v > current_max then
+			current_max = v
 			current = e
 		end
 	end
@@ -272,18 +273,18 @@ function _table.find_max(t, f)
 end
 
 --alias
-_table.find_best = _table.find_max
+functional.find_best = functional.find_max
 
 --return the element of the table that results in the value nearest to the passed value
 --todo: optimise as this generates a closure each time
-function _table.find_nearest(t, f, v)
-	return _table.find_best(t, function(e)
+function functional.find_nearest(t, f, v)
+	return functional.find_best(t, function(e)
 		return -math.abs(f(e) - v)
 	end)
 end
 
 --return the first element of the table that results in a true filter
-function _table.find_match(t, f)
+function functional.find_match(t, f)
 	for i,v in ipairs(t) do
 		if f(v) then
 			return v
@@ -292,4 +293,4 @@ function _table.find_match(t, f)
 	return nil
 end
 
-return _table
+return functional

@@ -14,14 +14,16 @@
 			cancelling
 ]]
 
-local async = {}
-async._mt = {__index = async}
+local path = (...):gsub("async", "")
+local class = require(path .. "class")
+
+local async = class()
 
 function async:new()
-	return setmetatable({
+	return self:init({
 		tasks = {},
 		tasks_stalled = {},
-	}, self._mt)
+	})
 end
 
 --add a task to the kernel

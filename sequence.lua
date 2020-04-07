@@ -42,7 +42,7 @@ function sequence:foreach(f)
 end
 
 function sequence:reduce(f, o)
-	return functional.foreach(self, f, o)
+	return functional.reduce(self, f, o)
 end
 
 function sequence:map(f)

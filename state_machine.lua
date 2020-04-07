@@ -38,11 +38,11 @@ function state_machine:_get_state()
 	return self.states[self.current_state]
 end
 
---make an internal call, with up to 4 arguments
-function state_machine:_call(name, a, b, c, d)
+--make an internal call
+function state_machine:_call(name, ...)
 	local state = self:_get_state()
 	if state and type(state[name]) == "function" then
-		return state[name](self, state, a, b, c, d)
+		return state[name](self, state, ...)
 	end
 	return nil
 end

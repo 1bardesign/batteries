@@ -218,10 +218,16 @@ end
 --turn a table into a vaguely easy to read string
 --which is also able to be parsed by lua in most cases
 function tablex.stringify(t)
-	if type(t) ~= "table" then
+	--if the input is not a table, or it has a tostring metamethod
+	--just use tostring
+	local mt = getmetatable(t)
+	if type(t) ~= "table" or mt and mt.__tostring then
 		return tostring(t)
 	end
+
+	--otherwise, collate into member chunks
 	local chunks = {}
+	--(tracking for already-seen elements from ipairs)
 	local seen = {}
 	--sequential part first
 	for i, v in ipairs(t) do

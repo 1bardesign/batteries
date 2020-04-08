@@ -146,6 +146,20 @@ function tablex.append(t1, t2)
 	return r
 end
 
+--return a copy of a sequence with all duplicates removed
+--	causes a little "extra" gc churn of one table to track the duplicates internally
+function tablex.dedupe(t)
+	local seen = {}
+	local r = {}
+	for i,v in ipairs(t) do
+		if not seen[v] then
+			seen[v] = true
+			table.insert(r, v)
+		end
+	end
+	return r
+end
+
 --(might already exist depending on luajit)
 if table.clear then
 	--import from global if it exists

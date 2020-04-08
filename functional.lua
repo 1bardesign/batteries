@@ -112,20 +112,6 @@ function functional.zip(t1, t2, f)
 	return ret
 end
 
---return a copy of a sequence with all duplicates removed
---	causes a little "extra" gc churn; one table and one closure
---	as well as the copied deduped table
-function functional.dedupe(t)
-	local seen = {}
-	return functional.filter(t, function(v)
-		if seen[v] then
-			return false
-		end
-		seen[v] = true
-		return true
-	end)
-end
-
 -----------------------------------------------------------
 --common queries and reductions
 -----------------------------------------------------------

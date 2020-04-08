@@ -9,6 +9,11 @@ local math = require(path .. "mathx") --shadow global math module
 local vec2 = class()
 vec2.type = "vec2"
 
+--stringification
+vec2.__mt.__tostring = function(self)
+	return ("(%.2f, %.2f)"):format(self.x, self.y)
+end
+
 --probably-too-flexible ctor
 function vec2:new(x, y)
 	if x and y then

@@ -12,7 +12,7 @@ local vec3 = class()
 vec3.type = "vec3"
 
 --stringification
-vec2.__mt.__tostring = function(self)
+vec3.__mt.__tostring = function(self)
 	return ("(%.2f, %.2f, %.2f)"):format(self.x, self.y, self.z)
 end
 

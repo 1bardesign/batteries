@@ -126,22 +126,6 @@ function functional.dedupe(t)
 	end)
 end
 
---append sequence t2 into t1, modifying t1
-function functional.append_inplace(t1, t2)
-	for i,v in ipairs(t2) do
-		table.insert(t1, v)
-	end
-	return t1
-end
-
---return a new sequence with the elements of both t1 and t2
-function functional.append(t1, t2)
-	local r = {}
-	functional.append_inplace(r, t1)
-	functional.append_inplace(r, t2)
-	return r
-end
-
 -----------------------------------------------------------
 --common queries and reductions
 -----------------------------------------------------------
@@ -278,8 +262,8 @@ functional.find_best = functional.find_max
 --return the element of the table that results in the value nearest to the passed value
 --todo: optimise as this generates a closure each time
 function functional.find_nearest(t, f, v)
-	return functional.find_best(t, function(e)
-		return -math.abs(f(e) - v)
+	return functional.find_min(t, function(e)
+		return math.abs(f(e) - v)
 	end)
 end
 

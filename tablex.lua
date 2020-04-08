@@ -127,22 +127,36 @@ function tablex.values(t)
 	return r
 end
 
+--append sequence t2 into t1, modifying t1
+function tablex.append_inplace(t1, t2)
+	for i,v in ipairs(t2) do
+		table.insert(t1, v)
+	end
+	return t1
+end
+
+--return a new sequence with the elements of both t1 and t2
+function tablex.append(t1, t2)
+	local r = {}
+	tablex.append_inplace(r, t1)
+	tablex.append_inplace(r, t2)
+	return r
+end
+
 --(might already exist depending on luajit)
-if tablex.clear == nil then
-	if tablex ~= table and table.clear then
-		--import from global if it exists
-		tablex.clear = table.clear
-	else
-		--remove all values from a table
-		--useful when multiple references are floating around
-		--so you cannot just pop a new table out of nowhere
-		function tablex.clear(t)
-			assert(type(t) == "table", "table.clear - argument 't' must be a table")
-			local k = next(t)
-			while k ~= nil do
-				t[k] = nil
-				k = next(t)
-			end
+if table.clear then
+	--import from global if it exists
+	tablex.clear = table.clear
+else
+	--remove all values from a table
+	--useful when multiple references are being held
+	--so you cannot just create a new table
+	function tablex.clear(t)
+		assert(type(t) == "table", "table.clear - argument 't' must be a table")
+		local k = next(t)
+		while k ~= nil do
+			t[k] = nil
+			k = next(t)
 		end
 	end
 end
@@ -196,6 +210,33 @@ function tablex.overlay(to, from)
 		to[k] = v
 	end
 	return to
+end
+
+--turn a table into a vaguely easy to read string
+--which is also able to be parsed by lua in most cases
+function tablex.stringify(t)
+	if type(t) ~= "table" then
+		return tostring(t)
+	end
+	local chunks = {}
+	local seen = {}
+	--sequential part first
+	for i, v in ipairs(t) do
+		seen[i] = true
+		table.insert(chunks, tablex.stringify(v))
+	end
+	--non sequential follows
+	for k, v in pairs(t) do
+		if not seen[k] then
+			--encapsulate anything that's not a string
+			--todo: also keywords
+			if type(k) ~= "string" then
+				k = "[" .. tostring(k) .. "]"
+			end
+			table.insert(chunks, k .. " = " .. tablex.stringify(v))
+		end
+	end
+	return "{" .. table.concat(chunks, ", ") .. "}"
 end
 
 --faster unpacking for known-length tables up to 8

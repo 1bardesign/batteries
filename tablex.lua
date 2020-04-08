@@ -73,8 +73,11 @@ function tablex.add_value(t, a)
 	return false
 end
 
---helper for optionally passed random
-local _global_random = love.math.random or math.random
+--helper for optionally passed random; defaults to love.math.random if present, otherwise math.random
+local _global_random = math.random
+if love and love.math and love.math.random then
+	_global_random = love.math.random
+end
 local function _random(min, max, r)
 	return r and r:random(min, max) 
 		or _global_random(min, max)

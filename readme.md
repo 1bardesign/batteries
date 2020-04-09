@@ -6,6 +6,8 @@ Does a lot to get projects off the ground faster, filling out lua's sparse stand
 
 It's a bit of a grab bag of functionality, but quite extensively documented, and currently still under a hundred kb uncompressed, including the license and readme, so you get quite a lot per byte! Of course, feel free to trim it down for your use case as required (see [below](#stripping-down-batteries)).
 
+Examples [in another repo](https://github.com/1bardesign/batteries-examples) to avoid cluttering the history and filesystem here.
+
 # Module Overview
 
 - `class` - Single-inheritance oo in a single function.

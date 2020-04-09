@@ -16,6 +16,11 @@ function mathx.wrap(v, lo, hi)
 	return lo + final_wrap
 end
 
+--wrap i around the indices of t
+function mathx.wrap_index(i, t)
+	return math.floor(mathx.wrap(i, 1, #t + 1))
+end
+
 --clamp v to range [lo, hi]
 function mathx.clamp(v, lo, hi)
 	return math.max(lo, math.min(v, hi))
@@ -156,17 +161,29 @@ function mathx.next_prime_1k_sparse(v)
 end
 
 --angle handling stuff
+
+--superior constant handy for expressing things in turns
+mathx.tau = math.pi * 2
+
+--normalise angle onto the interval [-math.pi, math.pi)
+--so each angle only has a single value representing it
 function mathx.normalise_angle(a)
 	return mathx.wrap(a, -math.pi, math.pi)
 end
 
+--alias for americans
+mathx.normalize_angle = mathx.normalise_angle
+
+--get the relative turn between two angles
 function mathx.relative_angle(a1, a2)
 	a1 = mathx.normalise_angle(a1)
 	a2 = mathx.normalise_angle(a2)
 	return mathx.normalise_angle(a1 - a2)
 end
 
---geometric rotation multi-return
+--geometric rotation with multi-return
+--consider using vec2 if you need anything more complex than this,
+--but this can be very handy for little inline transformations
 function mathx.rotate(x, y, r)
 	local s = math.sin(r)
 	local c = math.cos(r)

@@ -13,6 +13,11 @@ local tablex = setmetatable({}, {
 --alias
 tablex.join = tablex.concat
 
+--return the front element of a table
+function tablex.front(t)
+	return t[1]
+end
+
 --return the back element of a table
 function tablex.back(t)
 	return t[#t]
@@ -40,12 +45,23 @@ end
 
 --find the index in a sequential table that a resides at
 --or nil if nothing was found
---(todo: consider pairs version?)
 function tablex.index_of(t, a)
 	if a == nil then return nil end
 	for i,b in ipairs(t) do
 		if a == b then
 			return i
+		end
+	end
+	return nil
+end
+
+--find the key in a keyed table that a resides at
+--or nil if nothing was found
+function tablex.key_of(t, a)
+	if a == nil then return nil end
+	for k, v in pairs(t) do
+		if a == v then
+			return k
 		end
 	end
 	return nil
@@ -72,6 +88,9 @@ function tablex.add_value(t, a)
 	end
 	return false
 end
+
+--note: keyed versions of the above aren't required; you can't double
+--up values under keys
 
 --helper for optionally passed random; defaults to love.math.random if present, otherwise math.random
 local _global_random = math.random

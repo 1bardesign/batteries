@@ -28,9 +28,10 @@ function tablex.pop(t)
 	return table.remove(t)
 end
 
---insert to the back of a table
+--insert to the back of a table, returning the table for possible chaining
 function tablex.push(t, v)
-	return table.insert(t, v)
+	table.insert(t, v)
+	return t
 end
 
 --remove the front element of a table and return it
@@ -38,9 +39,10 @@ function tablex.shift(t)
 	return table.remove(t, 1)
 end
 
---insert to the front of a table
+--insert to the front of a table, returning the table for possible chaining
 function tablex.unshift(t, v)
-	return table.insert(t, 1, v)
+	table.insert(t, 1, v)
+	return t
 end
 
 --find the index in a sequential table that a resides at

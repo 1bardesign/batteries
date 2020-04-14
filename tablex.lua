@@ -45,6 +45,25 @@ function tablex.unshift(t, v)
 	return t
 end
 
+--insert to the first position before the first larger element in the table
+--if this is used on an already sorted table, the table will remain sorted and not need re-sorting
+--todo: make it do binary search rather than linear to improve performance
+--return the table for possible chaining
+function tablex.insert_sorted(t, v, less)
+	local inserted = false
+	for i = 1, #t do
+		if less(v, t[i]) then
+			table.insert(t, i, v)
+			inserted = true
+			break
+		end
+	end
+	if not inserted then
+		table.insert(t, v)
+	end
+	return t
+end
+
 --find the index in a sequential table that a resides at
 --or nil if nothing was found
 function tablex.index_of(t, a)

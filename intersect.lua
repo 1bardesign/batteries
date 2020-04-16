@@ -65,24 +65,29 @@ end
 -- line segments
 -- todo: separate double-sided, one-sided, and pull-through (along normal) collisions?
 
+--get the nearest point on the line segment a from point b
+function intersect.nearest_point_on_line(a_start, a_end, b_pos, into)
+	if into == nil then into = vec2:zero() end
+	--direction of segment
+	local segment = a_end:pooled_copy():vsubi(a_start)
+	--detect degenerate case
+	local lensq = segment:length_squared()
+	if lensq <= COLLIDE_EPS then
+		into:vset(a_start)
+	else
+		--solve for factor along segment
+		local point_to_start = b_pos:pooled_copy():vsubi(a_start)
+		local factor = math.clamp01(point_to_start:dot(segment) / lensq)
+		point_to_start:release()
+		into:vset(segment):smuli(factor):vaddi(a_start)
+	end
+	segment:release()
+	return into
+end
+
 --vector from line seg to point
 function intersect._line_to_point(a_start, a_end, b_pos, into)
-	if into == nil then into = vec2:zero() end
-	--direction of line
-	into:vset(a_end):vsub(a_start)
-	--detect degenerate case
-	if into:length_squared() <= COLLIDE_EPS then
-		return intersect.circle_circle_collide(a_start, a_rad, b_pos, b_rad)
-	end
-	--solve for factor along line
-	local dx = (b_pos.x - a_start.x) * (a_end.x - a_start.x)
-	local dy = (b_pos.y - a_start.y) * (a_end.y - a_start.y)
-	local u = (dx + dy) / into:length_squared()
-	--clamp onto segment
-	u = math.clamp01(u)
-	--get the displacement to the nearest point (invalidate direction)
-	into:smuli(u):vaddi(a_start):vsubi(b_pos)
-	return into
+	return intersect.nearest_point_on_line(a_start, a_end, b_pos, into):vsubi(b_pos)
 end
 
 --line displacement vector from separation vector

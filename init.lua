@@ -34,6 +34,8 @@ local _stable_sort = require_relative("stable_sort")
 local _functional = require_relative("functional")
 local _sequence = require_relative("sequence")
 
+local _stringx = require_relative("stringx")
+
 local _vec2 = require_relative("vec2")
 local _vec3 = require_relative("vec3")
 local _intersect = require_relative("intersect")
@@ -59,6 +61,9 @@ local _batteries = {
 	--
 	table = _tablex,
 	tablex = _tablex,
+	--
+	string = _stringx,
+	stringx = _stringx,
 	--sorting routines
 	stable_sort = _stable_sort,
 	sort = _stable_sort,
@@ -66,7 +71,7 @@ local _batteries = {
 	functional = _functional,
 	--
 	sequence = _sequence,
-	--
+	--geom
 	vec2 = _vec2,
 	vec3 = _vec3,
 	intersect = _intersect,
@@ -97,6 +102,9 @@ function _batteries:export(self)
 
 	--overlay onto math
 	_tablex.overlay(math, _mathx)
+
+	--overlay onto string
+	_tablex.overlay(string, _stringx)
 
 	--export geom
 	vec2 = _vec2

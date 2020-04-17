@@ -276,7 +276,12 @@ function tablex.stringify(t)
 	--just use tostring
 	local mt = getmetatable(t)
 	if type(t) ~= "table" or mt and mt.__tostring then
-		return tostring(t)
+		local s = tostring(t)
+		--quote strings
+		if type(t) == "string" then
+			s = '"' .. s .. '"'
+		end
+		return s
 	end
 
 	--otherwise, collate into member chunks

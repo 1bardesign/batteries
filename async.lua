@@ -64,7 +64,7 @@ function async:update()
 	--(using unpack because coroutine is also nyi and it's core to this async model)
 	local co, args, cb, error_cb = unpack(td)
 	--(8 temps rather than table churn capturing varargs)
-	local success, a, b, c, d, e, f, g, h = coroutine.resume(co, unpack(args))
+	local success, a, b, c, d, e, f, g, h = coroutine.resume(co, args and unpack(args))
 	--error?
 	if not success then
 		if error_cb then

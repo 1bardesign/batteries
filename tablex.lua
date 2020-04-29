@@ -242,11 +242,11 @@ end
 function tablex.copy(t, deep_or_into)
 	assert(type(t) == "table", "table.copy - argument 't' must be a table")
 	local is_bool = type(deep_or_into) == "boolean"
-	local istablex = type(deep_or_into) == "table"
+	local is_table = type(deep_or_into) == "table"
 
-	local deep = (is_bool and deep_or_into) or istablex
-	local into = istablex and deep_or_into or {}
-	for k,v in pairs(t) do
+	local deep = is_bool and deep_or_into or is_table
+	local into = is_table and deep_or_into or {}
+	for k, v in pairs(t) do
 		if deep and type(v) == "table" then
 			if type(v.copy) == "function" then
 				v = v:copy()
@@ -267,6 +267,29 @@ function tablex.overlay(to, from)
 		to[k] = v
 	end
 	return to
+end
+
+--collapse the first level of a table into a new table of reduced dimensionality
+--will collapse {{1, 2}, 3, {4, 5, 6}} into {1, 2, 3, 4, 5, 6}
+--useful when collating multiple result sets, or when you got 2d data when you wanted 1d data.
+--in the former case you may just want to append_inplace though :)
+--note that non-tabular elements in the base level are preserved,
+--	but _all_ tables are collapsed; this includes any table-based types (eg a batteries.vec2),
+--	so they can't exist in the base level
+--	(... or at least, their non-ipairs members won't survive the collapse)
+function tablex.collapse(t)
+	assert(type(t) == "table", "table.collapse - argument 't' must be a table")
+	local r = {}
+	for _, v in ipairs(t) do
+		if type(v) == "table" then
+			for _, v in ipairs(v) do
+				table.insert(r, v)
+			end
+		else
+			table.insert(r, v)
+		end
+	end
+	return r
 end
 
 --faster unpacking for known-length tables up to 8

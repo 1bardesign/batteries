@@ -174,20 +174,31 @@ end
 --alias for americans
 mathx.normalize_angle = mathx.normalise_angle
 
---get the relative turn between two angles
---note: cam considering reversing this, as the (b - a) version is more useful and intuitive...
-function mathx.relative_angle(a, b)
+--get the normalised difference between two angles
+function mathx.angle_difference(a, b)
 	a = mathx.normalise_angle(a)
 	b = mathx.normalise_angle(b)
-	return mathx.normalise_angle(a - b)
+	return mathx.normalise_angle(b - a)
 end
 
---lerp between two angles
+--mathx.lerp equivalent for angles
 function mathx.lerp_angle(a, b, t)
-	--(note: if we change relative_angle this will need changing,
-	--	it's a good example of why relative_angle should probably change)
-	local dif = mathx.relative_angle(a, b)
-	return mathx.normalise_angle(a - dif * t)
+	local dif = mathx.angle_difference(a, b)
+	return mathx.normalise_angle(a + dif * t)
+end
+
+--mathx.lerp_eps equivalent for angles
+function mathx.lerp_angle_eps(a, b, t, eps)
+	--short circuit to avoid having to wrap so many angles
+	if a == b then
+		return a
+	end
+	--same logic as lerp_eps
+	local v = mathx.lerp_angle(a, b, t)
+	if math.abs(mathx.angle_difference(v, b)) < eps then
+		v = b
+	end
+	return v
 end
 
 --geometric rotation with multi-return

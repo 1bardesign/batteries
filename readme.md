@@ -17,6 +17,7 @@ Examples [in another repo](https://github.com/1bardesign/batteries-examples) to 
 - `stable_sort` - A stable sorting algorithm that is also, as a bonus, often faster than table.sort under luajit.
 - `functional` - Functional programming facilities. `map`, `reduce`, `any`, `match`, `minmax`, `mean`...
 - `sequence` - An oo wrapper on sequential tables, so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports method chaining for the `functional` interface above, which can save a lot of typing!
+- `set` - A set type supporting a full suite of set operations with fast membership testing and ipairs-style iteration.
 - `state_machine` - Finite state machine implementation with state transitions and all the rest. Useful for game states, ai, cutscenes...
 - `async` - Async operations as coroutines.
 - `manual_gc` - Get GC out of your update/draw calls. Useful when trying to get accurate profiling information; moves "randomness" of GC. Requires you to think a bit about your garbage budgets though.

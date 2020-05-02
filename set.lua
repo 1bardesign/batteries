@@ -58,6 +58,14 @@ function set:values()
 	return table.copy(self._ordered)
 end
 
+--get a direct reference to the internal list of values in the set
+--do NOT modify the result, or you'll break the set!
+--for read-only access it avoids a needless table copy
+--(eg this is sensible to pass to functional apis)
+function set:values_readonly()
+	return self._ordered
+end
+
 --modifying operations
 
 --add all the elements present in the other set

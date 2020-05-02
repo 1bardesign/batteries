@@ -1,22 +1,7 @@
 --[[
 	batteries for lua
 
-	if required as the "entire library" (ie by this file), puts everything into
-	global namespace by default as it'll presumably be commonly used
-
-	if not, several of the modules work as normal lua modules and return a table
-	for local-friendly use
-
-	the others that modify some global table can be talked into behaving as normal
-	lua modules as well by setting appropriate globals prior to inclusion
-
-	you can avoid modifying any global namespace by setting
-
-		BATTERIES_NO_GLOBALS = true
-
-	before requiring, then everything can be accessed as eg
-
-		batteries.table.stable_sort
+	a collection of helpful code to get your project off the ground faster
 ]]
 
 local path = ...
@@ -32,7 +17,9 @@ local _tablex = require_relative("tablex")
 local _stable_sort = require_relative("stable_sort")
 
 local _functional = require_relative("functional")
+
 local _sequence = require_relative("sequence")
+local _set = require_relative("set")
 
 local _stringx = require_relative("stringx")
 
@@ -69,8 +56,9 @@ local _batteries = {
 	sort = _stable_sort,
 	--
 	functional = _functional,
-	--
+	--collections
 	sequence = _sequence,
+	set = _set,
 	--geom
 	vec2 = _vec2,
 	vec3 = _vec3,
@@ -97,8 +85,9 @@ function _batteries:export(self)
 	--functional module also available separate from table
 	functional = _functional
 
-	--export sequence
+	--export collections
 	sequence = _sequence
+	set = _set
 
 	--overlay onto math
 	_tablex.overlay(math, _mathx)
@@ -111,7 +100,7 @@ function _batteries:export(self)
 	vec3 = _vec3
 	intersect = _intersect
 
-	--misc :)
+	--"misc" :)
 	unique_mapping = _unique_mapping
 	state_machine = _state_machine
 	async = _async

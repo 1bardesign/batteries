@@ -7,11 +7,17 @@
 
 local function class(inherits)
 	local c = {}
-	c.__mt = {__index = c}
-	--handle single inheritence
-	if type(inherits) == "table" and inherits.__mt then
-		setmetatable(c, inherits.__mt)
-	end
+	c.__mt = {
+		__index = c,
+	}
+	setmetatable(c, {
+		--wire up call as ctor
+		__call = function(self, ...)
+			return self:new(...)
+		end,
+		--handle single inheritence
+		__index = inherits,
+	})
 	--common class functions
 
 	--internal initialisation
@@ -41,6 +47,7 @@ local function class(inherits)
 	function c:super()
 		return inherits
 	end
+
 
 	--done
 	return c

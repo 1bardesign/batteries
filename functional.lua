@@ -70,6 +70,7 @@ function functional.remap(t, f)
 end
 
 --filters a sequence
+-- returns a table containing items where f(v) returns truthy
 function functional.filter(t, f)
 	local r = {}
 	for i,v in ipairs(t) do
@@ -80,7 +81,21 @@ function functional.filter(t, f)
 	return r
 end
 
---partitions a sequence based on filter criteria
+-- complement of filter
+-- returns a table containing items where f(v) returns falsey
+-- nil results are included so that this is an exact complement of filter; consider using partition if you need both!
+function functional.remove_if(t, f)
+	local r = {}
+	for i, v in ipairs(t) do
+		if not f(v, i) then
+			table.insert(r, v)
+		end
+	end
+	return r
+end
+
+--partitions a sequence into two, based on filter criteria
+--simultaneous filter and remove_if
 function functional.partition(t, f)
 	local a = {}
 	local b = {}
@@ -92,6 +107,20 @@ function functional.partition(t, f)
 		end
 	end
 	return a, b
+end
+
+-- returns a table where the elements in t are grouped into sequential tables by the result of f on each element.
+-- more general than partition, but requires you to know your groups ahead of time (or use numeric grouping) if you want to avoid pairs!
+function functional.group_by(t, f)
+	local result = {}
+	for i, v in ipairs(t) do
+		local group = f(v)
+		if result[group] == nil then
+			result[group] = {}
+		end
+		table.insert(result[group], v)
+	end
+	return result
 end
 
 --zips two sequences together into a new table, based on another function

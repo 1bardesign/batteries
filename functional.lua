@@ -263,4 +263,17 @@ function functional.find_match(t, f)
 	return nil
 end
 
+-- returns a table where the elements in t are grouped by the result of f on each element.
+function functional.group_by(t, f)
+	local result = {}
+	for i, v in ipairs(t) do
+		local group = f(v)
+		if result[group] == nil then
+			result[group] = {}
+		end
+		table.insert(result[group], v)
+	end
+	return result
+end
+
 return functional

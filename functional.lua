@@ -80,6 +80,17 @@ function functional.filter(t, f)
 	return r
 end
 
+-- inverse of filter - returns a table containing items where f(v) returns false.
+function functional.remove(t, f)
+	local r = {}
+	for i, v in ipairs(t) do
+		if not f(v, i) then
+			table.insert(r, v)
+		end
+	end
+	return r
+end
+
 --partitions a sequence based on filter criteria
 function functional.partition(t, f)
 	local a = {}

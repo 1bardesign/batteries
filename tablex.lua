@@ -209,7 +209,7 @@ else
 	--useful when multiple references are being held
 	--so you cannot just create a new table
 	function tablex.clear(t)
-		assert(type(t) == "table", "table.clear - argument 't' must be a table")
+		assert(type(t) == "table", "tablex.clear - argument 't' must be a table")
 		local k = next(t)
 		while k ~= nil do
 			t[k] = nil
@@ -240,7 +240,7 @@ end
 --		but doesn't clear anything out
 --		(useful for deep overlays and avoiding garbage)
 function tablex.copy(t, deep_or_into)
-	assert(type(t) == "table", "table.copy - argument 't' must be a table")
+	assert(type(t) == "table", "tablex.copy - argument 't' must be a table")
 	local is_bool = type(deep_or_into) == "boolean"
 	local is_table = type(deep_or_into) == "table"
 
@@ -259,14 +259,20 @@ function tablex.copy(t, deep_or_into)
 	return into
 end
 
---overlay one table directly onto another, shallow only
-function tablex.overlay(to, from)
-	assert(type(to) == "table", "table.overlay - argument 'to' must be a table")
-	assert(type(from) == "table", "table.overlay - argument 'from' must be a table")
-	for k,v in pairs(from) do
-		to[k] = v
+--overlay tables directly onto one another, shallow only
+--takes as many tables as required,
+--overlays them in passed order onto the first,
+--and returns the first table with the overlay(s) applied
+function tablex.overlay(a, b, ...)
+	assert(type(a) == "table", "tablex.overlay - argument 'a' must be a table")
+	assert(type(b) == "table", "tablex.overlay - argument 'b' must be a table")
+	for k,v in pairs(b) do
+		a[k] = v
 	end
-	return to
+	if ... then
+		return tablex.overlay(a, ...)
+	end
+	return a
 end
 
 --collapse the first level of a table into a new table of reduced dimensionality
@@ -278,7 +284,7 @@ end
 --	so they can't exist in the base level
 --	(... or at least, their non-ipairs members won't survive the collapse)
 function tablex.collapse(t)
-	assert(type(t) == "table", "table.collapse - argument 't' must be a table")
+	assert(type(t) == "table", "tablex.collapse - argument 't' must be a table")
 	local r = {}
 	for _, v in ipairs(t) do
 		if type(v) == "table" then

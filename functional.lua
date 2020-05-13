@@ -129,8 +129,8 @@ end
 --nil results ignored
 function functional.zip(t1, t2, f)
 	local ret = {}
-	local limit = math.min(#t2, #t2)
-	for i=1, limit do
+	local limit = math.min(#t1, #t2)
+	for i = 1, limit do
 		local v1 = t1[i]
 		local v2 = t2[i]
 		local zipped = f(v1, v2, i)

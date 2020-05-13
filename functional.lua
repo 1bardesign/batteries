@@ -142,6 +142,40 @@ function functional.zip(t1, t2, f)
 end
 
 -----------------------------------------------------------
+--generating data
+-----------------------------------------------------------
+
+--generate data into a table
+--basically a map on numeric values from 1 to count
+--nil values are omitted in the result, as for map
+function functional.generate(count, f)
+	local r = {}
+	for i = 1, count do
+		local v = f(i)
+		if v ~= nil then
+			table.insert(r, v)
+		end
+	end
+	return r
+end
+
+--2d version of the above
+--note: ends up with a 1d table;
+--	if you need a 2d table, nest 1d generate calls
+function functional.generate_2d(width, height, f)
+	local r = {}
+	for y = 1, height do
+		for x = 1, width do
+			local v = f(x, y)
+			if v ~= nil then
+				table.insert(r, v)
+			end
+		end
+	end
+	return r
+end
+
+-----------------------------------------------------------
 --common queries and reductions
 -----------------------------------------------------------
 

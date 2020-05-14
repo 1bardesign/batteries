@@ -24,7 +24,7 @@ local function class(inherits)
 	--sets up an initialised object with a default value table
 	--performing a super construction if necessary and assigning the right metatable
 	function c:init(t, ...)
-		if inherits then
+		if inherits and inherits.new then
 			--construct superclass instance, then overlay args table
 			local ct = inherits:new(...)
 			for k,v in pairs(t) do

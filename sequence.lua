@@ -1,11 +1,8 @@
 --[[
 	sequence - functional + oo wrapper for ordered tables
 
-	sort of depends on functional.lua but can be used without it, will just
-	crash if you call the functional interface
-
-	in that case, you can still use the table methods that accept a table
-	first as method calls.
+	mainly beneficial when used for method chaining
+	to save on typing and data plumbing
 ]]
 
 local path = (...):gsub("sequence", "")
@@ -13,9 +10,7 @@ local class = require(path .. "class")
 local table = require(path .. "tablex") --shadow global table module
 local functional = require(path .. "functional")
 
-local sequence = class()
---proxy missing table fns to global table api
-setmetatable(sequence, {__index = table})
+local sequence = class(table) --proxy missing table fns to tablex api
 
 --upgrade a table into a sequence, or create a new sequence
 function sequence:new(t)
@@ -28,15 +23,26 @@ sequence.join = table.concat
 --sorting default to stable if present
 sequence.sort = table.stable_sort or table.sort
 
---import functional interface to sequence in a type-preserving way, for method chaining
+--patch various interfaces in a type-preserving way, for method chaining
+
+--import copying tablex
 function sequence:keys()
-	return sequence:new(functional.keys(self))
+	return sequence(self:keys())
 end
 
 function sequence:values()
-	return sequence:new(functional.values(self))
+	return sequence(self:values())
 end
 
+function sequence:append(other)
+	return sequence(self:append(other))
+end
+
+function sequence:dedupe()
+	return sequence(self:dedupe())
+end
+
+--import functional interface
 function sequence:foreach(f)
 	return functional.foreach(self, f)
 end
@@ -46,7 +52,7 @@ function sequence:reduce(f, o)
 end
 
 function sequence:map(f)
-	return sequence:new(functional.map(self, f))
+	return sequence(functional.map(self, f))
 end
 
 function sequence:remap(f)
@@ -54,32 +60,20 @@ function sequence:remap(f)
 end
 
 function sequence:filter(f)
-	return sequence:new(functional.filter(self, f))
+	return sequence(functional.filter(self, f))
+end
+
+function sequence:remove_if(f)
+	return sequence(functional.remove_if(self, f))
 end
 
 function sequence:partition(f)
 	local a, b = functional.partition(self, f)
-	return sequence:new(a), sequence:new(b)
+	return sequence(a), sequence(b)
 end
 
 function sequence:zip(other, f)
-	return sequence:new(functional.zip(self, other, f))
-end
-
-function sequence:dedupe()
-	return functional.dedupe(self)
-end
-
-function sequence:append_inplace(other)
-	return functional.append_inplace(self, other)
-end
-
-function sequence:append(other)
-	return sequence:new():append_inplace(self):append_inplace(other)
-end
-
-function sequence:copy(deep)
-	return sequence:new(functional.copy(self, deep))
+	return sequence(functional.zip(self, other, f))
 end
 
 return sequence

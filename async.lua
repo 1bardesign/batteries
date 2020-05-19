@@ -28,19 +28,14 @@ end
 
 --add a task to the kernel
 function async:call(f, args, callback, error_callback)
-	table.insert(self.tasks, {
-		coroutine.create(f),
-		args or false,
-		callback or false,
-		error_callback or false,
-	})
+	self:add(coroutine.create(f), args, callback, error_callback)
 end
 
 --add an already-existing coroutine to the kernel
 function async:add(co, args, callback, error_callback)
 	table.insert(self.tasks, {
 		co,
-		args or false,
+		args or {},
 		callback or false,
 		error_callback or false,
 	})
@@ -64,7 +59,7 @@ function async:update()
 	--(using unpack because coroutine is also nyi and it's core to this async model)
 	local co, args, cb, error_cb = unpack(td)
 	--(8 temps rather than table churn capturing varargs)
-	local success, a, b, c, d, e, f, g, h = coroutine.resume(co, args and unpack(args))
+	local success, a, b, c, d, e, f, g, h = coroutine.resume(co, unpack(args))
 	--error?
 	if not success then
 		if error_cb then

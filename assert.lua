@@ -36,11 +36,20 @@ function assert:some(v, msg, stack_level)
 end
 
 --assert two values are equal
-function assert:equals(a, b, msg, stack_level)
+function assert:equal(a, b, msg, stack_level)
 	if a ~= b then
 		error(("assertion failed: %s is not equal to %s %s"):format(
 			tostring(a),
 			tostring(b),
+			_extra(msg)
+		), 2 + (stack_level or 0))
+	end
+end
+
+--assert two values are not equal
+function assert:not_equal(a, b, msg, stack_level)
+	if a == b then
+		error(("assertion failed: values are equal %s"):format(
 			_extra(msg)
 		), 2 + (stack_level or 0))
 	end

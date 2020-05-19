@@ -45,9 +45,18 @@ local function class(inherits)
 	--get the inherited class for super calls if/as needed
 	--allows overrides that still refer to superclass behaviour
 	function c:super()
-		return inherits
+		return inherits or c
 	end
 
+	--delegate a call to the super class, by name
+	--still a bit clumsy but cleaner than the inline equivalent
+	function c:super_call(func_name, ...)
+		local f = self:super()[func_name]
+		if f then
+			return f(self, ...)
+		end
+		error("failed super call - missing function "..tostring(func_name).." in superclass")
+	end
 
 	--done
 	return c

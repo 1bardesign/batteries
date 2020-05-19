@@ -6,6 +6,9 @@
 --so it works "as if" it was the global table api
 --upgraded with these routines
 
+local path = (...):gsub(".tablex", ".")
+local assert = require(path .. "assert")
+
 local tablex = setmetatable({}, {
 	__index = table,
 })
@@ -209,7 +212,7 @@ else
 	--useful when multiple references are being held
 	--so you cannot just create a new table
 	function tablex.clear(t)
-		assert(type(t) == "table", "tablex.clear - argument 't' must be a table")
+		assert:type(t, "table", "tablex.clear - t", 1)
 		local k = next(t)
 		while k ~= nil do
 			t[k] = nil
@@ -240,7 +243,7 @@ end
 --		but doesn't clear anything out
 --		(useful for deep overlays and avoiding garbage)
 function tablex.copy(t, deep_or_into)
-	assert(type(t) == "table", "tablex.copy - argument 't' must be a table")
+	assert:type(t, "table", "tablex.copy - t", 1)
 	local is_bool = type(deep_or_into) == "boolean"
 	local is_table = type(deep_or_into) == "table"
 
@@ -264,8 +267,8 @@ end
 --overlays them in passed order onto the first,
 --and returns the first table with the overlay(s) applied
 function tablex.overlay(a, b, ...)
-	assert(type(a) == "table", "tablex.overlay - argument 'a' must be a table")
-	assert(type(b) == "table", "tablex.overlay - argument 'b' must be a table")
+	assert:type(a, "table", "tablex.overlay - a", 1)
+	assert:type(b, "table", "tablex.overlay - b", 1)
 	for k,v in pairs(b) do
 		a[k] = v
 	end
@@ -284,7 +287,7 @@ end
 --	so they can't exist in the base level
 --	(... or at least, their non-ipairs members won't survive the collapse)
 function tablex.collapse(t)
-	assert(type(t) == "table", "tablex.collapse - argument 't' must be a table")
+	assert:type(t, "table", "tablex.collapse - t", 1)
 	local r = {}
 	for _, v in ipairs(t) do
 		if type(v) == "table" then

@@ -9,109 +9,90 @@ local function require_relative(p)
 	return require(table.concat({path, p}, "."))
 end
 
-local _class = require_relative("class")
-
-local _mathx = require_relative("mathx")
-
-local _tablex = require_relative("tablex")
-local _stable_sort = require_relative("stable_sort")
-
-local _functional = require_relative("functional")
-
-local _sequence = require_relative("sequence")
-local _set = require_relative("set")
-
-local _stringx = require_relative("stringx")
-
-local _vec2 = require_relative("vec2")
-local _vec3 = require_relative("vec3")
-local _intersect = require_relative("intersect")
-
-local _unique_mapping = require_relative("unique_mapping")
-local _state_machine = require_relative("state_machine")
-
-local _async = require_relative("async")
-
-local _manual_gc = require_relative("manual_gc")
-
-local _colour = require_relative("colour")
-
 --build the module
 local _batteries = {
-	--fire and forget mode function
-	export = export,
 	--
-	class = _class,
-	--support x and non-x naming
-	math = _mathx,
-	mathx = _mathx,
+	class = require_relative("class"),
 	--
-	table = _tablex,
-	tablex = _tablex,
-	--
-	string = _stringx,
-	stringx = _stringx,
+	assert = require_relative("assert"),
+	--extension libraries
+	mathx = require_relative("mathx"),
+	tablex = require_relative("tablex"),
+	stringx = require_relative("stringx"),
 	--sorting routines
-	stable_sort = _stable_sort,
-	sort = _stable_sort,
+	stable_sort = require_relative("stable_sort"),
 	--
-	functional = _functional,
+	functional = require_relative("functional"),
 	--collections
-	sequence = _sequence,
-	set = _set,
+	sequence = require_relative("sequence"),
+	set = require_relative("set"),
 	--geom
-	vec2 = _vec2,
-	vec3 = _vec3,
-	intersect = _intersect,
+	vec2 = require_relative("vec2"),
+	vec3 = require_relative("vec3"),
+	intersect = require_relative("intersect"),
 	--
-	unique_mapping = _unique_mapping,
-	state_machine = _state_machine,
-	async = _async,
-	manual_gc = _manual_gc,
-	colour = _colour,
-	color = _colour,
+	unique_mapping = require_relative("unique_mapping"),
+	state_machine = require_relative("state_machine"),
+	async = require_relative("async"),
+	manual_gc = require_relative("manual_gc"),
+	colour = require_relative("colour"),
 }
 
+--assign aliases
+for _, alias in ipairs({
+	{"mathx", "math"},
+	{"tablex", "table"},
+	{"stringx", "string"},
+	{"stable_sort", "sort"},
+	{"colour", "color"},
+}) do
+	_batteries[alias[2]] = _batteries[alias[1]]
+end
+
 --easy export globally if required
-function _batteries:export(self)
+function _batteries:export()
 	--export oo
-	class = _class
+	class = self.class
+
+	--export assert
+	assert = self.assert
 
 	--overlay tablex and functional and sort routines onto table
-	_tablex.overlay(table, _tablex)
-	_tablex.overlay(table, _functional)
-	_stable_sort:export()
+	self.tablex.overlay(table, self.tablex)
+	--now we can use it through table directly
+	table.overlay(table, self.functional)
+	self.stable_sort:export()
 	
 	--functional module also available separate from table
-	functional = _functional
+	functional = self.functional
 
 	--export collections
-	sequence = _sequence
-	set = _set
+	sequence = self.sequence
+	set = self.set
 
-	--overlay onto math
-	_tablex.overlay(math, _mathx)
+	--overlay onto global math table
+	table.overlay(math, self.mathx)
 
 	--overlay onto string
-	_tablex.overlay(string, _stringx)
+	table.overlay(string, self.stringx)
 
 	--export geom
-	vec2 = _vec2
-	vec3 = _vec3
-	intersect = _intersect
+	vec2 = self.vec2
+	vec3 = self.vec3
+	intersect = self.intersect
 
 	--"misc" :)
-	unique_mapping = _unique_mapping
-	state_machine = _state_machine
-	async = _async
-	manual_gc = _manual_gc
+	unique_mapping = self.unique_mapping
+	state_machine = self.state_machine
+	async = self.async
+	manual_gc = self.manual_gc
 
 	--support both spellings
-	colour = _colour
-	color = _colour
+	colour = self.colour
+	color = self.colour
 
 	--export top level module as well for ease of migration for code
-	batteries = _batteries
+	batteries = self
 
 	return self
 end

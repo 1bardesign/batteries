@@ -2,12 +2,18 @@
 	extra string routines
 ]]
 
+local path = (...):gsub(".stringx", ".")
+local assert = require(path .. "assert")
+
 local stringx = setmetatable({}, {
 	__index = string
 })
 
 --split a string on a delimiter into an ordered table
-function stringx:split(delim)
+function stringx.split(self, delim)
+	assert:type(self, "string", "stringx.split - self", 1)
+	assert:type(delim, "string", "stringx.split - delim", 1)
+
 	--we try to create as little garbage as possible!
 	--only one table to contain the result, plus the split strings.
 	--so we do two passes, and  work with the bytes underlying the string
@@ -63,8 +69,8 @@ end
 
 --turn input into a vaguely easy to read string
 --(which is also able to be parsed by lua in many cases)
---todo: multi-line for big tables
---todo: support self-referential tables at least without crashing :)
+--todo: multi-line/indent for big tables
+--todo: support cyclic references without crashing :)
 function stringx.pretty(input)
 	--if the input is not a table, or it has a tostring metamethod
 	--then we can just use tostring

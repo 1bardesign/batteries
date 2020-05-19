@@ -26,6 +26,15 @@ local function _extra(msg)
 	return "(note: " .. msg .. ")"
 end
 
+--assert a value is not nil
+function assert:some(v, msg, stack_level)
+	if v == nil then
+		error(("assertion failed: value is nil %s"):format(
+			_extra(msg)
+		), 2 + (stack_level or 0))
+	end
+end
+
 --assert two values are equal
 function assert:equals(a, b, msg, stack_level)
 	if a ~= b then

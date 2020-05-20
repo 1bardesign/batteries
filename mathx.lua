@@ -83,6 +83,11 @@ end
 
 --todo: various other easing curves
 
+--nan checking
+function mathx.isnan(v)
+	return v ~= v
+end
+
 --prime number stuff
 local primes_1k = {
 	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,

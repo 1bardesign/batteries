@@ -55,7 +55,9 @@ local function class(inherits)
 	--plus handles heirarchical complications, and detects various mistakes
 	function c:super_call(func_name, ...)
 		--
-		assert(type(func_name) == "string", "super_call requires a string function name to look up")
+		if type(func_name) ~= "string" then
+			error("super_call requires a string function name to look up, got "..tostring(func_name))
+		end
 		--todo: memoize the below :)
 		local first_impl = c
 		--find the first superclass that actually has the method

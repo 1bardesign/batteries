@@ -69,9 +69,8 @@ end
 
 --turn input into a vaguely easy to read string
 --(which is also able to be parsed by lua in many cases)
---todo: multi-line/indent for big tables
 --todo: support cyclic references without crashing :)
-function stringx.pretty(input)
+function stringx.pretty(input, indent, after)
 	--if the input is not a table, or it has a tostring metamethod
 	--then we can just use tostring
 	local mt = getmetatable(input)
@@ -84,6 +83,22 @@ function stringx.pretty(input)
 		return s
 	end
 
+	--resolve indentation requirements
+	indent = indent or ""
+	if type(indent) == "number" then
+		indent = (" "):rep(indent)
+	end
+	newline = indent == "" and "" or "\n"
+	separator = indent == "" and ", " or ",\n"..indent
+
+	local function internal_value(v)
+		v = stringx.pretty(v, indent, after)
+		if indent ~= "" then
+			v = v:gsub(newline, newline..indent)
+		end
+		return v
+	end
+
 	--otherwise, we've got to build up a table representation
 	--collate into member chunks
 	local chunks = {}
@@ -93,7 +108,7 @@ function stringx.pretty(input)
 	--(in practice, pairs already does this, but the order isn't guaranteed)
 	for i, v in ipairs(input) do
 		seen[i] = true
-		table.insert(chunks, stringx.pretty(v))
+		table.insert(chunks, internal_value(v))
 	end
 	--non sequential follows
 	for k, v in pairs(input) do
@@ -103,10 +118,32 @@ function stringx.pretty(input)
 			if type(k) ~= "string" then
 				k = "[" .. tostring(k) .. "]"
 			end
-			table.insert(chunks, k .. " = " .. stringx.pretty(v))
+			table.insert(chunks, k .. " = " .. internal_value(v))
 		end
 	end
-	return "{" .. table.concat(chunks, ", ") .. "}"
+
+	--resolve number to newline skip after
+	after = after or 1
+	if after and after > 1 then
+		local line_chunks = {}
+		while #chunks > 0 do
+			local line = {}
+			for i = 1, after do
+				if #chunks == 0 then
+					break
+				end
+				local v = table.remove(chunks, 1)
+				table.insert(line, v)
+			end
+			table.insert(line_chunks, table.concat(line, ", "))
+		end
+		chunks = line_chunks
+	end
+
+
+	return "{" .. newline ..
+		indent .. table.concat(chunks, separator) .. newline ..
+	"}"
 end
 
 return stringx

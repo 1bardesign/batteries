@@ -18,6 +18,11 @@ local functional = setmetatable({}, {
 	__index = tablex,
 })
 
+--the identity function
+function functional.identity(v)
+	return v
+end
+
 --simple sequential iteration, f is called for all elements of t
 --f can return non-nil to break the loop (and return the value)
 function functional.foreach(t, f)
@@ -161,7 +166,7 @@ end
 
 --2d version of the above
 --note: ends up with a 1d table;
---	if you need a 2d table, nest 1d generate calls
+--	if you need a 2d table, you should nest 1d generate calls
 function functional.generate_2d(width, height, f)
 	local r = {}
 	for y = 1, height do

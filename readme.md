@@ -10,22 +10,26 @@ Examples [in another repo](https://github.com/1bardesign/batteries-examples) to 
 
 # Module Overview
 
-- `class` - Single-inheritance oo in a single function.
+**Lua Core Extensions:**
 - `mathx` - Mathematical extensions. Alias `math`.
 - `tablex` - Table handling extensions. Alias `table`.
 - `stringx` - String handling extensions. Alias `string`.
-- `stable_sort` - A stable sorting algorithm that is also, as a bonus, often faster than table.sort under luajit.
+**General Utility:**
+- `class` - Single-inheritance oo in a single function.
 - `functional` - Functional programming facilities. `map`, `reduce`, `any`, `match`, `minmax`, `mean`...
-- `sequence` - An oo wrapper on sequential tables, so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports method chaining for the `functional` interface above, which can save a lot of typing!
+- `sequence` - An oo wrapper on sequential tables, so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports method chaining for the `functional` interface above, which can save a lot of needless typing!
 - `set` - A set type supporting a full suite of set operations with fast membership testing and ipairs-style iteration.
+- `sort` - Provides a stable merge+insertion sorting algorithm that is also, as a bonus, often faster than `table.sort` under luajit. Also exposes `insertion_sort` if needed. Alias `stable_sort`
 - `state_machine` - Finite state machine implementation with state transitions and all the rest. Useful for game states, ai, cutscenes...
-- `async` - Async operations as coroutines.
-- `manual_gc` - Get GC out of your update/draw calls. Useful when trying to get accurate profiling information; moves "randomness" of GC. Requires you to think a bit about your garbage budgets though.
-- `colour` - Colour conversion routines. Alias `color`.
-- `unique_mapping` - Generate a unique mapping from arbitrary lua values to numeric keys - essentially making up a consistent ordering for unordered data. Niche, but can be used to optimise draw batches for example, as you can't sort on textures without it.
+**Geometry:**
+- `intersect` - 2d intersection routines, a bit sparse at the moment
 - `vec2` - 2d vectors with method chaining, garbage saving interface. A bit of a mouthful at times, but you get used to it.
 - `vec3` - 3d vectors as above.
-- `intersect` - 2d intersection routines, a bit sparse at the moment
+**Misc:**
+- `async` - Async operations as coroutines.
+- `colour` - Colour conversion routines. Alias `color`.
+- `manual_gc` - Get GC out of your update/draw calls. Useful when trying to get accurate profiling information; moves "randomness" of GC. Requires you to think a bit about your garbage budgets though.
+- `unique_mapping` - Generate a unique mapping from arbitrary lua values to numeric keys - essentially making up a consistent ordering for unordered data. Niche, but can be used to optimise draw batches for example, as you can't sort on textures without it.
 
 Aliases are provided at both the `batteries` level and globally when exported.
 

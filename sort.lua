@@ -1,9 +1,9 @@
 --[[
-	stable sorting routines
+	various sorting routines
 ]]
 
---this is based on MIT licensed code from Dirk Laurie and Steve Fisher
---license as follows:
+--this is based on code from Dirk Laurie and Steve Fisher,
+--used under license as follows:
 
 --[[
 	Copyright © 2013 Dirk Laurie and Steve Fisher.
@@ -29,13 +29,13 @@
 
 -- (modifications by Max Cahill 2018, 2020)
 
-local sort_core = {}
+local sort = {}
 
 --tunable size for insertion sort "bottom out"
-sort_core.max_chunk_size = 32
+sort.max_chunk_size = 32
 
 --insertion sort on a section of array
-function sort_core._insertion_sort_impl(array, first, last, less)
+function sort._insertion_sort_impl(array, first, last, less)
 	for i = first + 1, last do
 		local k = first
 		local v = array[i]
@@ -52,7 +52,7 @@ function sort_core._insertion_sort_impl(array, first, last, less)
 end
 
 --merge sorted adjacent sections of array
-function sort_core._merge(array, workspace, low, middle, high, less)
+function sort._merge(array, workspace, low, middle, high, less)
 	local i, j, k
 	i = 1
 	-- copy first half of array to auxiliary array
@@ -85,14 +85,14 @@ function sort_core._merge(array, workspace, low, middle, high, less)
 end
 
 --implementation for the merge sort
-function sort_core._merge_sort_impl(array, workspace, low, high, less)
-	if high - low <= sort_core.max_chunk_size then
-		sort_core._insertion_sort_impl(array, low, high, less)
+function sort._merge_sort_impl(array, workspace, low, high, less)
+	if high - low <= sort.max_chunk_size then
+		sort._insertion_sort_impl(array, low, high, less)
 	else
 		local middle = math.floor((low + high) / 2)
-		sort_core._merge_sort_impl(array, workspace, low, middle, less)
-		sort_core._merge_sort_impl(array, workspace, middle + 1, high, less)
-		sort_core._merge(array, workspace, low, middle, high, less)
+		sort._merge_sort_impl(array, workspace, low, middle, less)
+		sort._merge_sort_impl(array, workspace, middle + 1, high, less)
+		sort._merge(array, workspace, low, middle, high, less)
 	end
 end
 
@@ -102,7 +102,7 @@ local function default_less(a, b)
 end
 
 --inline common setup stuff
-function sort_core._sort_setup(array, less)
+function sort._sort_setup(array, less)
 	--default less
 	less = less or default_less
 	--
@@ -119,36 +119,36 @@ function sort_core._sort_setup(array, less)
 	return trivial, n, less
 end
 
-function sort_core.stable_sort(array, less)
+function sort.stable_sort(array, less)
 	--setup
-	local trivial, n, less = sort_core._sort_setup(array, less)
+	local trivial, n, less = sort._sort_setup(array, less)
 	if not trivial then
 		--temp storage; allocate ahead of time
 		local workspace = {}
 		local middle = math.ceil(n / 2)
 		workspace[middle] = array[1]
 		--dive in
-		sort_core._merge_sort_impl( array, workspace, 1, n, less )
+		sort._merge_sort_impl( array, workspace, 1, n, less )
 	end
 	return array
 end
 
-function sort_core.insertion_sort(array, less)
+function sort.insertion_sort(array, less)
 	--setup
-	local trivial, n, less = sort_core._sort_setup(array, less)
+	local trivial, n, less = sort._sort_setup(array, less)
 	if not trivial then
-		sort_core._insertion_sort_impl(array, 1, n, less)
+		sort._insertion_sort_impl(array, 1, n, less)
 	end
 	return array
 end
 
-sort_core.unstable_sort = table.sort
+sort.unstable_sort = table.sort
 
 --export sort core to the global table module
-function sort_core:export()
-	table.insertion_sort = sort_core.insertion_sort
-	table.stable_sort = sort_core.stable_sort
-	table.unstable_sort = sort_core.unstable_sort
+function sort:export()
+	table.insertion_sort = sort.insertion_sort
+	table.stable_sort = sort.stable_sort
+	table.unstable_sort = sort.unstable_sort
 end
 
-return sort_core
+return sort

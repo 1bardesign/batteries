@@ -20,7 +20,7 @@ local _batteries = {
 	tablex = require_relative("tablex"),
 	stringx = require_relative("stringx"),
 	--sorting routines
-	stable_sort = require_relative("stable_sort"),
+	sort = require_relative("sort"),
 	--
 	functional = require_relative("functional"),
 	--collections
@@ -43,7 +43,7 @@ for _, alias in ipairs({
 	{"mathx", "math"},
 	{"tablex", "table"},
 	{"stringx", "string"},
-	{"stable_sort", "sort"},
+	{"sort", "stable_sort"},
 	{"colour", "color"},
 }) do
 	_batteries[alias[2]] = _batteries[alias[1]]
@@ -61,8 +61,8 @@ function _batteries:export()
 	self.tablex.overlay(table, self.tablex)
 	--now we can use it through table directly
 	table.overlay(table, self.functional)
-	self.stable_sort:export()
-	
+	self.sort:export()
+
 	--functional module also available separate from table
 	functional = self.functional
 

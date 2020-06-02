@@ -12,6 +12,7 @@
 		getting a reference to the task for manipulation
 			attaching multiple callbacks
 			cancelling
+`		proper error traces with internal xpcall?
 ]]
 
 local path = (...):gsub("async", "")

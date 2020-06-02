@@ -9,6 +9,7 @@ local path = (...):gsub("sequence", "")
 local class = require(path .. "class")
 local table = require(path .. "tablex") --shadow global table module
 local functional = require(path .. "functional")
+local stable_sort = require(path .. "sort").stable_sort
 
 local sequence = class(table) --proxy missing table fns to tablex api
 
@@ -17,29 +18,34 @@ function sequence:new(t)
 	return self:init(t or {})
 end
 
---alias
-sequence.join = table.concat
-
---sorting default to stable if present
-sequence.sort = table.stable_sort or table.sort
+--sorting default to stable
+sequence.sort = stable_sort
 
 --patch various interfaces in a type-preserving way, for method chaining
 
 --import copying tablex
 function sequence:keys()
-	return sequence(self:keys())
+	return sequence(table.keys(self))
 end
 
 function sequence:values()
-	return sequence(self:values())
-end
-
-function sequence:append(other)
-	return sequence(self:append(other))
+	return sequence(table.values(self))
 end
 
 function sequence:dedupe()
-	return sequence(self:dedupe())
+	return sequence(table.dedupe(self))
+end
+
+function sequence:append(...)
+	return sequence(table.append(self, ...))
+end
+
+function sequence:overlay(...)
+	return sequence(table.overlay(self, ...))
+end
+
+function sequence:copy(...)
+	return sequence(table.copy(self, ...))
 end
 
 --import functional interface

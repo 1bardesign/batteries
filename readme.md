@@ -11,11 +11,17 @@ Examples [in another repo](https://github.com/1bardesign/batteries-examples) to 
 # Module Overview
 
 **Lua Core Extensions:**
+
+Extensions to existing lua core modules to patch up some missing features.
+
 - `mathx` - Mathematical extensions. Alias `math`.
 - `tablex` - Table handling extensions. Alias `table`.
 - `stringx` - String handling extensions. Alias `string`.
 
 **General Utility:**
+
+General utility data structures and algorithms to speed you along your way.
+
 - `class` - Single-inheritance oo in a single function.
 - `functional` - Functional programming facilities. `map`, `reduce`, `any`, `match`, `minmax`, `mean`...
 - `sequence` - An oo wrapper on sequential tables, so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports method chaining for the `functional` interface above, which can save a lot of needless typing!
@@ -24,12 +30,18 @@ Examples [in another repo](https://github.com/1bardesign/batteries-examples) to 
 - `state_machine` - Finite state machine implementation with state transitions and all the rest. Useful for game states, ai, cutscenes...
 
 **Geometry:**
-- `intersect` - 2d intersection routines, a bit sparse at the moment
-- `vec2` - 2d vectors with method chaining, garbage saving interface. A bit of a mouthful at times, but you get used to it.
+
+Modules to help work with spatial concepts.
+
+- `intersect` - 2d intersection routines, a bit sparse at the moment.
+- `vec2` - 2d vectors with method chaining, and garbage saving modifying operations. A bit of a mouthful at times, but you get used to it. (there's an issue discussing future solutions)
 - `vec3` - 3d vectors as above.
 
-**Misc:**
-- `async` - Async operations as coroutines.
+**Special Interest:**
+
+These modules are probably only useful to some folks in some circumstances, or are under-polished for one reason or another.
+
+- `async` - Asynchronous/"Background" task management.
 - `colour` - Colour conversion routines. Alias `color`.
 - `manual_gc` - Get GC out of your update/draw calls. Useful when trying to get accurate profiling information; moves "randomness" of GC. Requires you to think a bit about your garbage budgets though.
 - `unique_mapping` - Generate a unique mapping from arbitrary lua values to numeric keys - essentially making up a consistent ordering for unordered data. Niche, but can be used to optimise draw batches for example, as you can't sort on textures without it.

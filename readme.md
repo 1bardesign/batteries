@@ -14,6 +14,7 @@ Examples [in another repo](https://github.com/1bardesign/batteries-examples) to 
 - `mathx` - Mathematical extensions. Alias `math`.
 - `tablex` - Table handling extensions. Alias `table`.
 - `stringx` - String handling extensions. Alias `string`.
+
 **General Utility:**
 - `class` - Single-inheritance oo in a single function.
 - `functional` - Functional programming facilities. `map`, `reduce`, `any`, `match`, `minmax`, `mean`...
@@ -21,10 +22,12 @@ Examples [in another repo](https://github.com/1bardesign/batteries-examples) to 
 - `set` - A set type supporting a full suite of set operations with fast membership testing and ipairs-style iteration.
 - `sort` - Provides a stable merge+insertion sorting algorithm that is also, as a bonus, often faster than `table.sort` under luajit. Also exposes `insertion_sort` if needed. Alias `stable_sort`
 - `state_machine` - Finite state machine implementation with state transitions and all the rest. Useful for game states, ai, cutscenes...
+
 **Geometry:**
 - `intersect` - 2d intersection routines, a bit sparse at the moment
 - `vec2` - 2d vectors with method chaining, garbage saving interface. A bit of a mouthful at times, but you get used to it.
 - `vec3` - 3d vectors as above.
+
 **Misc:**
 - `async` - Async operations as coroutines.
 - `colour` - Colour conversion routines. Alias `color`.

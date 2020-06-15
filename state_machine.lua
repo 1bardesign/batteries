@@ -167,7 +167,7 @@ function state_machine:as_state(enter_state)
 		self._as_state = {
 			enter = function(m, s)
 				self.parent = m
-				self:set_state(enter_state)
+				self:set_state(enter_state, true)
 			end,
 			update = function(m, s, dt)
 				return self:update(dt)

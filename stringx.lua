@@ -88,8 +88,8 @@ function stringx.pretty(input, indent, after)
 	if type(indent) == "number" then
 		indent = (" "):rep(indent)
 	end
-	newline = indent == "" and "" or "\n"
-	separator = indent == "" and ", " or ",\n"..indent
+
+	local newline = indent == "" and "" or "\n"
 
 	local function internal_value(v)
 		v = stringx.pretty(v, indent, after)
@@ -127,23 +127,42 @@ function stringx.pretty(input, indent, after)
 	if after and after > 1 then
 		local line_chunks = {}
 		while #chunks > 0 do
+			local break_next = false
 			local line = {}
 			for i = 1, after do
 				if #chunks == 0 then
 					break
 				end
-				local v = table.remove(chunks, 1)
-				table.insert(line, v)
+				local v = chunks[1]
+				--tables split to own line
+				if v:find("{") then
+					--break line here
+					break_next = true
+					break
+				else
+					table.insert(line, table.remove(chunks, 1))
+				end
 			end
-			table.insert(line_chunks, table.concat(line, ", "))
+			if #line > 0 then
+				table.insert(line_chunks, table.concat(line, ", "))
+			end
+			if break_next then
+				table.insert(line_chunks, table.remove(chunks, 1))
+				break_next = false
+			end
 		end
 		chunks = line_chunks
 	end
 
+	local multiline = #chunks > 1
+	local separator = (indent == "" or not multiline) and ", " or ",\n"..indent
 
-	return "{" .. newline ..
-		indent .. table.concat(chunks, separator) .. newline ..
-	"}"
+	if multiline then
+		return "{" .. newline ..
+			indent .. table.concat(chunks, separator) .. newline ..
+		"}"
+	end
+	return "{" .. table.concat(chunks, separator) .. "}"
 end
 
 return stringx

@@ -2,17 +2,17 @@
 
 > Core dependencies for making games with lua, especially with [LÖVE](https://love2d.org).
 
-`batteries` does a lot to get projects off the ground faster; filling out lua's sparse standard library a little, and providing implementations of common algorithms and data structures useful for games.
+Get projects off the ground faster! `batteries` fills out lua's sparse standard library a little, and provides implementations of common algorithms and data structures useful for games.
 
-It's a bit of a mixture of functionality, but quite extensively documented in-line, and currently still under a hundred kb uncompressed - including the license and readme - so you get quite a lot per byte! Of course, feel free to trim it down for your use case as required (see [below](#stripping-down-batteries)).
+It's a bit of a mixture of functionality, but quite extensively documented in-line, and currently still under a hundred kb uncompressed - including the license and this readme - so you get quite a lot per byte! Of course, feel free to trim it down for your use case as required (see [below](#stripping-down-batteries)).
 
 Examples [in another repo](https://github.com/1bardesign/batteries-examples) to avoid cluttering the repo history and your project/filesystem when used as a submodule.
 
 # Installation
 
-`batteries` works out of the filesystem with no separate build step. The license file is included.
+`batteries` works straight out of the repo with no separate build step. The license file required for use is included.
 
-- Put the files somewhere your project can access them
+- Put the files in their own directory, somewhere your project can access them.
 - `require` the base `batteries` directory - the one with `init.lua` in it.
 	- Don't forget to use dot syntax on the path!
 	- With a normal `require` setup (ie stock LÖVE or lua), `init.lua` will pull in all the submodules.
@@ -61,16 +61,16 @@ General utility data structures and algorithms to speed you along your way.
 - `class` - Single-inheritance oo in a single function.
 - `functional` - Functional programming facilities. `map`, `reduce`, `any`, `match`, `minmax`, `mean`...
 - `sequence` - An oo wrapper on sequential tables, so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports method chaining for the `functional` interface above, which can save a lot of needless typing!
-- `set` - A set type supporting a full suite of set operations with fast membership testing and ipairs-style iteration.
-- `sort` - Provides a stable merge+insertion sorting algorithm that is also, as a bonus, often faster than `table.sort` under luajit. Also exposes `insertion_sort` if needed. Alias `stable_sort`
-- `state_machine` - Finite state machine implementation with state transitions and all the rest. Useful for game states, ai, cutscenes...
+- `set` - A set type supporting a full suite of set operations with fast membership testing and `ipairs`-style iteration.
+- `sort` - Provides a stable merge+insertion sorting algorithm that is also, as a bonus, often faster than `table.sort` under luajit. Also exposes `insertion_sort` if needed. Alias `stable_sort`.
+- `state_machine` - Finite state machine implementation with state transitions and all the rest. Useful for game states, AI, cutscenes...
 
 **Geometry:**
 
 Modules to help work with spatial concepts.
 
 - `intersect` - 2d intersection routines, a bit sparse at the moment.
-- `vec2` - 2d vectors with method chaining, and garbage saving modifying operations. A bit of a mouthful at times, but you get used to it. (there's an issue discussing future solutions)
+- `vec2` - 2d vectors with method chaining, and garbage saving modifying operations. A bit of a mouthful at times, but you get used to it. (there's an issue discussing future solutions).
 - `vec3` - 3d vectors as above.
 
 **Special Interest:**
@@ -101,9 +101,10 @@ Endless, of course :)
 - Broadphase:
 	- Spatial simplification systems for different needs. Probably AABB or point insertion of data.
 	- `bucket_grid` - Dumb 2d bucket broadphase.
+	- `sweep_and_prune` - Popular for bullet hell games.
 	- `quadtree`/`octree` - Everyone's favourite ;)
 - UI
-	- Maybe adopt 1bardesign/partner in here, maybe not?
+	- Maybe adopt 1bardesign/partner in here, or something evolved from it.
 
 # PRs
 
@@ -129,7 +130,7 @@ Many of the modules "just work" on their own if you just want to grab something 
 
 There are some inter-dependencies in the more complex modules, which should be straightforward to detect and figure out the best course of action (include or strip out) if you want to make a stripped-down version for distribution.
 
-Currently the lib is 30kb or so compressed, including the readme, so do think carefully whether you really need to worry!
+Currently the lib is 30kb or so compressed, including this readme, so do think carefully whether you really need to worry!
 
 # License
 

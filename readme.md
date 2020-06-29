@@ -1,12 +1,48 @@
 # ⚡ Batteries for Lua
 
-Core dependencies for making games with lua, especially with [love](https://love2d.org).
+> Core dependencies for making games with lua, especially with [LÖVE](https://love2d.org).
 
-Does a lot to get projects off the ground faster, filling out lua's sparse standard library a little and providing implementations of common algorithms and data structures useful for games.
+`batteries` does a lot to get projects off the ground faster; filling out lua's sparse standard library a little, and providing implementations of common algorithms and data structures useful for games.
 
-It's a bit of a grab bag of functionality, but quite extensively documented, and currently still under a hundred kb uncompressed, including the license and readme, so you get quite a lot per byte! Of course, feel free to trim it down for your use case as required (see [below](#stripping-down-batteries)).
+It's a bit of a mixture of functionality, but quite extensively documented in-line, and currently still under a hundred kb uncompressed - including the license and readme - so you get quite a lot per byte! Of course, feel free to trim it down for your use case as required (see [below](#stripping-down-batteries)).
 
-Examples [in another repo](https://github.com/1bardesign/batteries-examples) to avoid cluttering the history and filesystem here.
+Examples [in another repo](https://github.com/1bardesign/batteries-examples) to avoid cluttering the repo history and your project/filesystem when used as a submodule.
+
+# Installation
+
+`batteries` works out of the filesystem with no separate build step. The license file is included.
+
+- Put the files somewhere your project can access them
+- `require` the base `batteries` directory - the one with `init.lua` in it.
+	- Don't forget to use dot syntax on the path!
+	- With a normal `require` setup (ie stock LÖVE or lua), `init.lua` will pull in all the submodules.
+- Optionally `export` everything to the global environment.
+
+```lua
+--everything as globals
+require("path.to.batteries"):export()
+
+-- OR --
+
+--self-contained
+local batteries = require("path.to.batteries")
+```
+
+See [below](#export-globals) for a discussion of the pros and cons of `export`.
+
+## Git Submodule or Static Install
+
+`batteries` is fairly easily used as a git submodule - this is how I use it in my own projects, because updating is just a `git pull`.
+
+A static install is harder to update, but easier to trim down if you only need some of the functionality provided and aren't so interested in updating.
+
+# Versioning?
+
+Currently, the library is operated in a rolling-release manner - the head of the master branch is intended for public consumption. While this is kept as stable as possible, breaking API changes _do_ happen, and more are planned!
+
+For this reason, you should try to check the commit history for what has changed rather than blindly updating. If you let me know that you're using it actively, I'm generally happy to let you know when something breaking is on its way to `master` as well.
+
+If there is a large enough user base in the future to make a versioning scheme + non-repo changelog make sense, I will accomodate.
 
 # Module Overview
 
@@ -71,13 +107,13 @@ Endless, of course :)
 
 # PRs
 
-Pull requests are welcome for anything!
+Pull requests are welcome for anything - positive changes will be merged optimistically, and I'm happy to work with you to get anything sensible ready for inclusion.
 
-If you have something "big" to contribute please get in touch before starting work so we can make sure it fits, but I'm quite open minded!
+If you have something "big" to contribute _please_ do get in touch before starting work so we can make sure it fits, but I'm quite open minded!
 
 # Export Globals
 
-You are strongly encouraged to use the library in a "fire and forget" manner through `require("batteries"):export()` (or whatever appropriate module path), which will modify builtin lua modules (such as `table` and `math`) and expose all the modules directly as globals for convenience.
+You are strongly encouraged to use the library in a "fire and forget" manner through `require("batteries"):export()` (or whatever appropriate module path), which will modify builtin lua modules (such as `table` and `math`) and expose all the other modules directly as globals for convenience.
 
 This eases consumption later on - you don't have to remember if say, `table.remove_value` is built in to lua or not, or get used to accessing the builtin table functions through `batteries.table` or `tablex`.
 

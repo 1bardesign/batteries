@@ -36,6 +36,11 @@ function sequence:dedupe()
 	return sequence(table.dedupe(self))
 end
 
+function sequence:collapse()
+	return sequence(table.collapse(self))
+end
+sequence.flatten = sequence.collapse
+
 function sequence:append(...)
 	return sequence(table.append(self, ...))
 end

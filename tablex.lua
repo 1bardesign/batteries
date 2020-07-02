@@ -122,7 +122,7 @@ if love and love.math and love.math.random then
 	_global_random = love.math.random
 end
 local function _random(min, max, r)
-	return r and r:random(min, max) 
+	return r and r:random(min, max)
 		or _global_random(min, max)
 end
 
@@ -221,7 +221,7 @@ else
 	end
 end
 
---note: 
+--note:
 --	copies and overlays are currently not satisfactory
 --
 --	i feel that copy especially tries to do too much and
@@ -300,6 +300,9 @@ function tablex.collapse(t)
 	end
 	return r
 end
+
+--alias
+tablex.flatten = tablex.collapse
 
 --faster unpacking for known-length tables up to 8
 --gets around nyi in luajit

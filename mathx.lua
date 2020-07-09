@@ -8,12 +8,7 @@ local mathx = setmetatable({}, {
 
 --wrap v around range [lo, hi)
 function mathx.wrap(v, lo, hi)
-	local range = hi - lo
-	local relative = v - lo
-	local relative_wrapped = relative % range
-	local relative_add = relative_wrapped + range
-	local final_wrap = relative_add % range
-	return lo + final_wrap
+	return (v - lo) % (hi - lo) + lo
 end
 
 --wrap i around the indices of t
@@ -31,8 +26,11 @@ function mathx.clamp01(v)
 	return mathx.clamp(v, 0, 1)
 end
 
---round v to nearest whole
+--round v to nearest whole, away from zero
 function mathx.round(v)
+	if v < 0 then
+		return math.ceil(v - 0.5)
+	end
 	return math.floor(v + 0.5)
 end
 

@@ -66,7 +66,9 @@ function async:update()
 		if error_cb then
 			error_cb(a)
 		else
-			error("failure in async task: "..a)
+			local err = ("failure in async task:\n\n\t%s\n")
+				:format(tostring(a))
+			error(err)
 		end
 	end
 	--check done

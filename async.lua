@@ -51,7 +51,7 @@ function async:update()
 		if #self.tasks_stalled > 0 then
 			--swap queues rather than churning elements
 			self.tasks_stalled, self.tasks = self.tasks, self.tasks_stalled
-			td = table.remove(self.tasks, 1)
+			return self:update()
 		else
 			return false
 		end

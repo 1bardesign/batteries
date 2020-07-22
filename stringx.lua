@@ -114,7 +114,7 @@ function stringx.pretty(input, indent, after)
 	for k, v in pairs(input) do
 		if not seen[k] then
 			--encapsulate anything that's not a string
-			--todo: also keywords
+			--todo: also keywords and strings with spaces
 			if type(k) ~= "string" then
 				k = "[" .. tostring(k) .. "]"
 			end

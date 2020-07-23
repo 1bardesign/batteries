@@ -12,7 +12,7 @@
 		getting a reference to the task for manipulation
 			attaching multiple callbacks
 			cancelling
-`		proper error traces with internal xpcall?
+`		proper error traces for coroutines with async:add, additional wrapper?
 ]]
 
 local path = (...):gsub("async", "")
@@ -29,7 +29,14 @@ end
 
 --add a task to the kernel
 function async:call(f, args, callback, error_callback)
-	self:add(coroutine.create(f), args, callback, error_callback)
+	self:add(coroutine.create(function(...)
+		local results = {xpcall(f, debug.traceback, ...)}
+		local success = table.remove(results, 1)
+		if not success then
+			error(table.remove(results, 1))
+		end
+		return unpack(results)
+	end), args, callback, error_callback)
 end
 
 --add an already-existing coroutine to the kernel

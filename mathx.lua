@@ -67,6 +67,15 @@ function mathx.lerp_eps(a, b, t, eps)
 	return v
 end
 
+--bilinear interpolation between 4 samples
+function mathx.bilerp(a, b, c, d, u, v)
+	return math.lerp(
+		math.lerp(a, b, u),
+		math.lerp(c, d, u),
+		v
+	)
+end
+
 --classic smoothstep
 --(only "safe" for 0-1 range)
 function mathx.smoothstep(v)

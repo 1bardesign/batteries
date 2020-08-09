@@ -12,25 +12,40 @@
 		getting a reference to the task for manipulation
 			attaching multiple callbacks
 			cancelling
+`		proper error traces for coroutines with async:add, additional wrapper?
 ]]
 
-local async = {}
-async._mt = {__index = async}
+local path = (...):gsub("async", "")
+local class = require(path .. "class")
+
+local async = class()
 
 function async:new()
-	return setmetatable({
+	return self:init({
 		tasks = {},
 		tasks_stalled = {},
-	}, self._mt)
+	})
 end
 
 --add a task to the kernel
-function async:call(f, args, cb, error_cb)
+function async:call(f, args, callback, error_callback)
+	self:add(coroutine.create(function(...)
+		local results = {xpcall(f, debug.traceback, ...)}
+		local success = table.remove(results, 1)
+		if not success then
+			error(table.remove(results, 1))
+		end
+		return unpack(results)
+	end), args, callback, error_callback)
+end
+
+--add an already-existing coroutine to the kernel
+function async:add(co, args, callback, error_callback)
 	table.insert(self.tasks, {
-		coroutine.create(f),
-		args,
-		cb,
-		error_cb,
+		co,
+		args or {},
+		callback or false,
+		error_callback or false,
 	})
 end
 
@@ -43,25 +58,24 @@ function async:update()
 		if #self.tasks_stalled > 0 then
 			--swap queues rather than churning elements
 			self.tasks_stalled, self.tasks = self.tasks, self.tasks_stalled
-			td = table.remove(self.tasks, 1)
+			return self:update()
 		else
 			return false
 		end
 	end
 	--run a step
-	local co, args, cb, error_cb = td[1], td[2], td[3], td[4]
-	--(reuse these 8 temps)
-	local a, b, c, d, e, f, g, h
-	if args then
-		a, b, c, d, e, f, g, h = unpack(args)
-	end
-	local success, a, b, c, d, e, f, g, h = coroutine.resume(co, a, b, c, d, e, f, g, h)
+	--(using unpack because coroutine is also nyi and it's core to this async model)
+	local co, args, cb, error_cb = unpack(td)
+	--(8 temps rather than table churn capturing varargs)
+	local success, a, b, c, d, e, f, g, h = coroutine.resume(co, unpack(args))
 	--error?
 	if not success then
 		if error_cb then
 			error_cb(a)
 		else
-			error("failure in async task: "..a)
+			local err = ("failure in async task:\n\n\t%s\n")
+				:format(tostring(a))
+			error(err)
 		end
 	end
 	--check done

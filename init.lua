@@ -1,22 +1,7 @@
 --[[
 	batteries for lua
 
-	if required as the "entire library" (ie by this file), puts everything into
-	global namespace by default as it'll presumably be commonly used
-
-	if not, several of the modules work as normal lua modules and return a table
-	for local-friendly use
-
-	the others that modify some global table can be talked into behaving as normal
-	lua modules as well by setting appropriate globals prior to inclusion
-
-	you can avoid modifying any global namespace by setting
-
-		BATTERIES_NO_GLOBALS = true
-
-	before requiring, then everything can be accessed as eg
-
-		batteries.table.stable_sort
+	a collection of helpful code to get your project off the ground faster
 ]]
 
 local path = ...
@@ -24,70 +9,92 @@ local function require_relative(p)
 	return require(table.concat({path, p}, "."))
 end
 
-if BATTERIES_NO_GLOBALS then
-	--define local tables for everything to go into
-	BATTERIES_MATH_MODULE = {}
-	BATTERIES_TABLE_MODULE = {}
-	BATTERIES_FUNCTIONAL_MODULE = {}
+--build the module
+local _batteries = {
+	--
+	class = require_relative("class"),
+	--
+	assert = require_relative("assert"),
+	--extension libraries
+	mathx = require_relative("mathx"),
+	tablex = require_relative("tablex"),
+	stringx = require_relative("stringx"),
+	--sorting routines
+	sort = require_relative("sort"),
+	--
+	functional = require_relative("functional"),
+	--collections
+	sequence = require_relative("sequence"),
+	set = require_relative("set"),
+	--geom
+	vec2 = require_relative("vec2"),
+	vec3 = require_relative("vec3"),
+	intersect = require_relative("intersect"),
+	--
+	unique_mapping = require_relative("unique_mapping"),
+	state_machine = require_relative("state_machine"),
+	async = require_relative("async"),
+	manual_gc = require_relative("manual_gc"),
+	colour = require_relative("colour"),
+}
+
+--assign aliases
+for _, alias in ipairs({
+	{"mathx", "math"},
+	{"tablex", "table"},
+	{"stringx", "string"},
+	{"sort", "stable_sort"},
+	{"colour", "color"},
+}) do
+	_batteries[alias[2]] = _batteries[alias[1]]
 end
 
-local _class = require_relative("class")
+--easy export globally if required
+function _batteries:export()
+	--export oo
+	class = self.class
 
-local _math = require_relative("math")
+	--export assert
+	assert = self.assert
 
-local _table = require_relative("table")
-local _stable_sort = require_relative("stable_sort")
+	--overlay tablex and functional and sort routines onto table
+	self.tablex.overlay(table, self.tablex)
+	--now we can use it through table directly
+	table.overlay(table, self.functional)
+	self.sort:export()
 
-local _functional = require_relative("functional")
-local _sequence = require_relative("sequence")
+	--functional module also available separate from table
+	functional = self.functional
 
-local _vec2 = require_relative("vec2")
-local _vec3 = require_relative("vec3")
-local _intersect = require_relative("intersect")
+	--export collections
+	sequence = self.sequence
+	set = self.set
 
-local _unique_mapping = require_relative("unique_mapping")
-local _state_machine = require_relative("state_machine")
+	--overlay onto global math table
+	table.overlay(math, self.mathx)
 
-local _async = require_relative("async")
+	--overlay onto string
+	table.overlay(string, self.stringx)
 
-local _manual_gc = require_relative("manual_gc")
+	--export geom
+	vec2 = self.vec2
+	vec3 = self.vec3
+	intersect = self.intersect
 
-local _colour = require_relative("colour")
-
---export globally if required
-if not BATTERIES_NO_GLOBALS then
-	class = _class
-	sequence = _sequence
-	
-	vec2 = _vec2
-	vec3 = _vec3
-	intersect = _intersect
-
-	unique_mapping = _unique_mapping
-	state_machine = _state_machine
-	async = _async
-	manual_gc = _manual_gc
+	--"misc" :)
+	unique_mapping = self.unique_mapping
+	state_machine = self.state_machine
+	async = self.async
+	manual_gc = self.manual_gc
 
 	--support both spellings
-	colour = _colour
-	color = _colour
+	colour = self.colour
+	color = self.colour
+
+	--export top level module as well for ease of migration for code
+	batteries = self
+
+	return self
 end
 
---either way, export to package registry
-return {
-	class = _class,
-	math = _math,
-	table = _table,
-	stable_sort = _stable_sort,
-	functional = _functional,
-	sequence = _sequence,
-	vec2 = _vec2,
-	vec3 = _vec3,
-	intersect = _intersect,
-	unique_mapping = _unique_mapping,
-	state_machine = _state_machine,
-	async = _async,
-	manual_gc = _manual_gc,
-	colour = _colour,
-	color = _colour,
-}
+return _batteries

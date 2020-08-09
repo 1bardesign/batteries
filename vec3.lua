@@ -2,31 +2,18 @@
 	3d vector type
 ]]
 
---[[
-	notes:
-
-	some methods depend on math library extensions
-
-		math.clamp(v, min, max) - return v clamped between min and max
-		math.round(v) - round v downwards if fractional part is < 0.5
-]]
-
 --import vec2 if not defined globally
-local global_vec2 = vec2
-local vec2 = global_vec2
-if not vec2 then
-	local path = ...
-	local vec2_path = path:sub(1, path:len() - 1) .. "2"
-	vec2 = require(vec2_path)
-end
+local path = (...):gsub("vec3", "")
+local class = require(path .. "class")
+local vec2 = require(path .. "vec2")
+local math = require(path .. "mathx") --shadow global math module
 
-local vec3 = {}
+local vec3 = class()
 vec3.type = "vec3"
 
---class
-vec3._mt = {__index = vec3}
-function vec3:init(t)
-	return setmetatable(t, self._mt)
+--stringification
+vec3.__mt.__tostring = function(self)
+	return ("(%.2f, %.2f, %.2f)"):format(self.x, self.y, self.z)
 end
 
 --probably-too-flexible ctor
@@ -343,39 +330,48 @@ end
 
 --swizzle extraction
 --not as nice as property accessors so might be worth doing that later :)
+
+--also dog slow, so there's that
+local _swizzle_x_byte = ("x"):byte()
+local _swizzle_y_byte = ("y"):byte()
+local _swizzle_z_byte = ("z"):byte()
 local _allowed_swizzle = {
-	x = true,
-	y = true,
-	z = true,
+	[_swizzle_x_byte] = "x",
+	[_swizzle_y_byte] = "y",
+	[_swizzle_z_byte] = "z",
 }
-function vec3:extract_single(swizzle)
-	if _allowed_swizzle[swizzle] then
-		return self[swizzle]
+
+function vec3:encode_swizzle_field(swizzle)
+	if type(swizzle) == "string" then
+		swizzle = swizzle:byte()
 	end
-	return 0
+	return _allowed_swizzle[swizzle] or "x"
+end
+
+function vec3:extract_single(swizzle)
+	return self[self:encode_swizzle_field(swizzle)]
 end
 
 function vec3:infuse_single(swizzle, v)
-	if _allowed_swizzle[swizzle] then
-		self[swizzle] = v
-	end
+	self[self:encode_swizzle_field(swizzle)] = v
 	return self
 end
 
 function vec3:extract_vec2(swizzle, into)
 	if not into then into = vec2:zero() end
-	local x = self:extract_single(swizzle:sub(1, 1))
-	local y = self:extract_single(swizzle:sub(2, 2))
+	local x = self:extract_single(swizzle:byte(1))
+	local y = self:extract_single(swizzle:byte(2))
 	return into:sset(x, y)
 end
 
 function vec3:infuse_vec2(swizzle, v)
-	self:infuse_single(swizzle:sub(1, 1), v.x)
-	self:infuse_single(swizzle:sub(2, 2), v.y)
+	self:infuse_single(swizzle:byte(1), v.x)
+	self:infuse_single(swizzle:byte(2), v.y)
 	return self
 end
 
 --rotate around a swizzle
+--todo: angle-axis version
 function vec3:rotatei(swizzle, angle)
 	local v = vec2:pooled()
 	self:extract_vec2(swizzle, v)
@@ -428,16 +424,12 @@ function vec3:inverse()
 	return self:copy():inversei()
 end
 
-function vec3:rotate(angle)
-	return self:copy():rotatei(angle)
+function vec3:rotate(swizzle, angle)
+	return self:copy():rotatei(swizzle, angle)
 end
 
-function vec3:rot90r()
-	return self:copy():rot90ri()
-end
-
-function vec3:rot90l()
-	return self:copy():rot90li()
+function vec3:rotate_euler(angle_x_axis, angle_y_axis, angle_z_axis)
+	return self:copy():rotate_euleri(angle_x_axis, angle_y_axis, angle_z_axis)
 end
 
 vec3.rot180 = vec3.inverse --alias
@@ -549,6 +541,17 @@ end
 
 function vec3:lerp(other, amount)
 	return self:copy():lerpi(other, amount)
+end
+
+function vec3:lerp_epsi(other, amount, eps)
+	self.x = math.lerp_eps(self.x, other.x, amount, eps)
+	self.y = math.lerp_eps(self.y, other.y, amount, eps)
+	self.z = math.lerp_eps(self.z, other.z, amount, eps)
+	return self
+end
+
+function vec3:lerp_eps(other, amount, eps)
+	return self:copy():lerp_epsi(other, amount, eps)
 end
 
 -----------------------------------------------------------

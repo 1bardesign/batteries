@@ -51,11 +51,12 @@ end
 
 --easy export globally if required
 function _batteries:export()
-	--export oo
-	class = self.class
-
-	--export assert
-	assert = self.assert
+	--export all key strings globally, if doesn't always exist
+	for k, v in pairs(self) do
+		if not _G[k] then
+			_G[k] = v
+		end
+	end
 
 	--overlay tablex and functional and sort routines onto table
 	self.tablex.overlay(table, self.tablex)
@@ -63,36 +64,11 @@ function _batteries:export()
 	table.overlay(table, self.functional)
 	self.sort:export()
 
-	--functional module also available separate from table
-	functional = self.functional
-
-	--export collections
-	sequence = self.sequence
-	set = self.set
-
 	--overlay onto global math table
 	table.overlay(math, self.mathx)
 
 	--overlay onto string
 	table.overlay(string, self.stringx)
-
-	--export geom
-	vec2 = self.vec2
-	vec3 = self.vec3
-	intersect = self.intersect
-
-	--"misc" :)
-	unique_mapping = self.unique_mapping
-	state_machine = self.state_machine
-	async = self.async
-	manual_gc = self.manual_gc
-
-	--support both spellings
-	colour = self.colour
-	color = self.colour
-
-	--export top level module as well for ease of migration for code
-	batteries = self
 
 	return self
 end

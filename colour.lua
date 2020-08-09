@@ -57,6 +57,14 @@ function colour.unpackRGB(rgb)
 	return r, g, b, a
 end
 
+function colour.hex2RGB(hex)
+	local h = h:gsub("#", "")
+	local r = tonumber("0x" .. h:sub(1, 2))
+	local g = tonumber("0x" .. h:sub(3, 4))
+	local b = tonumber("0x" .. h:sub(5, 6))
+	return r, g, b
+end
+
 --todo: hsl, hsv, other colour spaces
 
 return colour

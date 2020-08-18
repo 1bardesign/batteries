@@ -112,4 +112,27 @@ end
 
 --todo: hsv, other colour spaces
 
+--colour distance functions
+--distance of one colour to another (linear space)
+--can be used for finding nearest colours for palette mapping, for example
+
+function colour.distance_rgb(
+	ar, ag, ab,
+	br, bg, bb
+)
+	local dr, dg, db = ar - br, ag - bg, ab - bb
+	return math.sqrt(dr * dr + dg * dg + db * db)
+end
+
+function colour.distance_packed_rgb(a, b)
+	local ar, ag, ab = colour.unpack_rgb(a)
+	local br, bg, bb = colour.unpack_rgb(b)
+	return colour.distance_rgb(
+		ar, ag, ab,
+		br, bg, bb
+	)
+end
+
+--todo: rgba and various other unpacks
+
 return colour

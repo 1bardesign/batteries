@@ -66,6 +66,15 @@ function set:values_readonly()
 	return self._ordered
 end
 
+--convert to an ordered table, destroying set-like properties
+--and deliberately disabling the initial set object
+function set:to_table()
+	local r = self._ordered
+	self._ordered = nil
+	self._keyed = nil
+	return r
+end
+
 --modifying operations
 
 --add all the elements present in the other set

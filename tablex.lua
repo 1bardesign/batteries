@@ -152,6 +152,14 @@ function tablex.reverse(t)
 	return t
 end
 
+--trim a table to a certain maximum length
+function tablex.trim(t, l)
+	while #t > l do
+		table.remove(t)
+	end
+	return t
+end
+
 --collect all keys of a table into a sequential table
 --(useful if you need to iterate non-changing keys often and want an nyi tradeoff;
 --	this call will be slow but then following iterations can use ipairs)

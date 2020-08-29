@@ -46,6 +46,18 @@ function set:remove(v)
 	return self
 end
 
+--get the number of distinct values in the set
+function set:size()
+	return #self._ordered
+end
+
+--return a value from the set
+--index must be between 1 and size() inclusive
+--adding/removing invalidates indices
+function set:get(index)
+	return self._ordered[index]
+end
+
 --iterate the values in the set, along with their index
 --the index is useless but harmless, and adding a custom iterator seems
 --like a really easy way to encourage people to use slower-than-optimal code

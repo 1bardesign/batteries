@@ -213,13 +213,26 @@ function mathx.lerp_angle_eps(a, b, t, eps)
 	return v
 end
 
---geometric rotation with multi-return
---consider using vec2 if you need anything more complex than this,
---but this can be very handy for little inline transformations
+--geometric functions standalone/"unpacked" components and multi-return
+--consider using vec2 if you need anything complex!
+
+--rotate a point around the origin by an angle
 function mathx.rotate(x, y, r)
 	local s = math.sin(r)
 	local c = math.cos(r)
 	return c * x - s * y, s * x + c * y
+end
+
+--get the length of a vector from the origin
+function mathx.length(x, y)
+	return math.sqrt(x * x + y * y)
+end
+
+--get the distance between two points
+function mathx.distance(x1, y1, x2, y2)
+	local dx = x1 - x2
+	local dy = y1 - y2
+	return mathx.length(dx, dy)
 end
 
 return mathx

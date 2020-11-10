@@ -26,61 +26,86 @@ end
 --simple sequential iteration, f is called for all elements of t
 --f can return non-nil to break the loop (and return the value)
 function functional.foreach(t, f)
-	for i,v in ipairs(t) do
-		local r = f(v, i)
-		if r ~= nil then
-			return r
+	local n = #t
+	for i = 1, n do
+		local result = f(t[i], i)
+		if result ~= nil then
+			return result
 		end
 	end
 end
 
 --performs a left to right reduction of t using f, with o as the initial value
--- reduce({1, 2, 3}, f, 0) -> f(f(f(0, 1), 2), 3)
+-- reduce({1, 2, 3}, 0, f) -> f(f(f(0, 1), 2), 3)
 -- (but performed iteratively, so no stack smashing)
-function functional.reduce(t, f, o)
-	for i,v in ipairs(t) do
-		o = f(o, v)
+function functional.reduce(t, seed, f)
+	local n = #t
+	for i = 1, n do
+		seed = f(seed, t[i], i)
 	end
-	return o
+	return seed
 end
 
 --maps a sequence {a, b, c} -> {f(a), f(b), f(c)}
--- (automatically drops any nils due to table.insert, which can be used to simultaneously map and filter)
+-- (automatically drops any nils to keep a sequence, so can be used to simultaneously map and filter)
 function functional.map(t, f)
-	local r = {}
-	for i,v in ipairs(t) do
-		local mapped = f(v, i)
-		if mapped ~= nil then
-			table.insert(r, mapped)
+	local result = {}
+	local n = #t
+	for i = 1, n do
+		local v = f(t[i], i)
+		if v ~= nil then
+			table.insert(result, v)
 		end
 	end
-	return r
+	return result
 end
 
 --maps a sequence inplace, modifying it {a, b, c} -> {f(a), f(b), f(c)}
--- (automatically drops any nils, which can be used to simultaneously map and filter,
---	but this results in a linear table.remove so "careful" for big working sets)
-function functional.remap(t, f)
-	local i = 1
-	while i <= #t do
-		local mapped = f(t[i])
-		if mapped ~= nil then
-			t[i] = mapped
-			i = i + 1
-		else
-			table.remove(t, i)
+-- (automatically drops any nils, which can be used to simultaneously map and filter)
+function functional.map_inplace(t, f)
+	local write_i = 0
+	local n = #t
+	for i = 1, n do
+		local v = f(t[i], i)
+		if v ~= nil then
+			write_i = write_i + 1
+			t[write_i] = v
+		end
+		if i ~= write_i then
+			t[i] = nil
 		end
 	end
 	return t
 end
 
+--alias
+functional.remap = functional.map_inplace
+
 --filters a sequence
--- returns a table containing items where f(v) returns truthy
+-- returns a table containing items where f(v, i) returns truthy
 function functional.filter(t, f)
-	local r = {}
-	for i,v in ipairs(t) do
+	local result = {}
+	local n = #t
+	for i = 1, n do
+		if f(t[i], i) then
+			table.insert(result, v)
+		end
+	end
+	return result
+end
+
+--filters a sequence in place, modifying it
+function functional.filter_inplace(t, f)
+	local write_i = 1
+	local n = #t
+	for i = 1, n do
+		local v = t[i]
 		if f(v, i) then
-			table.insert(r, v)
+			t[write_i] = v
+			write_i = write_i + 1
+		end
+		if i ~= write_i then
+			t[i] = nil
 		end
 	end
 	return r
@@ -90,13 +115,14 @@ end
 -- returns a table containing items where f(v) returns falsey
 -- nil results are included so that this is an exact complement of filter; consider using partition if you need both!
 function functional.remove_if(t, f)
-	local r = {}
-	for i, v in ipairs(t) do
-		if not f(v, i) then
-			table.insert(r, v)
+	local result = {}
+	local n = #t
+	for i = 1, n do
+		if not f(t[i], i) then
+			table.insert(result, v)
 		end
 	end
-	return r
+	return result
 end
 
 --partitions a sequence into two, based on filter criteria
@@ -104,8 +130,9 @@ end
 function functional.partition(t, f)
 	local a = {}
 	local b = {}
-	for i,v in ipairs(t) do
-		if f(v, i) then
+	local n = #t
+	for i = 1, n do
+		if f(t[i], i) then
 			table.insert(a, v)
 		else
 			table.insert(b, v)
@@ -115,11 +142,13 @@ function functional.partition(t, f)
 end
 
 -- returns a table where the elements in t are grouped into sequential tables by the result of f on each element.
--- more general than partition, but requires you to know your groups ahead of time (or use numeric grouping) if you want to avoid pairs!
+--	more general than partition, but requires you to know your groups ahead of time
+--	(or use numeric grouping and pre-seed) if you want to avoid pairs!
 function functional.group_by(t, f)
 	local result = {}
-	for i, v in ipairs(t) do
-		local group = f(v)
+	local n = #t
+	for i = 1, n do
+		local group = f(t[i], i)
 		if result[group] == nil then
 			result[group] = {}
 		end
@@ -154,26 +183,26 @@ end
 --basically a map on numeric values from 1 to count
 --nil values are omitted in the result, as for map
 function functional.generate(count, f)
-	local r = {}
+	local result = {}
 	for i = 1, count do
 		local v = f(i)
 		if v ~= nil then
-			table.insert(r, v)
+			table.insert(result, v)
 		end
 	end
-	return r
+	return result
 end
 
 --2d version of the above
 --note: ends up with a 1d table;
 --	if you need a 2d table, you should nest 1d generate calls
 function functional.generate_2d(width, height, f)
-	local r = {}
+	local result = {}
 	for y = 1, height do
 		for x = 1, width do
 			local v = f(x, y)
 			if v ~= nil then
-				table.insert(r, v)
+				table.insert(result, v)
 			end
 		end
 	end
@@ -186,8 +215,9 @@ end
 
 --true if any element of the table matches f
 function functional.any(t, f)
-	for i,v in ipairs(t) do
-		if f(v) then
+	local n = #t
+	for i = 1, n do
+		if f(t[i], i) then
 			return true
 		end
 	end
@@ -196,8 +226,9 @@ end
 
 --true if no element of the table matches f
 function functional.none(t, f)
-	for i,v in ipairs(t) do
-		if f(v) then
+	local n = #t
+	for i = 1, n do
+		if f(t[i], i) then
 			return false
 		end
 	end
@@ -206,8 +237,9 @@ end
 
 --true if all elements of the table match f
 function functional.all(t, f)
-	for i,v in ipairs(t) do
-		if not f(v) then
+	local n = #t
+	for i = 1, n do
+		if not f(t[i], i) then
 			return false
 		end
 	end
@@ -217,8 +249,9 @@ end
 --counts the elements of t that match f
 function functional.count(t, f)
 	local c = 0
-	for i,v in ipairs(t) do
-		if f(v) then
+	local n = #t
+	for i = 1, n do
+		if f(t[i], i) then
 			c = c + 1
 		end
 	end
@@ -227,8 +260,9 @@ end
 
 --true if the table contains element e
 function functional.contains(t, e)
-	for i, v in ipairs(t) do
-		if v == e then
+	local n = #t
+	for i = 1, n do
+		if t[i] == e then
 			return true
 		end
 	end
@@ -237,9 +271,12 @@ end
 
 --return the numeric sum of all elements of t
 function functional.sum(t)
-	return functional.reduce(t, function(a, b)
-		return a + b
-	end, 0)
+	local c = 0
+	local n = #t
+	for i = 1, n do
+		c = c + t[i]
+	end
+	return c
 end
 
 --return the numeric mean of all elements of t
@@ -256,14 +293,15 @@ end
 --	(would perhaps more correctly be math.huge, -math.huge
 --	 but that tends to be surprising/annoying in practice)
 function functional.minmax(t)
-	local max, min
-	for i,v in ipairs(t) do
-		min = not min and v or math.min(min, v)
-		max = not max and v or math.max(max, v)
+	local n = #t
+	if n == 0 then
+		return 0, 0
 	end
-	if min == nil then
-		min = 0
-		max = 0
+	local max = t[1]
+	local min = t[1]
+	for i = 2, n do
+		min = math.min(min, v)
+		max = math.max(max, v)
 	end
 	return min, max
 end
@@ -285,7 +323,9 @@ end
 function functional.find_min(t, f)
 	local current = nil
 	local current_min = math.huge
-	for i, e in ipairs(t) do
+	local n = #t
+	for i = 1, n do
+		local e = t[i]
 		local v = f(e, i)
 		if v and v < current_min then
 			current_min = v
@@ -300,7 +340,9 @@ end
 function functional.find_max(t, f)
 	local current = nil
 	local current_max = -math.huge
-	for i, e in ipairs(t) do
+	local n = #t
+	for i = 1, n do
+		local e = t[i]
 		local v = f(e, i)
 		if v and v > current_max then
 			current_max = v
@@ -314,7 +356,7 @@ end
 functional.find_best = functional.find_max
 
 --return the element of the table that results in the value nearest to the passed value
---todo: optimise as this generates a closure each time
+--todo: optimise, inline as this generates a closure each time
 function functional.find_nearest(t, f, v)
 	return functional.find_min(t, function(e)
 		return math.abs(f(e) - v)
@@ -323,7 +365,9 @@ end
 
 --return the first element of the table that results in a true filter
 function functional.find_match(t, f)
-	for i,v in ipairs(t) do
+	local n = #t
+	for i = 1, n do
+		local v = t[i]
 		if f(v) then
 			return v
 		end

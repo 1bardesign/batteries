@@ -70,6 +70,9 @@ function _batteries:export()
 	--overlay onto string
 	table.overlay(string, self.stringx)
 
+	--overwrite assert wholesale (it's compatible)
+	assert = self.assert
+
 	return self
 end
 

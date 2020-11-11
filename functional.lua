@@ -26,8 +26,7 @@ end
 --simple sequential iteration, f is called for all elements of t
 --f can return non-nil to break the loop (and return the value)
 function functional.foreach(t, f)
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		local result = f(t[i], i)
 		if result ~= nil then
 			return result
@@ -35,12 +34,11 @@ function functional.foreach(t, f)
 	end
 end
 
---performs a left to right reduction of t using f, with o as the initial value
+--performs a left to right reduction of t using f, with seed as the initial value
 -- reduce({1, 2, 3}, 0, f) -> f(f(f(0, 1), 2), 3)
 -- (but performed iteratively, so no stack smashing)
 function functional.reduce(t, seed, f)
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		seed = f(seed, t[i], i)
 	end
 	return seed
@@ -50,8 +48,7 @@ end
 -- (automatically drops any nils to keep a sequence, so can be used to simultaneously map and filter)
 function functional.map(t, f)
 	local result = {}
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		local v = f(t[i], i)
 		if v ~= nil then
 			table.insert(result, v)
@@ -64,7 +61,7 @@ end
 -- (automatically drops any nils, which can be used to simultaneously map and filter)
 function functional.map_inplace(t, f)
 	local write_i = 0
-	local n = #t
+	local n = #t --cache, so splitting the sequence doesn't stop iteration
 	for i = 1, n do
 		local v = f(t[i], i)
 		if v ~= nil then
@@ -85,8 +82,7 @@ functional.remap = functional.map_inplace
 -- returns a table containing items where f(v, i) returns truthy
 function functional.filter(t, f)
 	local result = {}
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		if f(t[i], i) then
 			table.insert(result, v)
 		end
@@ -97,7 +93,7 @@ end
 --filters a sequence in place, modifying it
 function functional.filter_inplace(t, f)
 	local write_i = 1
-	local n = #t
+	local n = #t --cache, so splitting the sequence doesn't stop iteration
 	for i = 1, n do
 		local v = t[i]
 		if f(v, i) then
@@ -116,8 +112,7 @@ end
 -- nil results are included so that this is an exact complement of filter; consider using partition if you need both!
 function functional.remove_if(t, f)
 	local result = {}
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		if not f(t[i], i) then
 			table.insert(result, v)
 		end
@@ -130,8 +125,7 @@ end
 function functional.partition(t, f)
 	local a = {}
 	local b = {}
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		if f(t[i], i) then
 			table.insert(a, v)
 		else
@@ -146,8 +140,7 @@ end
 --	(or use numeric grouping and pre-seed) if you want to avoid pairs!
 function functional.group_by(t, f)
 	local result = {}
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		local group = f(t[i], i)
 		if result[group] == nil then
 			result[group] = {}
@@ -215,8 +208,7 @@ end
 
 --true if any element of the table matches f
 function functional.any(t, f)
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		if f(t[i], i) then
 			return true
 		end
@@ -226,8 +218,7 @@ end
 
 --true if no element of the table matches f
 function functional.none(t, f)
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		if f(t[i], i) then
 			return false
 		end
@@ -237,8 +228,7 @@ end
 
 --true if all elements of the table match f
 function functional.all(t, f)
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		if not f(t[i], i) then
 			return false
 		end
@@ -249,8 +239,7 @@ end
 --counts the elements of t that match f
 function functional.count(t, f)
 	local c = 0
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		if f(t[i], i) then
 			c = c + 1
 		end
@@ -260,8 +249,7 @@ end
 
 --true if the table contains element e
 function functional.contains(t, e)
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		if t[i] == e then
 			return true
 		end
@@ -272,8 +260,7 @@ end
 --return the numeric sum of all elements of t
 function functional.sum(t)
 	local c = 0
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		c = c + t[i]
 	end
 	return c
@@ -323,8 +310,7 @@ end
 function functional.find_min(t, f)
 	local current = nil
 	local current_min = math.huge
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		local e = t[i]
 		local v = f(e, i)
 		if v and v < current_min then
@@ -340,8 +326,7 @@ end
 function functional.find_max(t, f)
 	local current = nil
 	local current_max = -math.huge
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		local e = t[i]
 		local v = f(e, i)
 		if v and v > current_max then
@@ -365,8 +350,7 @@ end
 
 --return the first element of the table that results in a true filter
 function functional.find_match(t, f)
-	local n = #t
-	for i = 1, n do
+	for i = 1, #t do
 		local v = t[i]
 		if f(v) then
 			return v

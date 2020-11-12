@@ -83,7 +83,8 @@ functional.remap = functional.map_inplace
 function functional.filter(t, f)
 	local result = {}
 	for i = 1, #t do
-		if f(t[i], i) then
+		local v = t[i]
+		if f(v, i) then
 			table.insert(result, v)
 		end
 	end
@@ -113,7 +114,8 @@ end
 function functional.remove_if(t, f)
 	local result = {}
 	for i = 1, #t do
-		if not f(t[i], i) then
+		local v = t[i]
+		if not f(v, i) then
 			table.insert(result, v)
 		end
 	end
@@ -126,7 +128,8 @@ function functional.partition(t, f)
 	local a = {}
 	local b = {}
 	for i = 1, #t do
-		if f(t[i], i) then
+		local v = t[i]
+		if f(v, i) then
 			table.insert(a, v)
 		else
 			table.insert(b, v)
@@ -141,7 +144,8 @@ end
 function functional.group_by(t, f)
 	local result = {}
 	for i = 1, #t do
-		local group = f(t[i], i)
+		local v = t[i]
+		local group = f(v, i)
 		if result[group] == nil then
 			result[group] = {}
 		end
@@ -287,6 +291,7 @@ function functional.minmax(t)
 	local max = t[1]
 	local min = t[1]
 	for i = 2, n do
+		local v = t[i]
 		min = math.min(min, v)
 		max = math.max(max, v)
 	end
@@ -342,10 +347,21 @@ functional.find_best = functional.find_max
 
 --return the element of the table that results in the value nearest to the passed value
 --todo: optimise, inline as this generates a closure each time
-function functional.find_nearest(t, f, v)
-	return functional.find_min(t, function(e)
-		return math.abs(f(e) - v)
-	end)
+function functional.find_nearest(t, f, target)
+	local current = nil
+	local current_min = math.huge
+	for i = 1, #t do
+		local e = t[i]
+		local v = math.abs(f(e, i) - target)
+		if v and v < current_min then
+			current_min = v
+			current = e
+			if v == 0 then
+				break
+			end
+		end
+	end
+	return current
 end
 
 --return the first element of the table that results in a true filter

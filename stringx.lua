@@ -165,4 +165,61 @@ function stringx.pretty(input, indent, after)
 	return "{" .. table.concat(chunks, separator) .. "}"
 end
 
+function stringx.deindent(s, keep_trailing_empty)
+	--detect windows or unix newlines
+	local windows_newlines = s:find("\r\n", nil, true)
+	local newline = windows_newlines and "\r\n" or "\n"
+	--split along newlines
+	local lines = stringx.split(s, newline)
+	--detect and strip any leading blank lines
+	local leading_newline = false
+	while lines[1] == "" do
+		leading_newline = true
+		table.remove(lines, 1)
+	end
+
+	--nothing to do
+	if #lines == 0 then
+		return ""
+	end
+
+	--detect indent
+	local _, _, indent = lines[1]:find("^([ \t]*)")
+	local indent_len = indent and indent:len() or 0
+
+	--not indented
+	if indent_len == 0 then
+		return table.concat(lines, newline)
+	end
+
+	--de-indent the lines
+	local res = {}
+	for _, line in ipairs(lines) do
+		local line_start = line:sub(1, indent:len())
+		local start_len = line_start:len()
+		if
+			line_start == indent
+			or (
+				start_len < indent_len
+				and line_start == indent:sub(1, start_len)
+			)
+		then
+			line = line:sub(start_len + 1)
+		end
+		table.insert(res, line)
+	end
+
+	--should
+	if not keep_trailing_empty then
+		if res[#res] == "" then
+			table.remove(res)
+		end
+	end
+
+	return table.concat(res, newline)
+end
+
+--alias
+stringx.dedent = stringx.deindent
+
 return stringx

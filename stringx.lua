@@ -165,6 +165,56 @@ function stringx.pretty(input, indent, after)
 	return "{" .. table.concat(chunks, separator) .. "}"
 end
 
+--(generate a map of whitespace byte values)
+local _whitespace_bytes = {}
+do
+	local _whitespace = " \t\n\r"
+	for i = 1, _whitespace:len() do
+		_whitespace_bytes[_whitespace:byte(i)] = true
+	end
+end
+
+--trim all whitespace off the head and tail of a string
+--	specifically trims space, tab, newline, and carriage return characters
+--	ignores form feeds, vertical tabs, and backspaces
+--
+--	only generates one string of garbage in the case there's actually space to trim
+function stringx.trim(s)
+	--cache
+	local len = s:len()
+
+	--we search for the head and tail of the string iteratively
+	--we could fuse these loops, but two separate loops is a lot easier to follow
+	--and branches less as well.
+	local head = 0
+	for i = 1, len do
+		if not _whitespace_bytes[s:byte(i)] then
+			head = i
+			break
+		end
+	end
+
+	local tail = 0
+	for i = len, 1, -1 do
+		if not _whitespace_bytes[s:byte(i)] then
+			tail = i
+			break
+		end
+	end
+
+	--overlapping ranges means no content
+	if head > tail then
+		return ""
+	end
+	--limit ranges means no trim
+	if head == 1 and tail == len then
+		return s
+	end
+
+	--pull out the content
+	return s:sub(head, tail)
+end
+
 function stringx.deindent(s, keep_trailing_empty)
 	--detect windows or unix newlines
 	local windows_newlines = s:find("\r\n", nil, true)

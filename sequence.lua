@@ -58,20 +58,26 @@ function sequence:foreach(f)
 	return functional.foreach(self, f)
 end
 
-function sequence:reduce(f, o)
-	return functional.reduce(self, f, o)
+function sequence:reduce(seed, f)
+	return functional.reduce(self, seed, f)
 end
 
 function sequence:map(f)
 	return sequence(functional.map(self, f))
 end
 
-function sequence:remap(f)
-	return functional.remap(self, f)
+function sequence:map_inplace(f)
+	return sequence(functional.map_inplace(self, f))
 end
+
+sequence.remap = sequence.map_inplace
 
 function sequence:filter(f)
 	return sequence(functional.filter(self, f))
+end
+
+function sequence:filter_inplace(f)
+	return sequence(functional.filter_inplace(self, f))
 end
 
 function sequence:remove_if(f)

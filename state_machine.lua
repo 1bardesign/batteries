@@ -3,7 +3,7 @@
 
 	a finite state machine implementation;
 	each state is a table with optional enter, exit, update and draw callbacks
-	which each optionally take the machine, and the state table as arguments
+	which each optionally take the machine, the state table, and varargs as arguments
 
 	on changing state, the outgoing state's exit callback is called, then the incoming state's
 	enter callback is called.

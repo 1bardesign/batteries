@@ -1,21 +1,26 @@
 --[[
 	state machine
 
-	a finite state machine implementation;
-	each state is a table with optional enter, exit, update and draw callbacks
-	which each optionally take the machine, the state table, and varargs as arguments
+	a finite state machine implementation
 
-	on changing state, the outgoing state's exit callback is called, then the incoming state's
-	enter callback is called.
+	each state is either:
+
+	- a table with enter, exit, update and draw callbacks (all optional)
+		which each take the state table and varargs as arguments
+	- a function
+		which gets passed the current event name, the machine, and varargs as arguments
+
+	on changing state, the outgoing state's exit callback is called
+	then the incoming state's enter callback is called
+		enter can trigger another transition by returning a string
 
 	on update, the current state's update callback is called
+		the return value can trigger a transition
+
 	on draw, the current state's draw callback is called
+		the return value is discarded
 
 	TODO: consider coroutine friendliness
-
-	TODO: consider refactoring the callback signatures to allow using objects with methods
-	      like update(dt)/draw() directly
-	      current pattern means they need to be wrapped (as in :as_state())
 ]]
 
 local path = (...):gsub("state_machine", "")
@@ -25,12 +30,11 @@ local state_machine = class()
 function state_machine:new(states, start)
 	self = self:init({
 		states = states or {},
-		current_state = ""
+		current_state = "",
+		start_state = "",
 	})
 
-	if start then
-		self:set_state(start)
-	end
+	self:reset()
 
 	return self
 end
@@ -47,19 +51,20 @@ function state_machine:_call(name, ...)
 	local state = self:_get_state()
 	if state then
 		if type(state[name]) == "function" then
-			return state[name](self, state, ...)
+			return state[name](state, ...)
 		elseif type(state) == "function" then
-			return state(self, name, ...)
+			return state(name, self, ...)
 		end
 	end
 	return nil
 end
 
---make an internal call and transition if the return value is a valid state
---return the value if it isn't a valid state
+--make an internal call
+--	return the call result if it isn't a valid state
+--	transition if the return value is a valid state - and return nil if so
 function state_machine:_call_and_transition(name, ...)
 	local r = self:_call(name, ...)
-	if self:has_state(r) then
+	if type(r) == "string" and self:has_state(r) then
 		self:set_state(r, r == self.current_state)
 		return nil
 	end
@@ -78,7 +83,7 @@ function state_machine:has_state(name)
 end
 
 -------------------------------------------------------------------------------
---state adding/removing
+--state management
 
 --add a state
 function state_machine:add_state(name, data)
@@ -87,7 +92,7 @@ function state_machine:add_state(name, data)
 	else
 		self.states[name] = data
 		if self:in_state(name) then
-			self:_call("enter")
+			self:_call("enter", self)
 		end
 	end
 
@@ -118,7 +123,7 @@ function state_machine:replace_state(name, data, do_transitions)
 	end
 	self.states[name] = data
 	if do_transitions and current then
-		self:_call_and_transition("enter")
+		self:_call_and_transition("enter", self)
 	end
 
 	return self
@@ -132,20 +137,28 @@ end
 -------------------------------------------------------------------------------
 --transitions and updates
 
+--reset the machine to whatever the start state was defined at at creation
+function state_machine:reset()
+	if self.start_state then
+		self:set_state(self.start_state, true)
+	end
+end
+
 --set the current state
---if the enter callback of the target state returns a valid state name, then
---	it is transitioned to in turn, and so on until the machine is at rest
+--	if the enter callback of the target state returns a valid state name,
+--		then it is transitioned to in turn,
+--		and so on until the machine is at rest
 function state_machine:set_state(state, reset)
 	if self.current_state ~= state or reset then
 		self:_call("exit")
 		self.current_state = state
-		self:_call_and_transition("enter")
+		self:_call_and_transition("enter", self)
 	end
 	return self
 end
 
 --perform an update
---pass in an optional delta time which is passed as an arg to the state functions
+--pass in an optional delta time, which is passed as an arg to the state functions
 --if the state update returns a string, and we have that state
 --	then we change state (reset if it's the current state)
 --	and return nil
@@ -159,25 +172,10 @@ function state_machine:draw()
 	self:_call("draw")
 end
 
---wrap a state machine in a table suitable for use directly as a state in another state_machine
---upon entry, this machine will be forced into enter_state
---the parent will be accessible under m.parent
-function state_machine:as_state(enter_state)
-	if not self._as_state then
-		self._as_state = {
-			enter = function(m, s)
-				self.parent = m
-				self:set_state(enter_state, true)
-			end,
-			update = function(m, s, dt)
-				return self:update(dt)
-			end,
-			draw = function(m, s)
-				return self:draw()
-			end,
-		}
-	end
-	return self._as_state
+--for compatibility when used as a state
+function state_machine:enter(parent)
+	self.parent = parent
+	self:reset()
 end
 
 return state_machine

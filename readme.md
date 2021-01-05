@@ -34,11 +34,11 @@ See [below](#export-globals) for a discussion of the pros and cons of `export`.
 
 `batteries` is fairly easily used as a git submodule - this is how I use it in my own projects, because updating is just a `git pull`.
 
-A static install is harder to update, but easier to trim down if you only need some of the functionality provided and aren't so interested in updating.
+A static install is harder to update, but easier to trim down if you only need some of the functionality provided. It can also _never_ mysteriously break when updating, which might be appealing to those who just cant help themselves from using the latest and greatest.
 
 # Versioning?
 
-Currently, the library is operated in a rolling-release manner - the head of the master branch is intended for public consumption. While this is kept as stable as possible, breaking API changes _do_ happen, and more are planned!
+Currently, the library is operated in a rolling-release manner - the head of the master branch is intended for public consumption. While this is kept as stable as practical, breaking API changes _do_ happen, and more are planned!
 
 For this reason, you should try to check the commit history for what has changed rather than blindly updating. If you let me know that you're using it actively, I'm generally happy to let you know when something breaking is on its way to `master` as well.
 

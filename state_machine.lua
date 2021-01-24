@@ -31,7 +31,7 @@ function state_machine:new(states, start)
 	self = self:init({
 		states = states or {},
 		current_state = "",
-		start_state = "",
+		start_state = start,
 	})
 
 	self:reset()

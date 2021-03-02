@@ -280,4 +280,8 @@ function stringx.apply_template(s, sub)
 	return r
 end
 
+function stringx.starts_with(s, start)
+	return s:sub(1, #start) == start
+end
+
 return stringx

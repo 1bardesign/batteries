@@ -280,8 +280,15 @@ function stringx.apply_template(s, sub)
 	return r
 end
 
-function stringx.starts_with(s, start)
-	return s:sub(1, #start) == start
+--check if a given string starts with another
+--(without garbage)
+function stringx.starts_with(s, prefix)
+	for i = 1, #prefix do
+		if s:byte(i) ~= prefix:byte(i) then
+			return false
+		end
+	end
+	return true
 end
 
 return stringx

@@ -182,18 +182,20 @@ function tablex.values(t)
 end
 
 --append sequence t2 into t1, modifying t1
-function tablex.append_inplace(t1, t2)
+function tablex.append_inplace(t1, t2, ...)
 	for i,v in ipairs(t2) do
 		table.insert(t1, v)
+	end
+	if ... then
+		return table.append_inplace(t1, ...)
 	end
 	return t1
 end
 
 --return a new sequence with the elements of both t1 and t2
-function tablex.append(t1, t2)
+function tablex.append(t1, ...)
 	local r = {}
-	tablex.append_inplace(r, t1)
-	tablex.append_inplace(r, t2)
+	tablex.append_inplace(r, t1, ...)
 	return r
 end
 

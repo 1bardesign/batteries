@@ -134,6 +134,14 @@ function tablex.pick_random(t, r)
 	return t[_random(1, #t, r)]
 end
 
+--take a random value from a table (or nil if it's empty)
+function tablex.take_random(t, r)
+	if #t == 0 then
+		return nil
+	end
+	return table.remove(t, _random(1, #t, r))
+end
+
 --shuffle the order of a table
 function tablex.shuffle(t, r)
 	for i = 1, #t do

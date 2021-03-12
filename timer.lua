@@ -17,11 +17,11 @@ local timer = class()
 --	the timer object, so can be reset if needed
 function timer:new(time, on_progress, on_finish)
 	return self:init({
-		time = math.max(time, 1e-6), --negative time not allowed
+		time = 0, --set in the reset below
 		timer = 0,
 		on_progress = on_progress,
 		on_finish = on_finish,
-	})
+	}):reset(time)
 end
 
 --update this timer, calling the relevant callback if it exists
@@ -50,10 +50,12 @@ function timer:progress()
 	return math.min(self.timer / self.time, 1)
 end
 
---reset the timer
+--reset the timer; optionally change the time
 --will resume calling the same callbacks, so can be used for intervals
-function timer:reset()
+function timer:reset(time)
 	self.timer = 0
+	self.time = math.max(time or self.time, 1e-6) --negative time not allowed
+	return self
 end
 
 return timer

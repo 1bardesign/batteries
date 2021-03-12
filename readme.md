@@ -64,6 +64,8 @@ General utility data structures and algorithms to speed you along your way.
 - `set` - A set type supporting a full suite of set operations with fast membership testing and `ipairs`-style iteration.
 - `sort` - Provides a stable merge+insertion sorting algorithm that is also, as a bonus, often faster than `table.sort` under luajit. Also exposes `insertion_sort` if needed. Alias `stable_sort`.
 - `state_machine` - Finite state machine implementation with state transitions and all the rest. Useful for game states, AI, cutscenes...
+- `timer` - a "countdown" style timer with progress and completion callbacks.
+- `pubsub` - a self-contained publish/subscribe message bus. Immediate mode rather than queued, local rather than networked, but if you were expecting mqtt in 60 lines I don't know what to tell you. Scales pretty well nonetheless.
 
 **Geometry:**
 

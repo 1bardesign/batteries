@@ -31,6 +31,8 @@ local _batteries = {
 	vec3 = require_relative("vec3"),
 	intersect = require_relative("intersect"),
 	--
+	timer = require_relative("timer"),
+	pubsub = require_relative("pubsub"),
 	unique_mapping = require_relative("unique_mapping"),
 	state_machine = require_relative("state_machine"),
 	async = require_relative("async"),
@@ -72,6 +74,9 @@ function _batteries:export()
 
 	--overwrite assert wholesale (it's compatible)
 	assert = self.assert
+
+	--export the whole library to global `batteries`
+	batteries = self
 
 	return self
 end

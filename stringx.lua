@@ -320,13 +320,13 @@ function stringx.starts_with(s, prefix)
 	return true
 end
 
-function stringx.ends_with(s, prefix)
-	if prefix == "" then return true end
+function stringx.ends_with(s, posfix)
+	if posfix == "" then return true end
 
-	if #prefix > #s then return false end
+	if #posfix > #s then return false end
 
-	for i = 0, #prefix-1 do
-		if s:byte(#s-i) ~= prefix:byte(#prefix-i) then
+	for i = 0, #posfix-1 do
+		if s:byte(#s-i) ~= posfix:byte(#posfix-i) then
 			return false
 		end
 	end

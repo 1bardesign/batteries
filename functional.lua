@@ -209,7 +209,7 @@ functional.map_stitch = functional.stitch
 function functional.cycle(t, f)
 	local result = {}
 	for i, a in ipairs(t) do
-		local b = t[mathx.wrap(i + 1, 1, #t)]
+		local b = t[mathx.wrap(i + 1, 1, #t + 1)]
 		local v = f(a, b, i)
 		if v ~= nil then
 			table.insert(result, v)

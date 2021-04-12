@@ -216,31 +216,33 @@ function stringx.trim(s)
 end
 
 function stringx.ltrim(s)
-    if s == "" or s == string.rep(" ", s:len()) then return "" end
+	if s == "" or s == string.rep(" ", s:len()) then
+		return ""
+	end
 
-    local head = 1
-    for i = 1, #s do
-        local c = s:sub(i, i)
-        if c ~= " " then
-            head = i
-            break
-        end
-    end
-    return s:sub(head)
-
+	local head = 1
+	for i = 1, #s do
+		if not _whitespace_bytes[s:byte(i)] then
+			head = i
+			break
+		end
+	end
+	return s:sub(head)
 end
 
 function stringx.rtrim(s)
-    if s == "" or s == string.rep(" ", s:len()) then return "" end
-
-	local tail = #s
-	for i=#s, 1 do
-        local c = s:sub(i, i)
-        if c ~= " " then
-            tail = i
-            break
-        end
+	if s == "" or s == string.rep(" ", s:len()) then
+		return ""
 	end
+	local tail = #s
+
+	for i = #s, 1, -1 do
+		if not _whitespace_bytes[s:byte(i)] then
+			tail = i
+			break
+		end
+	end
+
 	return s:sub(1, tail)
 end
 

@@ -55,7 +55,7 @@ function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
 			into = vec2:zero()
 		end
 		--normalise, scale to separating distance
-		into:vset(_ccc_delta):sdiv(dist):smuli(rad - dist)
+		into:vset(_ccc_delta):sdivi(dist):smuli(rad - dist)
 		return into
 	end
 	return false
@@ -97,7 +97,7 @@ function intersect._line_displacement_to_sep(a_start, a_end, separation, total_r
 	if sep <= 0 then
 		if distance <= COLLIDE_EPS then
 			--point intersecting the line; push out along normal
-			separation:vset(a_end):vsub(a_start):normalisei():rot90li()
+			separation:vset(a_end):vsubi(a_start):normalisei():rot90li()
 		else
 			separation:smuli(-sep)
 		end

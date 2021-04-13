@@ -418,4 +418,15 @@ function intersect.point_in_poly(point, poly)
 	return wn ~= 0
 end
 
+--resolution helpers
+
+--bounce a velocity off of a normal (modifying velocity)
+local _bounce_temp = vec2()
+function intersect.bounce_off(velocity, normal)
+	_bounce_temp:vset(velocity)
+	velocity:vreji(normal)
+	velocity:vsubi(_bounce_temp:vsubi(velocity))
+	return velocity
+end
+
 return intersect

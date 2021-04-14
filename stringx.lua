@@ -215,11 +215,8 @@ function stringx.trim(s)
 	return s:sub(head, tail)
 end
 
+--trim the start of a string
 function stringx.ltrim(s)
-	if s == "" or s == string.rep(" ", s:len()) then
-		return ""
-	end
-
 	local head = 1
 	for i = 1, #s do
 		if not _whitespace_bytes[s:byte(i)] then
@@ -227,13 +224,14 @@ function stringx.ltrim(s)
 			break
 		end
 	end
+	if head == 1 then
+		return s
+	end
 	return s:sub(head)
 end
 
+--trim the end of a string
 function stringx.rtrim(s)
-	if s == "" or s == string.rep(" ", s:len()) then
-		return ""
-	end
 	local tail = #s
 
 	for i = #s, 1, -1 do
@@ -241,6 +239,10 @@ function stringx.rtrim(s)
 			tail = i
 			break
 		end
+	end
+
+	if tail == #s then
+		return s
 	end
 
 	return s:sub(1, tail)
@@ -322,13 +324,13 @@ function stringx.starts_with(s, prefix)
 	return true
 end
 
-function stringx.ends_with(s, posfix)
-	if posfix == "" then return true end
-
-	if #posfix > #s then return false end
-
-	for i = 0, #posfix-1 do
-		if s:byte(#s-i) ~= posfix:byte(#posfix-i) then
+--check if a given string ends with another
+--(without garbage)
+function stringx.ends_with(s, suffix)
+	local len = #s
+	local suffix_len = #suffix
+	for i = 0, suffix_len - 1 do
+		if s:byte(len - i) ~= suffix:byte(suffix_len - i) then
 			return false
 		end
 	end

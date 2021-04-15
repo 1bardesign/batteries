@@ -55,7 +55,7 @@ function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
 			into = vec2:zero()
 		end
 		--normalise, scale to separating distance
-		into:vset(_ccc_delta):sdiv(dist):smuli(rad - dist)
+		into:vset(_ccc_delta):sdivi(dist):smuli(rad - dist)
 		return into
 	end
 	return false
@@ -97,7 +97,7 @@ function intersect._line_displacement_to_sep(a_start, a_end, separation, total_r
 	if sep <= 0 then
 		if distance <= COLLIDE_EPS then
 			--point intersecting the line; push out along normal
-			separation:vset(a_end):vsub(a_start):normalisei():rot90li()
+			separation:vset(a_end):vsubi(a_start):normalisei():rot90li()
 		else
 			separation:smuli(-sep)
 		end
@@ -416,6 +416,62 @@ function intersect.point_in_poly(point, poly)
 		end
 	end
 	return wn ~= 0
+end
+
+--resolution helpers
+
+--resolve a collision between two bodies, given a (minimum) separating vector
+--	from a's frame of reference, like the result of any of the _collide functions
+--requires the two positions of the bodies, the msv, and a balance factor
+--balance should be between 1 and 0;
+--	1 is only a_pos moving to resolve
+--	0 is only b_pos moving to resolve
+--	0.5 is balanced between both (default)
+--note: this wont work as-is for line segments, which have two separate position coordinates
+--		you will need to understand what is going on and move the second coordinate yourself
+function intersect.resolve_msv(a_pos, b_pos, msv, balance)
+	balance = balance or 0.5
+	a_pos:fmai(msv, balance)
+	b_pos:fmai(msv, -(1 - balance))
+end
+
+--bounce a velocity off of a normal (modifying velocity)
+--essentially flips the part of the velocity in the direction of the normal
+function intersect.bounce_off(velocity, normal, conservation)
+	--(default)
+	conservation = conservation or 1
+	--take a copy, we need it
+	local old_vel = vec2.pooled_copy(velocity)
+	--reject on the normal (keep velocity tangential to the normal)
+	velocity:vreji(normal)
+	--add back the complement of the difference;
+	--basically "flip" the velocity in line with the normal.
+	velocity:fmai(old_vel:vsubi(velocity), -conservation)
+	--clean up
+	old_vel:release()
+	return velocity
+end
+
+--mutual bounce; two similar bodies bounce off each other, transferring energy
+function intersect.mutual_bounce(velocity_a, velocity_b, normal, conservation)
+	--(default)
+	conservation = conservation or 1
+	--take copies, we need them
+	local old_a_vel = vec2.pooled_copy(velocity_a)
+	local old_b_vel = vec2.pooled_copy(velocity_b)
+	--reject on the normal
+	velocity_a:vreji(normal)
+	velocity_b:vreji(normal)
+	--calculate the amount remaining from the old velocity
+	--(transfer ownership)
+	local a_remaining = old_a_vel:vsubi(velocity_a)
+	local b_remaining = old_b_vel:vsubi(velocity_b)
+	--transfer it to the other body
+	velocity_a:fmai(b_remaining, conservation)
+	velocity_b:fmai(a_remaining, conservation)
+	--clean up
+	a_remaining:release()
+	b_remaining:release()
 end
 
 return intersect

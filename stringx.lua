@@ -215,6 +215,39 @@ function stringx.trim(s)
 	return s:sub(head, tail)
 end
 
+--trim the start of a string
+function stringx.ltrim(s)
+	local head = 1
+	for i = 1, #s do
+		if not _whitespace_bytes[s:byte(i)] then
+			head = i
+			break
+		end
+	end
+	if head == 1 then
+		return s
+	end
+	return s:sub(head)
+end
+
+--trim the end of a string
+function stringx.rtrim(s)
+	local tail = #s
+
+	for i = #s, 1, -1 do
+		if not _whitespace_bytes[s:byte(i)] then
+			tail = i
+			break
+		end
+	end
+
+	if tail == #s then
+		return s
+	end
+
+	return s:sub(1, tail)
+end
+
 function stringx.deindent(s, keep_trailing_empty)
 	--detect windows or unix newlines
 	local windows_newlines = s:find("\r\n", nil, true)
@@ -285,6 +318,19 @@ end
 function stringx.starts_with(s, prefix)
 	for i = 1, #prefix do
 		if s:byte(i) ~= prefix:byte(i) then
+			return false
+		end
+	end
+	return true
+end
+
+--check if a given string ends with another
+--(without garbage)
+function stringx.ends_with(s, suffix)
+	local len = #s
+	local suffix_len = #suffix
+	for i = 0, suffix_len - 1 do
+		if s:byte(len - i) ~= suffix:byte(suffix_len - i) then
 			return false
 		end
 	end

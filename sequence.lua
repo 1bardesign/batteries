@@ -53,7 +53,35 @@ function sequence:copy(...)
 	return sequence(table.copy(self, ...))
 end
 
---import functional interface
+--import functional interface in method form
+
+--(common case where something returns another sequence for chaining)
+for _, v in ipairs({
+	"map",
+	"map_inplace",
+	"filter",
+	"filter_inplace",
+	"remove_if",
+	"zip",
+	"stitch",
+	"cycle",
+}) do
+	local functional_f = functional[v]
+	sequence[v] = function(self, ...)
+		return sequence(functional_f(self, ...))
+	end
+end
+
+--aliases
+for _, v in ipairs({
+	{"remap", "map_inplace"},
+	{"map_stitch", "stitch"},
+	{"map_cycle", "cycle"},
+}) do
+	sequence[v[1]] = sequence[v[2]]
+end
+
+--(less common cases where we don't want to construct a new sequence or have more than one return value)
 function sequence:foreach(f)
 	return functional.foreach(self, f)
 end
@@ -62,35 +90,9 @@ function sequence:reduce(seed, f)
 	return functional.reduce(self, seed, f)
 end
 
-function sequence:map(f)
-	return sequence(functional.map(self, f))
-end
-
-function sequence:map_inplace(f)
-	return sequence(functional.map_inplace(self, f))
-end
-
-sequence.remap = sequence.map_inplace
-
-function sequence:filter(f)
-	return sequence(functional.filter(self, f))
-end
-
-function sequence:filter_inplace(f)
-	return sequence(functional.filter_inplace(self, f))
-end
-
-function sequence:remove_if(f)
-	return sequence(functional.remove_if(self, f))
-end
-
 function sequence:partition(f)
 	local a, b = functional.partition(self, f)
 	return sequence(a), sequence(b)
-end
-
-function sequence:zip(other, f)
-	return sequence(functional.zip(self, other, f))
 end
 
 return sequence

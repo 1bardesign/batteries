@@ -16,7 +16,7 @@ end
 
 --probably-too-flexible ctor
 function vec2:new(x, y)
-	if x and y then
+	if type(x) == "number" and type(y) == "number" then
 		return vec2:xy(x,y)
 	elseif x then
 		if type(x) == "number" then

@@ -121,7 +121,7 @@ local function qSlerp(ar,ai,aj,ak, br,bi,bj,bk, t) --slerp from a to b at t
 			ar,ai,aj,ak, 
 			qPow(
 				cr, ci, cj, ck,
-				t
+				t, 0, 0, 0
 			)
 		);
 end

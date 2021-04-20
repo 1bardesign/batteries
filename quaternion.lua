@@ -417,7 +417,7 @@ end
 quaternion.qMul = qMul;
 
 function quaternion.scl(a,b)
-	a.r, a.i, a.j, a.k = qScl(a.r, a.i, a.j, a.k, b.r, b.i, b.j, b.k);
+	a.r, a.i, a.j, a.k = qScl(a.r, a.i, a.j, a.k, b);
 	return a;
 end
 quaternion.qScl = qScl;

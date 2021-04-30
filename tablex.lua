@@ -48,68 +48,50 @@ function tablex.unshift(t, v)
 	return t
 end
 
-function tablex.is_sorted(t)
-    local sorted = true
-    for i = 1, #t - 1 do
-        if t[i] > t[i + 1] then
-            sorted = false
-            break
-        end
-    end
-    return sorted
+--default comparison; hoisted for clarity
+--(shared with sort.lua and suggests the sorted functions below should maybe be refactored there)
+local function default_less(a, b)
+	return a < b
+end
+
+--check if a function is sorted based on a "less" or "comes before" ordering comparison
+--if any item is "less" than the item before it, we are not sorted
+--(use stable_sort to )
+function tablex.is_sorted(t, less)
+	less = less or default_less
+	for i = 1, #t - 1 do
+		if less(t[i + 1], t[i]) then
+			return false
+		end
+	end
+	return true
 end
 
 --insert to the first position before the first larger element in the table
 --if this is used on an already sorted table, the table will remain sorted and not need re-sorting
---todo: make it do binary search rather than linear to improve performance
+--(you can check if the table is sorted and sort if needed if you don't know)
 --return the table for possible chaining
 function tablex.insert_sorted(t, v, less)
-	local inserted = false
-
-	-- to use binary search is necessary as precondition that
-	-- the table is sorted
-	if not tablex.is_sorted(t) then
-			for i = 1, #t do
-				if less(v, t[i]) then
-					table.insert(t, i, v)
-					inserted = true
-					break
-				end
-			end
-		if not inserted then
-			table.insert(t, v)
-		end
-		return t
-	end
-
-	local l = 1
-	local r = #t
-	
-	if r < l then
-		table.insert(t,v)
-		return t
-	end
-
-
-	while l <= r do
-		local mid = math.floor(l + (r - l) / 2)
-		if (less(v, t[mid]) or v == t[mid]) and (mid == 1 or less(t[mid - 1], v) or t[mid - 1] == v) then
-			table.insert(t, mid, v)
-			inserted = true
+	less = less or default_less
+	local low = 1
+	local high = #t
+	local match
+	while low <= high do
+		local mid = math.floor((low + high) / 2)
+		local mid_val = t[mid]
+		if less(v, mid_val) then
+			high = mid - 1
+		elseif less(mid_val, v) then
+			low = mid + 1
+		else
+			match = mid
 			break
-		elseif less(t[mid], v) then
-			l = mid + 1
-		elseif less(v, t[mid - 1]) then
-			r  = mid - 1
 		end
 	end
-
-	if not inserted then
-		table.insert(t, l, v)
-	end
-
+	table.insert(t, match or low, v)
 	return t
 end
+
 --find the index in a sequential table that a resides at
 --or nil if nothing was found
 function tablex.index_of(t, a)

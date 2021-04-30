@@ -24,73 +24,85 @@ sequence.sort = stable_sort
 --patch various interfaces in a type-preserving way, for method chaining
 
 --import copying tablex
-function sequence:keys()
-	return sequence(table.keys(self))
+--(common case where something returns another sequence for chaining)
+for _, v in ipairs({
+	"keys",
+	"values",
+	"dedupe",
+	"collapse",
+	"append",
+	"overlay",
+	"copy",
+}) do
+	local table_f = table[v]
+	sequence[v] = function(self, ...)
+		return sequence(table_f(self, ...))
+	end
 end
 
-function sequence:values()
-	return sequence(table.values(self))
+--aliases
+for _, v in ipairs({
+	{"flatten", "collapse"},
+}) do
+	sequence[v[1]] = sequence[v[2]]
 end
 
-function sequence:dedupe()
-	return sequence(table.dedupe(self))
+--import functional interface in method form
+
+--(common case where something returns another sequence for chaining)
+for _, v in ipairs({
+	"map",
+	"map_inplace",
+	"filter",
+	"filter_inplace",
+	"remove_if",
+	"zip",
+	"stitch",
+	"cycle",
+}) do
+	local functional_f = functional[v]
+	sequence[v] = function(self, ...)
+		return sequence(functional_f(self, ...))
+	end
 end
 
-function sequence:collapse()
-	return sequence(table.collapse(self))
-end
-sequence.flatten = sequence.collapse
-
-function sequence:append(...)
-	return sequence(table.append(self, ...))
-end
-
-function sequence:overlay(...)
-	return sequence(table.overlay(self, ...))
-end
-
-function sequence:copy(...)
-	return sequence(table.copy(self, ...))
-end
-
---import functional interface
-function sequence:foreach(f)
-	return functional.foreach(self, f)
-end
-
-function sequence:reduce(seed, f)
-	return functional.reduce(self, seed, f)
+--(cases where we don't want to construct a new sequence)
+for _, v in ipairs({
+	"foreach",
+	"reduce",
+	"any",
+	"none",
+	"all",
+	"count",
+	"contains",
+	"sum",
+	"mean",
+	"minmax",
+	"max",
+	"min",
+	"find_min",
+	"find_max",
+	"find_nearest",
+	"find_match",
+}) do
+	sequence[v] = functional[v]
 end
 
-function sequence:map(f)
-	return sequence(functional.map(self, f))
+
+--aliases
+for _, v in ipairs({
+	{"remap", "map_inplace"},
+	{"map_stitch", "stitch"},
+	{"map_cycle", "cycle"},
+	{"find_best", "find_max"},
+}) do
+	sequence[v[1]] = sequence[v[2]]
 end
 
-function sequence:map_inplace(f)
-	return sequence(functional.map_inplace(self, f))
-end
-
-sequence.remap = sequence.map_inplace
-
-function sequence:filter(f)
-	return sequence(functional.filter(self, f))
-end
-
-function sequence:filter_inplace(f)
-	return sequence(functional.filter_inplace(self, f))
-end
-
-function sequence:remove_if(f)
-	return sequence(functional.remove_if(self, f))
-end
-
+--(anything that needs bespoke wrapping)
 function sequence:partition(f)
 	local a, b = functional.partition(self, f)
 	return sequence(a), sequence(b)
-end
-
-function sequence:zip(other, f)
-	return sequence(functional.zip(self, other, f))
 end
 
 return sequence

@@ -13,6 +13,7 @@
 
 local path = (...):gsub("functional", "")
 local tablex = require(path .. "tablex")
+local mathx = require(path .. "mathx")
 
 local functional = setmetatable({}, {
 	__index = tablex,
@@ -171,6 +172,54 @@ function functional.zip(t1, t2, f)
 	end
 	return ret
 end
+
+-----------------------------------------------------------
+--specialised maps
+--	(experimental: let me know if you have better names for these!)
+-----------------------------------------------------------
+
+--maps a sequence {a, b, c} -> collapse { f(a), f(b), f(c) }
+-- (ie results from functions should generally be sequences,
+--  which are appended onto each other, resulting in one big sequence)
+-- (automatically drops any nils, same as map)
+function functional.stitch(t, f)
+	local result = {}
+	for i, v in ipairs(t) do
+		local v = f(v, i)
+		if v ~= nil then
+			if type(v) == "table" then
+				for _, e in ipairs(v) do
+					table.insert(result, e)
+				end
+			else
+				table.insert(result, v)
+			end
+		end
+	end
+	return result
+end
+
+--alias
+functional.map_stitch = functional.stitch
+
+--maps a sequence {a, b, c} -> { f(a, b), f(b, c), f(c, a) }
+-- useful for inter-dependent data
+-- (automatically drops any nils, same as map)
+
+function functional.cycle(t, f)
+	local result = {}
+	for i, a in ipairs(t) do
+		local b = t[mathx.wrap(i + 1, 1, #t + 1)]
+		local v = f(a, b, i)
+		if v ~= nil then
+			table.insert(result, v)
+		end
+	end
+	return result
+end
+
+functional.map_cycle = functional.cycle
+
 
 -----------------------------------------------------------
 --generating data

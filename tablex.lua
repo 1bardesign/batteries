@@ -48,22 +48,47 @@ function tablex.unshift(t, v)
 	return t
 end
 
+--default comparison; hoisted for clarity
+--(shared with sort.lua and suggests the sorted functions below should maybe be refactored there)
+local function default_less(a, b)
+	return a < b
+end
+
+--check if a function is sorted based on a "less" or "comes before" ordering comparison
+--if any item is "less" than the item before it, we are not sorted
+--(use stable_sort to )
+function tablex.is_sorted(t, less)
+	less = less or default_less
+	for i = 1, #t - 1 do
+		if less(t[i + 1], t[i]) then
+			return false
+		end
+	end
+	return true
+end
+
 --insert to the first position before the first larger element in the table
 --if this is used on an already sorted table, the table will remain sorted and not need re-sorting
---todo: make it do binary search rather than linear to improve performance
+--(you can check if the table is sorted and sort if needed if you don't know)
 --return the table for possible chaining
 function tablex.insert_sorted(t, v, less)
-	local inserted = false
-	for i = 1, #t do
-		if less(v, t[i]) then
-			table.insert(t, i, v)
-			inserted = true
+	less = less or default_less
+	local low = 1
+	local high = #t
+	local match
+	while low <= high do
+		local mid = math.floor((low + high) / 2)
+		local mid_val = t[mid]
+		if less(v, mid_val) then
+			high = mid - 1
+		elseif less(mid_val, v) then
+			low = mid + 1
+		else
+			match = mid
 			break
 		end
 	end
-	if not inserted then
-		table.insert(t, v)
-	end
+	table.insert(t, match or low, v)
 	return t
 end
 

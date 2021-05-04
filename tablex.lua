@@ -48,6 +48,12 @@ function tablex.unshift(t, v)
 	return t
 end
 
+--swap two indices of a table
+--(easier to read and generally less typing than the common idiom)
+function tablex.swap(t, i, j)
+	t[i], t[j] = t[j], t[i]
+end
+
 --insert to the first position before the first larger element in the table
 --if this is used on an already sorted table, the table will remain sorted and not need re-sorting
 --todo: make it do binary search rather than linear to improve performance

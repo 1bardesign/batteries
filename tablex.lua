@@ -247,10 +247,7 @@ function tablex.dedupe(t)
 end
 
 --(might already exist depending on luajit)
-if table.clear then
-	--import from global if it exists
-	tablex.clear = table.clear
-else
+if not tablex.clear then
 	--remove all values from a table
 	--useful when multiple references are being held
 	--so you cannot just create a new table

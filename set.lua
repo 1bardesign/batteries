@@ -46,6 +46,17 @@ function set:remove(v)
 	return self
 end
 
+--remove all elements from the set
+function set:clear()
+	if table.clear then
+		table.clear(self._keyed)
+		table.clear(self._ordered)
+	else
+		self._keyed = {}
+		self._ordered = {}
+	end
+end
+
 --get the number of distinct values in the set
 function set:size()
 	return #self._ordered

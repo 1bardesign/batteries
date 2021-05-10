@@ -428,6 +428,15 @@ local function aabb_clamp(pos, hs, v)
 	return _v_clamp.x, _v_clamp.y
 end
 
+--  return true on overlap, false otherwise
+local _a_b_closest = vec2:zero()
+local _a_b_delta = vec2:zero() -- Delta vec for minimum distance between aabb and circle
+function intersect.aabb_circle_overlap(apos, ahs, bpos, brad)
+	_a_b_closest:sset(aabb_clamp(apos, ahs, bpos))
+	_a_b_delta:vset(bpos):vsubi(_a_b_closest)
+	return _a_b_delta:dot(_a_b_delta) < (brad*brad) + COLLIDE_EPS -- Pythag theorem
+end
+
 --check if a point is in a polygon
 --point is the point to test
 --poly is a list of points in order

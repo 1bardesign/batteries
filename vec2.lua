@@ -581,4 +581,57 @@ function vec2:apply_friction_xy(mu_x, mu_y, dt)
 	return self
 end
 
+-- mask out min component
+function vec2:majori()
+	if self.x > self.y then
+		self.y = 0
+	elseif self.x < self.y then
+		self.x = 0
+	end
+	return self
+end
+-- mask out max component
+function vec2:minori()
+	if self.x > self.y then
+		self.x = 0
+	elseif self.x < self.y then
+		self.y = 0
+	end
+	return self
+end
+-- max out min magnitude component
+function vec2:farthesti()
+	if math.abs(self.x) > math.abs(self.y) then
+		self.y = 0
+	elseif math.abs(self.x) < math.abs(self.y) then
+		self.x = 0
+	end
+	return self
+end
+-- max out max magnitude component
+function vec2:closesti()
+	if math.abs(self.x) > math.abs(self.y) then
+		self.x = 0
+	elseif math.abs(self.x) < math.abs(self.y) then
+		self.y = 0
+	end
+	return self
+end
+
+function vec2:major(axis)
+	return self:copy():majori(axis)
+end
+
+function vec2:minor(axis)
+	return self:copy():minori(axis)
+end
+
+function vec2:farthest(axis)
+	return self:copy():farthesti(axis)
+end
+
+function vec2:closest(axis)
+	return self:copy():closesti(axis)
+end
+
 return vec2

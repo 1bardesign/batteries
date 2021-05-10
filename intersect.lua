@@ -232,6 +232,26 @@ function intersect.aabb_point_overlap(pos, hs, v)
 	return _apo_delta.x < hs.x and _apo_delta.y < hs.y
 end
 
+-- discrete displacement
+-- return msv to push point to closest edge of aabb
+local _apo_delta_c = vec2:zero()
+local _apo_delta_c_abs = vec2:zero()
+local _apo_normal = vec2:zero()
+function intersect.aabb_point_collide(pos, hs, v, into)
+	_apo_delta_c:vset(v):vsubi(pos)
+	_apo_delta_c_abs:vset(_apo_delta_c):absi()
+	if _apo_delta_c_abs.x < hs.x and _apo_delta_c_abs.y < hs.y then
+		into = into or vec2:zero()
+		-- ahh get the point outta here
+		_apo_normal:vset(hs):vsubi(_apo_delta_c_abs):minori()
+		_apo_delta_c:vmuli(_apo_normal):normalisei():smuli(_apo_normal:length())
+		-- nudge it a bit
+		into:vset(_apo_delta_c):vaddi(_apo_delta_c:normalisei():smuli(COLLIDE_EPS))
+		return into
+	end
+	return false
+end
+
 --return true on overlap, false otherwise
 local _aao_abs_delta = vec2:zero()
 local _aao_total_size = vec2:zero()

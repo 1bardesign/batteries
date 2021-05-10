@@ -240,13 +240,11 @@ local _apo_normal = vec2:zero()
 function intersect.aabb_point_collide(pos, hs, v, into)
 	_apo_delta_c:vset(v):vsubi(pos)
 	_apo_delta_c_abs:vset(_apo_delta_c):absi()
-	if _apo_delta_c_abs.x < hs.x and _apo_delta_c_abs.y < hs.y then
+	if _apo_delta_c_abs.x <= hs.x and _apo_delta_c_abs.y <= hs.y then
 		into = into or vec2:zero()
 		-- ahh get the point outta here
-		_apo_normal:vset(hs):vsubi(_apo_delta_c_abs):minori()
-		_apo_delta_c:vmuli(_apo_normal):normalisei():smuli(_apo_normal:length())
-		-- nudge it a bit
-		into:vset(_apo_delta_c):vaddi(_apo_delta_c:normalisei():smuli(COLLIDE_EPS))
+		_apo_normal:vset(hs):saddi(COLLIDE_EPS):vsubi(_apo_delta_c_abs):minori()
+		into:vset(_apo_delta_c):vmuli(_apo_normal):normalisei():smuli(_apo_normal:length())
 		return into
 	end
 	return false
@@ -435,6 +433,38 @@ function intersect.aabb_circle_overlap(apos, ahs, bpos, brad)
 	_a_b_closest:sset(aabb_clamp(apos, ahs, bpos))
 	_a_b_delta:vset(bpos):vsubi(_a_b_closest)
 	return _a_b_delta:dot(_a_b_delta) < (brad*brad) + COLLIDE_EPS -- Pythag theorem
+end
+
+-- Discrete
+-- return msv on collision, false otherwise
+local _new_bpos = vec2:zero() -- Intermediate circle pos
+local _ap_bp_delta = vec2:zero() -- Vec from closest points
+local _aabb_closest = vec2:zero() -- Closest point on aabb to circle
+local _circle_closest = vec2:zero() -- Closest point on circle to aabb
+function intersect.aabb_circle_collide(apos, ahs, bpos, brad, into)
+
+	-- Get msv
+	if intersect.aabb_circle_overlap(apos, ahs, bpos, brad) then
+
+		into = into or vec2:zero()
+
+		--if intersect.aabb_point_overlap(apos, ahs, bpos) then -- circle center in aabb
+		intersect.aabb_point_collide(apos, ahs, bpos, into) -- separate center out
+		--end
+
+		_new_bpos:vset(bpos):vaddi(into) -- Add msv to bpos
+		-- Closest point on aabb to new bpos
+		_aabb_closest:sset(aabb_clamp(apos, ahs, _new_bpos))
+		-- Closest point on circle to closest point on aabb
+		_ap_bp_delta:vset(_aabb_closest):vsubi(_new_bpos)
+		print(_ap_bp_delta)
+		_circle_closest:vset(_new_bpos):vaddi(_ap_bp_delta:normalisei():smuli(brad))
+		-- Delta between closest points
+		_ap_bp_delta:vset(_aabb_closest):vsubi(_circle_closest)
+		into:vaddi(_ap_bp_delta):vaddi(_ap_bp_delta:normalisei():smuli(COLLIDE_EPS))
+		return into
+	end
+	return false -- no overlap
 end
 
 --check if a point is in a polygon

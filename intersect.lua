@@ -417,6 +417,17 @@ function intersect.aabb_aabb_collide_continuous(
 	return false
 end
 
+-- helper function to clamp point to aabb
+local _v_min = vec2:zero()
+local _v_max = vec2:zero()
+local _v_clamp = vec2:zero()
+local function aabb_clamp(pos, hs, v)
+	_v_min:sset(pos.x-hs.x, pos.y-hs.y)
+	_v_max:sset(pos.x+hs.x, pos.y+hs.y)
+	_v_clamp:vset(v):clampi(_v_min,_v_max)
+	return _v_clamp.x, _v_clamp.y
+end
+
 --check if a point is in a polygon
 --point is the point to test
 --poly is a list of points in order

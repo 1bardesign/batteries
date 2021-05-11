@@ -48,6 +48,12 @@ function tablex.unshift(t, v)
 	return t
 end
 
+--swap two indices of a table
+--(easier to read and generally less typing than the common idiom)
+function tablex.swap(t, i, j)
+	t[i], t[j] = t[j], t[i]
+end
+	
 --default comparison; hoisted for clarity
 --(shared with sort.lua and suggests the sorted functions below should maybe be refactored there)
 local function default_less(a, b)

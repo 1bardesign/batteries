@@ -435,6 +435,25 @@ function intersect.resolve_msv(a_pos, b_pos, msv, balance)
 	b_pos:fmai(msv, -(1 - balance))
 end
 
+-- gets a normalised balance factor from two mass inputs, and treats <=0 or infinite or nil masses as static bodies
+-- returns false if we're colliding two static bodies, as that's invalid
+function intersect.balance_from_mass(a_mass, b_mass)
+	--static cases
+	local a_static = a_mass <= 0 or a_mass == math.huge or not a_mass
+	local b_static = b_mass <= 0 or b_mass == math.huge or not a_mass
+	if a_static and b_static then
+		return false --colliding two static bodies
+	elseif a_static then
+		return 0.0
+	elseif b_static then
+		return 1.0
+	end
+
+	--get balance factor
+	local total = a_mass + b_mass
+	return a_mass / total
+end
+
 --bounce a velocity off of a normal (modifying velocity)
 --essentially flips the part of the velocity in the direction of the normal
 function intersect.bounce_off(velocity, normal, conservation)

@@ -68,27 +68,24 @@ function tablex.is_sorted(t, less)
 end
 
 --insert to the first position before the first larger element in the table
+-- ({1, 2, 2, 3}, 2) -> {1, 2, 2, 2 (inserted here), 3}
 --if this is used on an already sorted table, the table will remain sorted and not need re-sorting
---(you can check if the table is sorted and sort if needed if you don't know)
+--(you can sort beforehand if you don't know)
 --return the table for possible chaining
 function tablex.insert_sorted(t, v, less)
 	less = less or default_less
 	local low = 1
 	local high = #t
-	local match
 	while low <= high do
 		local mid = math.floor((low + high) / 2)
 		local mid_val = t[mid]
 		if less(v, mid_val) then
 			high = mid - 1
-		elseif less(mid_val, v) then
-			low = mid + 1
 		else
-			match = mid
-			break
+			low = mid + 1
 		end
 	end
-	table.insert(t, match or low, v)
+	table.insert(t, low, v)
 	return t
 end
 

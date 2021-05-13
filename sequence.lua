@@ -13,6 +13,12 @@ local stable_sort = require(path .. "sort").stable_sort
 
 local sequence = class(table) --proxy missing table fns to tablex api
 
+--iterators as method calls
+--(no pairs, sequences are ordered)
+--todo: pico8 like `all`
+sequence.ipairs = ipairs
+sequence.iterate = ipairs
+
 --upgrade a table into a sequence, or create a new sequence
 function sequence:new(t)
 	return self:init(t or {})

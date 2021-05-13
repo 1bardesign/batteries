@@ -85,11 +85,13 @@ function intersect.nearest_point_on_line(a_start, a_end, b_pos, into)
 	return into
 end
 
+--internal
 --vector from line seg to point
 function intersect._line_to_point(a_start, a_end, b_pos, into)
 	return intersect.nearest_point_on_line(a_start, a_end, b_pos, into):vsubi(b_pos)
 end
 
+--internal
 --line displacement vector from separation vector
 function intersect._line_displacement_to_sep(a_start, a_end, separation, total_rad)
 	local distance = separation:normalisei_len()
@@ -104,6 +106,14 @@ function intersect._line_displacement_to_sep(a_start, a_end, separation, total_r
 		return separation
 	end
 	return false
+end
+
+--overlap a line segment with a circle
+function intersect.line_circle_overlap(a_start, a_end, a_rad, b_pos, b_rad)
+	local nearest = intersect._line_to_point(a_start, a_end, b_pos, vec2:pooled())
+	local overlapped = intersect.circle_point_overlap(b_pos, a_rad + b_rad, nearest)
+	nearest:release()
+	return overlapped
 end
 
 --collide a line segment with a circle

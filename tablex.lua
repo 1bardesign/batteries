@@ -173,7 +173,7 @@ end
 --shuffle the order of a table
 function tablex.shuffle(t, r)
 	for i = 1, #t do
-		local j = _random(1, #t, r)
+		local j = _random(i, #t, r)
 		t[i], t[j] = t[j], t[i]
 	end
 	return t

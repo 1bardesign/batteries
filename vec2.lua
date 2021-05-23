@@ -378,8 +378,26 @@ function vec2:rotate_around(angle, pivot)
 	return self:copy():rotate_aroundi(angle, pivot)
 end
 
+-- angle/direction specific
+
+--get the angle of this vector relative to (1, 0) 
 function vec2:angle()
 	return math.atan2(self.y, self.x)
+end
+
+--get the normalised difference in angle between two vectors
+function vec2:angle_difference(v)
+	return math.angle_difference(self:angle(), v:angle())
+end
+
+--lerp towards the direction of a provided vector
+--(length unchanged)
+function vec2:lerp_directioni(v, t)
+	return self:rotatei(self:angle_difference(v) * t)
+end
+
+function vec2:lerp_direction(v, t)
+	return self:copy():lerp_directioni(v, t)
 end
 
 -----------------------------------------------------------

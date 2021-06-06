@@ -108,7 +108,24 @@ function colour.hsl_to_rgb(h, s, l)
 	return r, g, b
 end
 
---todo: rgb to hsl
+--convert rgb to hsl
+function colour.rgb_to_hsl(r, g, b)
+	local max, min = math.max(r, g, b), math.min(r, g, b)
+	if max == min then return 0, 0, min end
+
+	local l, d = max + min, max - min
+	local s, h = d / (l > 1 and (2 - l) or l)
+	l = l / 2
+	if max == r then
+		h = (g - b) / d
+		if g < b then h = h + 6 end
+	elseif max == g then
+		h = (b - r) / d + 2
+	else
+		h = (r - g) / d + 4
+	end
+	return h / 6, s, l
+end
 
 --todo: hsv, other colour spaces
 --todo: oklab https://bottosson.github.io/posts/oklab/

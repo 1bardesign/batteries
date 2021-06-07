@@ -59,27 +59,24 @@ local function class(inherits)
 			error("super_call requires a string function name to look up, got "..tostring(func_name))
 		end
 		--todo: memoize the below :)
-		local first_impl = c
+		local previous_impl = c:super()
 		--find the first superclass that actually has the method
-		while first_impl and not rawget(first_impl, func_name) do
-			first_impl = first_impl:super()
+		while previous_impl and not rawget(previous_impl, func_name) do
+			previous_impl = previous_impl:super()
 		end
-		if not first_impl then
+		if not previous_impl then
 			error("failed super call - no superclass in the chain has an implementation of "..func_name)
 		end
-		--get the superclass of that
-		local super = first_impl:super()
-		if not super then
-			error("failed super call - no superclass to call from")
-		end
-
-		local f = super[func_name]
-		if not f then
+		-- get the function
+		local f = previous_impl[func_name]
+		if not f then -- this should never happen because we bail out earlier
 			error("failed super call - missing function "..func_name.." in superclass")
 		end
+		-- check if someone reuses that reference
 		if f == self[func_name] then
 			error("failed super call - function "..func_name.." is same in superclass as in derived; this will be a infinite recursion!")
 		end
+		-- call that function
 		return f(self, ...)
 	end
 

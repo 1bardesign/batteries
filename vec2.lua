@@ -92,9 +92,12 @@ function vec2:pooled_copy()
 end
 
 --release a vector to the pool
-function vec2:release()
+function vec2:release(...)
 	if vec2.pool_size() < _vec2_pool_limit then
 		table.insert(_vec2_pool, self)
+	end
+	if ... then
+		vec2.release(...)
 	end
 end
 

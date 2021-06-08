@@ -236,16 +236,26 @@ end
 -- return msv to push point to closest edge of aabb
 local _apo_delta_c = vec2:zero()
 local _apo_delta_c_abs = vec2:zero()
-local _apo_normal = vec2:zero()
 function intersect.aabb_point_collide(pos, hs, v, into)
-	_apo_delta_c:vset(v):vsubi(pos)
-	_apo_delta_c_abs:vset(_apo_delta_c):absi()
-	if _apo_delta_c_abs.x <= hs.x and _apo_delta_c_abs.y <= hs.y then
-		into = into or vec2:zero()
-		-- ahh get the point outta here
-		_apo_normal:vset(hs):saddi(COLLIDE_EPS):vsubi(_apo_delta_c_abs):minori()
-		into:vset(_apo_delta_c):vmuli(_apo_normal):normalisei():smuli(_apo_normal:length())
-		return into
+	--separation between centres
+	_apo_delta_c
+		:vset(v)
+		:vsubi(pos)
+	--absolute separation
+	_apo_delta_c_abs
+		:vset(_apo_delta_c)
+		:absi()
+	if _apo_delta_c_abs.x < hs.x and _apo_delta_c_abs.y < hs.y then
+		return (into or vec2:zero())
+			--separating offset in both directions
+			:vset(hs)
+			:vsubi(_apo_delta_c_abs)
+			--minimum separating distance
+			:minori()
+			--in the right direction
+			:vmuli(_apo_delta_c:signi())
+			--from the aabb's point of view
+			:smuli(-1)
 	end
 	return false
 end
@@ -253,9 +263,9 @@ end
 --return true on overlap, false otherwise
 local _aao_abs_delta = vec2:zero()
 local _aao_total_size = vec2:zero()
-function intersect.aabb_aabb_overlap(pos, hs, opos, ohs)
-	_aao_abs_delta:vset(pos):vsubi(opos):absi()
-	_aao_total_size:vset(hs):vaddi(ohs)
+function intersect.aabb_aabb_overlap(a_pos, a_hs, b_pos, b_hs)
+	_aao_abs_delta:vset(a_pos):vsubi(b_pos):absi()
+	_aao_total_size:vset(a_hs):vaddi(b_hs)
 	return _aao_abs_delta.x < _aao_total_size.x and _aao_abs_delta.y < _aao_total_size.y
 end
 
@@ -265,11 +275,11 @@ local _aac_delta = vec2:zero()
 local _aac_abs_delta = vec2:zero()
 local _aac_size = vec2:zero()
 local _aac_abs_amount = vec2:zero()
-function intersect.aabb_aabb_collide(apos, ahs, bpos, bhs, into)
+function intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, b_hs, into)
 	if not into then into = vec2:zero() end
-	_aac_delta:vset(apos):vsubi(bpos)
+	_aac_delta:vset(a_pos):vsubi(b_pos)
 	_aac_abs_delta:vset(_aac_delta):absi()
-	_aac_size:vset(ahs):vaddi(bhs)
+	_aac_size:vset(a_hs):vaddi(b_hs)
 	_aac_abs_amount:vset(_aac_size):vsubi(_aac_abs_delta)
 	if _aac_abs_amount.x > COLLIDE_EPS and _aac_abs_amount.y > COLLIDE_EPS then
 		--actually collided
@@ -295,8 +305,8 @@ end
 --return normal and fraction of dt encountered on collision, false otherwise
 --TODO: re-pool storage here
 function intersect.aabb_aabb_collide_continuous(
-	a_startpos, a_endpos, ahs,
-	b_startpos, b_endpos, bhs,
+	a_startpos, a_endpos, a_hs,
+	b_startpos, b_endpos, b_hs,
 	into
 )
 	if not into then into = vec2:zero() end
@@ -309,11 +319,11 @@ function intersect.aabb_aabb_collide_continuous(
 	do
 		local _self_half_delta = _self_delta_motion:smul(0.5)
 		local _self_bounds_pos = _self_half_delta:vadd(a_endpos)
-		local _self_bounds_hs = _self_half_delta:vadd(ahs)
+		local _self_bounds_hs = _self_half_delta:vadd(a_hs)
 
 		local _other_half_delta = _other_delta_motion:smul(0.5)
 		local _other_bounds_pos = _other_half_delta:vadd(b_endpos)
-		local _other_bounds_hs = _other_half_delta:vadd(bhs)
+		local _other_bounds_hs = _other_half_delta:vadd(b_hs)
 
 		if not body._overlap_raw(
 			_self_bounds_pos, _self_bounds_hs,
@@ -326,7 +336,7 @@ function intersect.aabb_aabb_collide_continuous(
 	--get ccd minkowski box
 	--this is a relative-space box
 	local _relative_delta_motion = _self_delta_motion:vsub(_other_delta_motion)
-	local _minkowski_halfsize = ahs:vadd(bhs)
+	local _minkowski_halfsize = a_hs:vadd(b_hs)
 	local _minkowski_pos = b_startpos:vsub(a_startpos)
 
 	--if a line seg from our relative motion hits the minkowski box, we're in luck
@@ -416,55 +426,43 @@ function intersect.aabb_aabb_collide_continuous(
 end
 
 -- helper function to clamp point to aabb
-local _v_min = vec2:zero()
-local _v_max = vec2:zero()
-local _v_clamp = vec2:zero()
-local function aabb_clamp(pos, hs, v)
-	_v_min:sset(pos.x-hs.x, pos.y-hs.y)
-	_v_max:sset(pos.x+hs.x, pos.y+hs.y)
-	_v_clamp:vset(v):clampi(_v_min,_v_max)
-	return _v_clamp.x, _v_clamp.y
+function intersect.aabb_point_clamp(pos, hs, v, into)
+	local v_min = pos:pooled_copy():vsubi(hs)
+	local v_max = pos:pooled_copy():vaddi(hs)
+	into = into or vec2:zero()
+	into:vset(v):clampi(v_min, v_max)
+	vec2.release(v_min, v_max)
+	return into
 end
 
---  return true on overlap, false otherwise
-local _a_b_closest = vec2:zero()
-local _a_b_delta = vec2:zero() -- Delta vec for minimum distance between aabb and circle
-function intersect.aabb_circle_overlap(apos, ahs, bpos, brad)
-	_a_b_closest:sset(aabb_clamp(apos, ahs, bpos))
-	_a_b_delta:vset(bpos):vsubi(_a_b_closest)
-	return _a_b_delta:dot(_a_b_delta) < (brad*brad) + COLLIDE_EPS -- Pythag theorem
+-- return true on overlap, false otherwise
+function intersect.aabb_circle_overlap(a_pos, a_hs, b_pos, b_rad)
+	local clamped = intersect.aabb_point_clamp(a_pos, a_hs, b_pos, vec2:pooled())
+	local edge_distance_squared = clamped:distance_squared(b_pos)
+	clamped:release()
+	return edge_distance_squared < (b_rad * b_rad)
 end
 
--- Discrete
 -- return msv on collision, false otherwise
-local _new_bpos = vec2:zero() -- Intermediate circle pos
-local _ap_bp_delta = vec2:zero() -- Vec from closest points
-local _aabb_closest = vec2:zero() -- Closest point on aabb to circle
-local _circle_closest = vec2:zero() -- Closest point on circle to aabb
-function intersect.aabb_circle_collide(apos, ahs, bpos, brad, into)
-
-	-- Get msv
-	if intersect.aabb_circle_overlap(apos, ahs, bpos, brad) then
-
-		into = into or vec2:zero()
-
-		--if intersect.aabb_point_overlap(apos, ahs, bpos) then -- circle center in aabb
-		intersect.aabb_point_collide(apos, ahs, bpos, into) -- separate center out
-		--end
-
-		_new_bpos:vset(bpos):vaddi(into) -- Add msv to bpos
-		-- Closest point on aabb to new bpos
-		_aabb_closest:sset(aabb_clamp(apos, ahs, _new_bpos))
-		-- Closest point on circle to closest point on aabb
-		_ap_bp_delta:vset(_aabb_closest):vsubi(_new_bpos)
-		print(_ap_bp_delta)
-		_circle_closest:vset(_new_bpos):vaddi(_ap_bp_delta:normalisei():smuli(brad))
-		-- Delta between closest points
-		_ap_bp_delta:vset(_aabb_closest):vsubi(_circle_closest)
-		into:vaddi(_ap_bp_delta):vaddi(_ap_bp_delta:normalisei():smuli(COLLIDE_EPS))
-		return into
+function intersect.aabb_circle_collide(a_pos, a_hs, b_pos, b_rad, into)
+	local abs_delta = a_pos:pooled_copy():vsub(b_pos):absi()
+	--circle centre within aabb-like bounds, collide as an aabb
+	local like_aabb = abs_delta.x < a_hs.x or abs_delta.y < a_hs.y
+	--(clean up)
+	abs_delta:release()
+	--
+	local result
+	if like_aabb then
+		local pretend_hs = vec2:pooled():sset(b_rad)
+		result = intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, pretend_hs, into)
+		pretend_hs:release()
+	else
+		--outside aabb-like bounds so we need to collide with the nearest clamped corner point
+		local clamped = intersect.aabb_point_clamp(a_pos, a_hs, b_pos, vec2:pooled())
+		result = intersect.circle_circle_collide(clamped, 0, b_pos, b_rad, into)
+		clamped:release()
 	end
-	return false -- no overlap
+	return result
 end
 
 --check if a point is in a polygon

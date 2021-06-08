@@ -434,6 +434,20 @@ function vec2:abs()
 end
 
 -----------------------------------------------------------
+-- sign
+-----------------------------------------------------------
+
+function vec2:signi()
+	self.x = math.sign(self.x)
+	self.y = math.sign(self.y)
+	return self
+end
+
+function vec2:sign()
+	return self:copy():signi()
+end
+
+-----------------------------------------------------------
 -- truncation/rounding
 -----------------------------------------------------------
 

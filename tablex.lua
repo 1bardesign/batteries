@@ -53,6 +53,13 @@ end
 function tablex.swap(t, i, j)
 	t[i], t[j] = t[j], t[i]
 end
+
+--swap the element at i to the back of the table, and remove it
+--avoids linear cost of removal at the expense of messing with the order of the table
+function tablex.swap_and_pop(t, i)
+	tablex.swap(t, i, #t)
+	return tablex.pop(t)
+end
 	
 --default comparison; hoisted for clarity
 --(shared with sort.lua and suggests the sorted functions below should maybe be refactored there)

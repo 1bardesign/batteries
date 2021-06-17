@@ -15,6 +15,7 @@
 
 local path = (...):gsub("intersect", "")
 local vec2 = require(path .. "vec2")
+local functional = require(path .. "functional")
 
 --module storage
 local intersect = {}
@@ -219,7 +220,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 			table.insert(search_tab, {intersect._line_to_point(a_start, a_end, b_end),   -1})
 		end
 
-		local best = table.find_best(search_tab, function(v)
+		local best = functional.find_best(search_tab, function(v)
 			return -(v[1]:length_squared())
 		end)
 

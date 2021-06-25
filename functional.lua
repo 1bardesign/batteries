@@ -1,14 +1,19 @@
 --[[
 	functional programming facilities
 
-	notes:
-		be careful about creating closures in hot loops.
-		this is this module's achilles heel - there's no special
-		syntax for closures so it's not apparent that you're suddenly
-		allocating at every call
+	be wary of use in performance critical code under luajit
 
-		reduce has a similar problem, but at least arguments
-		there are clear!
+		absolute performance is this module's achilles heel;
+		you're generally allocating more garbage than is strictly necessary,
+		plus inline anonymous will be re-created each call, which is NYI
+
+		this can be a Bad Thing and means probably this isn't a great module
+		to heavily leverage in the middle of your action game's physics update
+
+		but, there are many cases where it matters less than you'd think
+		generally, if it wasn't hot enough to get compiled anyway, you're fine
+
+	(if all this means nothing to you, just don't worry about it)
 ]]
 
 local path = (...):gsub("functional", "")

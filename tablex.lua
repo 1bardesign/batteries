@@ -256,17 +256,22 @@ function tablex.dedupe(t)
 	return r
 end
 
---(might already exist depending on luajit)
+--(might already exist depending on environment)
 if not tablex.clear then
-	--remove all values from a table
-	--useful when multiple references are being held
-	--so you cannot just create a new table
-	function tablex.clear(t)
-		assert:type(t, "table", "tablex.clear - t", 1)
-		local k = next(t)
-		while k ~= nil do
-			t[k] = nil
-			k = next(t)
+	local imported
+	--pull in from luajit if possible
+	imported, tablex.clear = pcall(require, "table.clear")
+	if not imported then
+		--remove all values from a table
+		--useful when multiple references are being held
+		--so you cannot just create a new table
+		function tablex.clear(t)
+			assert:type(t, "table", "tablex.clear - t", 1)
+			local k = next(t)
+			while k ~= nil do
+				t[k] = nil
+				k = next(t)
+			end
 		end
 	end
 end

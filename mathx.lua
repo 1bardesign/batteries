@@ -46,6 +46,7 @@ function mathx.to_precision(v, decimal_points)
 end
 
 --0, 1, -1 sign of a scalar
+--todo: investigate if a branchless or `/abs` approach is faster in general case
 function mathx.sign(v)
 	if v < 0 then return -1 end
 	if v > 0 then return 1 end

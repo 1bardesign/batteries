@@ -9,8 +9,7 @@
 	continuous sweeps (where provided) also return the
 	time-domain position of first intersection
 
-	TODO: refactor vector storage to be pooled rather than fully local
-	      so these functions can be reentrant
+	TODO: refactor vector storage to be pooled where needed
 ]]
 
 local path = (...):gsub("intersect", "")
@@ -35,18 +34,18 @@ function intersect.circle_circle_overlap(a_pos, a_rad, b_pos, b_rad)
 	return a_pos:distance_squared(b_pos) < rad * rad
 end
 
-local _ccc_delta = vec2:zero()
 function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
 	--get delta
-	_ccc_delta:vset(a_pos):vsubi(b_pos)
+	local delta = a_pos:pooled_copy():vsubi(b_pos)
 	--squared threshold
 	local rad = a_rad + b_rad
-	local dist = _ccc_delta:length_squared()
+	local dist = delta:length_squared()
+	local res = false
 	if dist < rad * rad then
 		if dist == 0 then
 			--singular case; just resolve vertically
 			dist = 1
-			_ccc_delta:sset(0,1)
+			delta:sset(0,1)
 		else
 			--get actual distance
 			dist = math.sqrt(dist)
@@ -56,10 +55,10 @@ function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
 			into = vec2:zero()
 		end
 		--normalise, scale to separating distance
-		into:vset(_ccc_delta):sdivi(dist):smuli(rad - dist)
-		return into
+		res = into:vset(delta):sdivi(dist):smuli(rad - dist)
 	end
-	return false
+	delta:release()
+	return res
 end
 
 ------------------------------------------------------------------------------
@@ -237,80 +236,66 @@ end
 -- axis aligned bounding boxes
 
 --return true on overlap, false otherwise
-local _apo_delta = vec2:zero()
 function intersect.aabb_point_overlap(pos, hs, v)
-	_apo_delta:vset(pos):vsubi(v):absi()
-	return _apo_delta.x < hs.x and _apo_delta.y < hs.y
+	local delta = pos:pooled_copy():vsubi(v):absi()
+	local overlap = delta.x < hs.x and delta.y < hs.y
+	delta:release()
+	return overlap
 end
 
 -- discrete displacement
 -- return msv to push point to closest edge of aabb
-local _apo_delta_c = vec2:zero()
-local _apo_delta_c_abs = vec2:zero()
 function intersect.aabb_point_collide(pos, hs, v, into)
 	--separation between centres
-	_apo_delta_c
-		:vset(v)
-		:vsubi(pos)
+	local delta_c = v:pooled_copy():vsubi(pos)
 	--absolute separation
-	_apo_delta_c_abs
-		:vset(_apo_delta_c)
-		:absi()
-	if _apo_delta_c_abs.x < hs.x and _apo_delta_c_abs.y < hs.y then
-		return (into or vec2:zero())
+	local delta_c_abs = delta_c:pooled_copy():absi()
+	local res = false
+	if delta_c_abs.x < hs.x and delta_c_abs.y < hs.y then
+		res = (into or vec2:zero())
 			--separating offset in both directions
 			:vset(hs)
-			:vsubi(_apo_delta_c_abs)
+			:vsubi(delta_c_abs)
 			--minimum separating distance
 			:minori()
 			--in the right direction
-			:vmuli(_apo_delta_c:signi())
+			:vmuli(delta_c:signi())
 			--from the aabb's point of view
 			:smuli(-1)
 	end
-	return false
+	vec2.release(delta_c, delta_c_abs)
+	return res
 end
 
 --return true on overlap, false otherwise
-local _aao_abs_delta = vec2:zero()
-local _aao_total_size = vec2:zero()
 function intersect.aabb_aabb_overlap(a_pos, a_hs, b_pos, b_hs)
-	_aao_abs_delta:vset(a_pos):vsubi(b_pos):absi()
-	_aao_total_size:vset(a_hs):vaddi(b_hs)
-	return _aao_abs_delta.x < _aao_total_size.x and _aao_abs_delta.y < _aao_total_size.y
+	local delta = a_pos:pooled_copy():vsubi(b_pos):absi()
+	local total_size = a_hs:pooled_copy():vaddi(b_hs)
+	local overlap = delta.x < total_size.x and delta.y < total_size.y
+	vec2.release(delta, total_size)
+	return overlap
 end
 
 --discrete displacement
 --return msv on collision, false otherwise
-local _aac_delta = vec2:zero()
-local _aac_abs_delta = vec2:zero()
-local _aac_size = vec2:zero()
-local _aac_abs_amount = vec2:zero()
 function intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, b_hs, into)
 	if not into then into = vec2:zero() end
-	_aac_delta:vset(a_pos):vsubi(b_pos)
-	_aac_abs_delta:vset(_aac_delta):absi()
-	_aac_size:vset(a_hs):vaddi(b_hs)
-	_aac_abs_amount:vset(_aac_size):vsubi(_aac_abs_delta)
-	if _aac_abs_amount.x > COLLIDE_EPS and _aac_abs_amount.y > COLLIDE_EPS then
+	local delta = a_pos:pooled_copy():vsubi(b_pos)
+	local abs_delta = delta:pooled_copy():absi()
+	local size = a_hs:pooled_copy():vaddi(b_hs)
+	local abs_amount = size:pooled_copy():vsubi(abs_delta)
+	local res = false
+	if abs_amount.x > COLLIDE_EPS and abs_amount.y > COLLIDE_EPS then
 		--actually collided
-		if _aac_abs_amount.x <= _aac_abs_amount.y then
+		if abs_amount.x <= abs_amount.y then
 			--x min
-			if _aac_delta.x < 0 then
-				return into:sset(-_aac_abs_amount.x, 0)
-			else
-				return into:sset(_aac_abs_amount.x, 0)
-			end
+			res = into:sset(abs_amount.x * math.sign(delta.x), 0)
 		else
 			--y min
-			if _aac_delta.y < 0 then
-				return into:sset(0, -_aac_abs_amount.y)
-			else
-				return into:sset(0, _aac_abs_amount.y)
-			end
+			res = into:sset(0, abs_amount.y * math.sign(delta.y))
 		end
 	end
-	return false
+	return res
 end
 
 --return normal and fraction of dt encountered on collision, false otherwise

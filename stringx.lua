@@ -218,6 +218,24 @@ function stringx.apply_template(s, sub)
 	return r
 end
 
+--check if a given string contains another
+--(without garbage)
+function stringx.contains(haystack, needle)
+	for i = 1, #haystack - #needle + 1 do
+		local found = true
+		for j = 1, #needle do
+			if haystack:byte(i + j - 1) ~= needle:byte(j) then
+				found = false
+				break
+			end
+		end
+		if found then
+			return true
+		end
+	end
+	return false
+end
+
 --check if a given string starts with another
 --(without garbage)
 function stringx.starts_with(s, prefix)

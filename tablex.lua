@@ -162,11 +162,19 @@ local function _random(min, max, r)
 end
 
 --pick a random value from a table (or nil if it's empty)
+function tablex.random_index(t, r)
+	if #t == 0 then
+		return 0
+	end
+	return _random(1, #t, r)
+end
+
+--pick a random value from a table (or nil if it's empty)
 function tablex.pick_random(t, r)
 	if #t == 0 then
 		return nil
 	end
-	return t[_random(1, #t, r)]
+	return t[tablex.random_index(t, r)]
 end
 
 --take a random value from a table (or nil if it's empty)
@@ -174,7 +182,7 @@ function tablex.take_random(t, r)
 	if #t == 0 then
 		return nil
 	end
-	return table.remove(t, _random(1, #t, r))
+	return table.remove(t, tablex.random_index(t, r))
 end
 
 --shuffle the order of a table

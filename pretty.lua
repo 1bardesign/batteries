@@ -59,7 +59,7 @@ function pretty._process(input, config, processing_state)
 	end
 
 	--pull out config
-	config = table.overlay(pretty.default_config, config or {})
+	config = table.overlay({}, pretty.default_config, config or {})
 	
 	local per_line = config.per_line
 	local depth = config.depth

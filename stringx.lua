@@ -2,8 +2,9 @@
 	extra string routines
 ]]
 
-local path = (...):gsub(".stringx", ".")
+local path = (...):gsub("stringx", "")
 local assert = require(path .. "assert")
+local pretty = require(path .. "pretty")
 
 local stringx = setmetatable({}, {
 	__index = string
@@ -66,104 +67,7 @@ function stringx.split(self, delim)
 	return res
 end
 
-
---turn input into a vaguely easy to read string
---(which is also able to be parsed by lua in many cases)
---todo: support cyclic references without crashing :)
-function stringx.pretty(input, indent, after)
-	--if the input is not a table, or it has a tostring metamethod
-	--then we can just use tostring
-	local mt = getmetatable(input)
-	if type(input) ~= "table" or mt and mt.__tostring then
-		local s = tostring(input)
-		--quote strings
-		if type(input) == "string" then
-			s = '"' .. s .. '"'
-		end
-		return s
-	end
-
-	--resolve indentation requirements
-	indent = indent or ""
-	if type(indent) == "number" then
-		indent = (" "):rep(indent)
-	end
-
-	local newline = indent == "" and "" or "\n"
-
-	local function internal_value(v)
-		v = stringx.pretty(v, indent, after)
-		if indent ~= "" then
-			v = v:gsub(newline, newline..indent)
-		end
-		return v
-	end
-
-	--otherwise, we've got to build up a table representation
-	--collate into member chunks
-	local chunks = {}
-	--(tracking for already-seen elements from ipairs)
-	local seen = {}
-	--sequential part first
-	--(in practice, pairs already does this, but the order isn't guaranteed)
-	for i, v in ipairs(input) do
-		seen[i] = true
-		table.insert(chunks, internal_value(v))
-	end
-	--non sequential follows
-	for k, v in pairs(input) do
-		if not seen[k] then
-			--encapsulate anything that's not a string
-			--todo: also keywords and strings with spaces
-			if type(k) ~= "string" then
-				k = "[" .. tostring(k) .. "]"
-			end
-			table.insert(chunks, k .. " = " .. internal_value(v))
-		end
-	end
-
-	--resolve number to newline skip after
-	after = after or 1
-	if after and after > 1 then
-		local line_chunks = {}
-		while #chunks > 0 do
-			local break_next = false
-			local line = {}
-			for i = 1, after do
-				if #chunks == 0 then
-					break
-				end
-				local v = chunks[1]
-				--tables split to own line
-				if v:find("{") then
-					--break line here
-					break_next = true
-					break
-				else
-					table.insert(line, table.remove(chunks, 1))
-				end
-			end
-			if #line > 0 then
-				table.insert(line_chunks, table.concat(line, ", "))
-			end
-			if break_next then
-				table.insert(line_chunks, table.remove(chunks, 1))
-				break_next = false
-			end
-		end
-		chunks = line_chunks
-	end
-
-	local multiline = #chunks > 1
-	local separator = (indent == "" or not multiline) and ", " or ",\n"..indent
-
-	if multiline then
-		return "{" .. newline ..
-			indent .. table.concat(chunks, separator) .. newline ..
-		"}"
-	end
-	return "{" .. table.concat(chunks, separator) .. "}"
-end
+stringx.pretty = pretty.string
 
 --(generate a map of whitespace byte values)
 local _whitespace_bytes = {}

@@ -38,6 +38,7 @@ local _batteries = {
 	async = require_relative("async"),
 	manual_gc = require_relative("manual_gc"),
 	colour = require_relative("colour"),
+	pretty = require_relative("pretty"),
 }
 
 --assign aliases

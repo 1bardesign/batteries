@@ -12,6 +12,7 @@ local stringx = setmetatable({}, {
 
 --split a string on a delimiter into an ordered table
 function stringx.split(self, delim)
+	delim = delim or ""
 	assert:type(self, "string", "stringx.split - self", 1)
 	assert:type(delim, "string", "stringx.split - delim", 1)
 

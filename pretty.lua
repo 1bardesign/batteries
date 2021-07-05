@@ -10,13 +10,13 @@
 
 	all exposed functions take a config table, defaults found in pretty.default_config
 
-		per_line
-			how many fields to print per line
 		indent
 			indentation to use for each line, or "" for single-line packed
 			can be a number of spaces, boolean, or a string to use verbatim
 		depth
 			a limit on how deep to explore the table
+		per_line
+			how many fields to print per line
 ]]
 
 local path = (...):gsub("pretty", "")
@@ -25,9 +25,9 @@ local table = require(path.."tablex") --shadow global table module
 local pretty = {}
 
 pretty.default_config = {
-	per_line = 1,
-	depth = math.huge,
 	indent = true,
+	depth = math.huge,
+	per_line = 1,
 }
 
 --indentation to use when `indent = true` is provided

@@ -99,13 +99,13 @@ end
 
 --filters a sequence in place, modifying it
 function functional.filter_inplace(t, f)
-	local write_i = 1
+	local write_i = 0
 	local n = #t --cache, so splitting the sequence doesn't stop iteration
 	for i = 1, n do
 		local v = t[i]
 		if f(v, i) then
-			t[write_i] = v
 			write_i = write_i + 1
+			t[write_i] = v
 		end
 		if i ~= write_i then
 			t[i] = nil

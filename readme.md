@@ -156,6 +156,10 @@ For this reason, you should try to check the commit history for what has changed
 
 If there is a large enough user base in the future to make a versioning scheme + non-repo changelog make sense, I will accomodate.
 
+## snake_case? Why?
+
+I personally prefer it, but I accept that it's a matter of taste and puts people off. I'm considering an automatic camelCase API conversion that you can opt in to, this will be updated if that eventuates.
+
 # License
 
 zlib, see [here](license.txt)

@@ -1,7 +1,7 @@
 --[[
 	add pooling functionality to a class
 
-	adds a handful of class and instance methods
+	adds a handful of class and instance methods to do with pooling
 ]]
 
 return function(class, limit)
@@ -29,9 +29,11 @@ return function(class, limit)
 	--(re-initialised with new, or freshly constructed if the pool was empty)
 	function class:pooled(...)
 		if #_pool == 0 then
-			return c(...)
+			return class(...)
 		end
-		return c.drain_pool():new(...)
+		local instance = class:drain_pool()
+		instance:new(...)
+		return instance
 	end
 
 	--release a vector to the pool

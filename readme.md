@@ -92,6 +92,7 @@ These modules are probably only useful to some folks in some circumstances, or a
 - [`colour`](./colour.lua) - Colour conversion routines. Alias `color`.
 - [`manual_gc`](./manual_gc.lua) - Get GC out of your update/draw calls. Useful when trying to get accurate profiling information; moves "randomness" of GC. Requires you to think a bit about your garbage budgets though.
 - [`unique_mapping`](./unique_mapping.lua) - Generate a unique mapping from arbitrary lua values to numeric keys - essentially making up a consistent ordering for unordered data. Niche, but can be used to optimise draw batches for example, as you can't sort on textures without it.
+- [`make_pooled`](./make_pooled.lua) - add pooling/recycling capability to a class
 
 Any aliases are provided at both the `batteries` module level, and globally when exported.
 

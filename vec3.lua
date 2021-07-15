@@ -7,118 +7,73 @@ local path = (...):gsub("vec3", "")
 local class = require(path .. "class")
 local vec2 = require(path .. "vec2")
 local math = require(path .. "mathx") --shadow global math module
+local make_pooled = require(path .. "make_pooled")
 
-local vec3 = class()
-vec3.type = "vec3"
+local vec3 = class({
+	name = "vec3",
+})
 
 --stringification
-vec3.__mt.__tostring = function(self)
+function vec3:__tostring()
 	return ("(%.2f, %.2f, %.2f)"):format(self.x, self.y, self.z)
 end
 
 --probably-too-flexible ctor
 function vec3:new(x, y, z)
-	if x and y and z then
-		return vec3:xyz(x, y, z)
-	elseif x then
-		if type(x) == "number" then
-			return vec3:filled(x)
-		elseif type(x) == "table" then
-			if x.type == "vec3" then
-				return x:copy()
-			elseif x[1] and x[2] and x[3] then
-				return vec3:xyz(x[1], x[2], x[3])
-			end
+	if type(x) == "number" or type(x) == "nil" then
+		self:sset(x or 0, y, z)
+	elseif type(x) == "table" then
+		if x.type and x:type() == "vec3" then
+			self:vset(x)
+		elseif x[1] then
+			self:sset(x[1], x[2], x[3])
+		else
+			self:sset(x.x, x.y, x.z)
 		end
 	end
-	return vec3:zero()
 end
 
 --explicit ctors
 function vec3:copy()
-	return self:init({
-		x = self.x, y = self.y, z = self.z
-	})
+	return vec3(self.x, self.y, self.z)
 end
 
 function vec3:xyz(x, y, z)
-	return self:init({
-		x = x, y = y, z = z
-	})
+	return vec3(x, y, z)
 end
 
-function vec3:filled(v)
-	return self:init({
-		x = v, y = v, z = v
-	})
+function vec3:filled(x, y, z)
+	return vec3(x, y, z)
 end
 
 function vec3:zero()
-	return vec3:filled(0)
+	return vec3(0, 0, 0)
 end
 
---shared pooled storage
-local _vec3_pool = {}
---size limit for tuning memory upper bound
-local _vec3_pool_limit = 128
-
-function vec3.pool_size()
-	return #_vec3_pool
+--unpack for multi-args
+function vec3:unpack()
+	return self.x, self.y, self.z
 end
 
---flush the entire pool
-function vec3.flush_pool()
-	if vec3.pool_size() > 0 then
-		_vec3_pool = {}
-	end
+--pack when a sequence is needed
+function vec3:pack()
+	return {self:unpack()}
 end
 
---drain one element from the pool, if it exists
-function vec3.drain_pool()
-	if #_vec3_pool > 0 then
-		return table.remove(_vec3_pool)
-	end
-	return nil
-end
-
---get a pooled vector (initialise it yourself)
-function vec3:pooled()
-	return vec3.drain_pool() or vec3:zero()
-end
+--handle pooling
+make_pooled(vec3, 128)
 
 --get a pooled copy of an existing vector
 function vec3:pooled_copy()
 	return vec3:pooled():vset(self)
 end
 
---release a vector to the pool
-function vec3:release()
-	if vec3.pool_size() < _vec3_pool_limit then
-		table.insert(_vec3_pool, self)
-	end
-end
-
---unpack for multi-args
-
-function vec3:unpack()
-	return self.x, self.y, self.z
-end
-
---pack when a sequence is needed
---(not particularly useful)
-
-function vec3:pack()
-	return {self:unpack()}
-end
-
 --modify
 
 function vec3:sset(x, y, z)
-	if not y then y = x end
-	if not z then z = y end
 	self.x = x
-	self.y = y
-	self.z = z
+	self.y = y or x
+	self.z = z or y or z
 	return self
 end
 

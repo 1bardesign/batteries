@@ -66,7 +66,7 @@ Extensions to existing lua core modules to provide missing features.
 
 General utility data structures and algorithms to speed you along your way.
 
-- [`class`](./class.lua) - Single-inheritance oo in a single function.
+- [`class`](./class.lua) - OOP with inheritance and interfaces in a single function.
 - [`functional`](./functional.lua) - Functional programming facilities. `map`, `reduce`, `any`, `match`, `minmax`, `mean`...
 - [`sequence`](./sequence.lua) - An oo wrapper on sequential tables, so you can do `t:insert(i, v)` instead of `table.insert(t, i, v)`. Also supports method chaining for the `functional` interface above, which can save a lot of needless typing!
 - [`set`](./set.lua) - A set type supporting a full suite of set operations with fast membership testing and `ipairs`-style iteration.

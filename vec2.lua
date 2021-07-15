@@ -5,113 +5,65 @@
 local path = (...):gsub("vec2", "")
 local class = require(path .. "class")
 local math = require(path .. "mathx") --shadow global math module
+local make_pooled = require(path .. "make_pooled")
 
-local vec2 = class()
-vec2.type = "vec2"
+local vec2 = class({
+	name = "vec2",
+})
 
 --stringification
-vec2.__mt.__tostring = function(self)
+function vec2:__tostring()
 	return ("(%.2f, %.2f)"):format(self.x, self.y)
 end
 
 --probably-too-flexible ctor
 function vec2:new(x, y)
-	if type(x) == "number" and type(y) == "number" then
-		return vec2:xy(x,y)
-	elseif x then
-		if type(x) == "number" then
-			return vec2:filled(x)
-		elseif type(x) == "table" then
-			if x.type == "vec2" then
-				return x:copy()
-			elseif x[1] and x[2] then
-				return vec2:xy(x[1], x[2])
-			elseif x.x and x.y then
-				return vec2:xy(x.x, x.y)
-			end
+	if type(x) == "number" or type(x) == "nil" then
+		self:sset(x or 0, y)
+	elseif type(x) == "table" then
+		if x.type and x:type() == "vec2" then
+			self:vset(x)
+		elseif x[1] then
+			self:sset(x[1], x[2])
+		else
+			self:sset(x.x, x.y)
 		end
 	end
-	return vec2:zero()
 end
 
 --explicit ctors
 function vec2:copy()
-	return self:init({
-		x = self.x, y = self.y
-	})
+	return vec2(self.x, self.y)
 end
 
 function vec2:xy(x, y)
-	return self:init({
-		x = x, y = y
-	})
+	return vec2(x, y)
 end
 
 function vec2:filled(v)
-	return self:init({
-		x = v, y = v
-	})
+	return vec2(v)
 end
 
 function vec2:zero()
-	return vec2:filled(0)
-end
-
---shared pooled storage
-local _vec2_pool = {}
---size limit for tuning memory upper bound
-local _vec2_pool_limit = 128
-
-function vec2.pool_size()
-	return #_vec2_pool
-end
-
---flush the entire pool
-function vec2.flush_pool()
-	if vec2.pool_size() > 0 then
-		_vec2_pool = {}
-	end
-end
-
---drain one element from the pool, if it exists
-function vec2.drain_pool()
-	if #_vec2_pool > 0 then
-		return table.remove(_vec2_pool)
-	end
-	return nil
-end
-
---get a pooled vector (initialise it yourself)
-function vec2:pooled()
-	return vec2.drain_pool() or vec2:zero()
-end
-
---get a pooled copy of an existing vector
-function vec2:pooled_copy()
-	return vec2:pooled():vset(self)
-end
-
---release a vector to the pool
-function vec2:release(...)
-	if vec2.pool_size() < _vec2_pool_limit then
-		table.insert(_vec2_pool, self)
-	end
-	if ... then
-		vec2.release(...)
-	end
+	return vec2(0)
 end
 
 --unpack for multi-args
-
 function vec2:unpack()
 	return self.x, self.y
 end
 
 --pack when a sequence is needed
---(not particularly useful)
-
 function vec2:pack()
 	return {self:unpack()}
+end
+
+--shared pooled storage
+make_pooled(vec2, 128)
+
+--get a pooled copy of an existing vector
+function vec2:pooled_copy()
+	return vec2:pooled():vset(self)
 end
 
 --modify

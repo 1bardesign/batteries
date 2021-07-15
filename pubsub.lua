@@ -4,13 +4,13 @@
 
 local path = (...):gsub("pubsub", "")
 local class = require(path .. "class")
-local pubsub = class()
+local pubsub = class({
+	name = "pubsub",
+})
 
 --create a new pubsub bus
 function pubsub:new()
-	return self:init({
-		subscriptions = {},
-	})
+	self.subscriptions = {}
 end
 
 --(internal; notify a callback set of an event)

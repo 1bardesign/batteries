@@ -26,17 +26,15 @@
 local path = (...):gsub("state_machine", "")
 local class = require(path .. "class")
 
-local state_machine = class()
+local state_machine = class({
+	name = "state_machine",
+})
+
 function state_machine:new(states, start_in_state)
-	self = self:init({
-		states = states or {},
-		current_state_name = "",
-		reset_state_name = start_in_state or "",
-	})
-
+	self.states = states or {}
+	self.current_state_name = ""
+	self.reset_state_name = start_in_state or ""
 	self:reset()
-
-	return self
 end
 
 --get the current state table (or nil if it doesn't exist)

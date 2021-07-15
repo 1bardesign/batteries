@@ -6,21 +6,20 @@ local path = (...):gsub("set", "")
 local class = require(path .. "class")
 local table = require(path .. "tablex") --shadow global table module
 
-local set = class()
+local set = class({
+	name = "set",
+})
 
 --construct a new set
 --elements is an optional ordered table of elements to be added to the set
 function set:new(elements)
-	self = self:init({
-		_keyed = {},
-		_ordered = {},
-	})
+	self._keyed = {}
+	self._ordered = {}
 	if elements then
 		for _, v in ipairs(elements) do
 			self:add(v)
 		end
 	end
-	return self
 end
 
 --check if an element is present in the set
@@ -120,7 +119,7 @@ end
 
 --copy a set
 function set:copy()
-	return set:new():add_set(self)
+	return set():add_set(self)
 end
 
 --create a new set containing the complement of the other set contained in this one
@@ -141,7 +140,7 @@ end
 --create a new set containing the intersection of this set with another
 --only the elements present in both sets will remain in the result
 function set:intersection(other)
-	local r = set:new()
+	local r = set()
 	for i, v in self:ipairs() do
 		if other:has(v) then
 			r:add(v)
@@ -157,7 +156,7 @@ end
 --equal to self:union(other):subtract_set(self:intersection(other))
 --	but with much less wasted effort
 function set:symmetric_difference(other)
-	local r = set:new()
+	local r = set()
 	for i, v in self:ipairs() do
 		if not other:has(v) then
 			r:add(v)

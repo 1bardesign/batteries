@@ -1,83 +1,131 @@
 --[[
 	barebones oop basics
-	supports basic inheritance and means you don't have to build/set your own metatable each time
 
-	todo: collect some stats on classes/optional global class registry
+	call the class object to construct a new instance
+
+	classes are used as metatables directly so that
+	metamethods "just work" - except for index, which is
+	used to hook up instance methods
+
+	classes do use a prototype chain for inheritance, but
+	also copy their interfaces (including superclass)
+
+		we copy interfaces in classes rather than relying on
+		a prototype chain, so that pairs on the class gets
+		all the methods when implemented as an interface
+
+		class properties are not copied and should likely
+		be accessed through the concrete class object so
+		that everything refers to the same object
+
+	arguments (all optional):
+		name (string):
+			the name to use for type()
+		extends (class):
+			superclass for basic inheritance
+		implements (ordered table of classes):
+			mixins/interfaces
+		default_tostring (boolean):
+			whether or not to provide a default tostring function
+
 ]]
 
-local function class(inherits)
-	local c = {}
-	--class metatable
-	setmetatable(c, {
-		--wire up call as ctor
-		__call = function(self, ...)
-			return self:new(...)
-		end,
-		--handle single inheritence chain
-		__index = inherits,
-	})
-	--instance metatable
-	c.__mt = {
-		__index = c,
-	}
-	--common class functions
+--generate unique increasing class ids
+local class_id_gen = 0
+local function next_class_id()
+	class_id_gen = class_id_gen + 1
+	return class_id_gen
+end
 
-	--internal initialisation
-	--sets up an initialised object with a default value table
-	--performing a super construction if necessary, and (re-)assigning the right metatable
-	function c:init(t, ...)
-		if inherits and inherits.new then
-			--construct superclass instance, then overlay args table
-			local ct = inherits:new(...)
-			for k,v in pairs(t) do
-				ct[k] = v
-			end
-			t = ct
+--implement an interface into c
+local function implement(c, interface)
+	c.__is[interface] = true
+	for k, v in pairs(interface) do
+		if c[k] == nil and type(v) == "function" then
+			c[k] = v
 		end
-		--upgrade to this class and return
-		return setmetatable(t, self.__mt)
+	end
+end
+
+--build a new class
+local function class(config)
+	local class_id = next_class_id()
+
+	config = config or {}
+	local extends = config.extends
+	local implements = config.implements
+	local name = config.name or ("unnamed class %d)"):format(class_id)
+
+	local c = {}
+
+	--unique generated id per-class
+	c.__id = class_id
+
+	--the class name
+	c.__name = name
+
+	--prototype
+	c.__index = c
+
+	--return the name of the class
+	function c:type()
+		return name
 	end
 
-	--constructor
-	--generally to be overridden
-	function c:new()
-		return self:init({})
+	if config.default_tostring then
+		function c:__tostring()
+			return name
+		end
+	end
+
+	--class metatable to set up constructor call
+	setmetatable(c, {
+		__call = function(self, ...)
+			local instance = setmetatable({}, self)
+			instance:new(...)
+			return instance
+		end,
+		__index = extends,
+	})
+
+	--checking class membership for probably-too-dynamic code
+	--returns true for both extended classes and implemented interfaces
+	--(implemented with a hashset for fast lookups)
+	c.__is = {}
+	c.__is[c] = true
+	function c:is(t)
+		return self.__is[t] == true
 	end
 
 	--get the inherited class for super calls if/as needed
 	--allows overrides that still refer to superclass behaviour
-	function c:super()
-		return inherits
+	c.__super = extends
+	--nop by default
+	function c:super() end
+
+	if c.__super then
+		--perform a super construction for an instance
+		function c:super(...)
+			c.__super.new(self, ...)
+		end
+		--implement superclass interface
+		implement(c, c.__super)
 	end
 
-	--delegate a call to the superclass, by name
-	--still a bit clumsy but much cleaner than the inline equivalent,
-	--plus handles heirarchical complications, and detects various mistakes
-	function c:super_call(func_name, ...)
-		--
-		if type(func_name) ~= "string" then
-			error("super_call requires a string function name to look up, got "..tostring(func_name))
+
+	--implement all the passed interfaces/mixins
+	--in order provided
+	if implements then
+		for _, interface in ipairs(implements) do
+			implement(c, interface)
 		end
-		--todo: memoize the below :)
-		local previous_impl = c:super()
-		--find the first superclass that actually has the method
-		while previous_impl and not rawget(previous_impl, func_name) do
-			previous_impl = previous_impl:super()
-		end
-		if not previous_impl then
-			error("failed super call - no superclass in the chain has an implementation of "..func_name)
-		end
-		-- get the function
-		local f = previous_impl[func_name]
-		if not f then -- this should never happen because we bail out earlier
-			error("failed super call - missing function "..func_name.." in superclass")
-		end
-		-- check if someone reuses that reference
-		if f == self[func_name] then
-			error("failed super call - function "..func_name.." is same in superclass as in derived; this will be a infinite recursion!")
-		end
-		-- call that function
-		return f(self, ...)
+	end
+
+	--default constructor, just proxy to the super constructor
+	--override it and use to set up the properties of the instance
+	--but don't forget to call the super constructor!
+	function c:new(...)
+		self:super(...)
 	end
 
 	--done

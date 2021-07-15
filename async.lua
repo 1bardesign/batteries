@@ -18,13 +18,13 @@
 local path = (...):gsub("async", "")
 local class = require(path .. "class")
 
-local async = class()
+local async = class({
+	name = "async",
+})
 
 function async:new()
-	return self:init({
-		tasks = {},
-		tasks_stalled = {},
-	})
+	self.tasks = {}
+	self.tasks_stalled = {}
 end
 
 --add a task to the kernel

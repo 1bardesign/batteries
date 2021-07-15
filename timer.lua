@@ -9,19 +9,20 @@
 
 local path = (...):gsub("timer", "")
 local class = require(path .. "class")
-local timer = class()
+local timer = class({
+	name = "timer",
+})
 
 --create a timer, with optional callbacks
 --callbacks recieve as arguments:
 --	the current progress as a number from 0 to 1, so can be used for lerps
 --	the timer object, so can be reset if needed
 function timer:new(time, on_progress, on_finish)
-	return self:init({
-		time = 0, --set in the reset below
-		timer = 0,
-		on_progress = on_progress,
-		on_finish = on_finish,
-	}):reset(time)
+	self.time = 0
+	self.timer = 0
+	self.on_progress = on_progress
+	self.on_finish = on_finish
+	self:reset(time)
 end
 
 --update this timer, calling the relevant callback if it exists

@@ -6,12 +6,19 @@
 ]]
 
 local path = (...):gsub("sequence", "")
-local class = require(path .. "class")
 local table = require(path .. "tablex") --shadow global table module
 local functional = require(path .. "functional")
 local stable_sort = require(path .. "sort").stable_sort
 
-local sequence = class(table) --proxy missing table fns to tablex api
+--(not a class, because we want to be able to upgrade tables that are passed in without a copy)
+local sequence = {}
+sequence.__index = sequence
+setmetatable(sequence, {
+	__index = table,
+	__call = function(self, ...)
+		return sequence:new(...)
+	end,
+})
 
 --iterators as method calls
 --(no pairs, sequences are ordered)
@@ -21,7 +28,7 @@ sequence.iterate = ipairs
 
 --upgrade a table into a sequence, or create a new sequence
 function sequence:new(t)
-	return self:init(t or {})
+	return setmetatable(t or {}, sequence)
 end
 
 --sorting default to stable

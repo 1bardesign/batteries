@@ -1,14 +1,24 @@
 --[[
 	barebones oop basics
 
-	call the class object to construct a new instance
+	construction
+
+		call the class object to construct a new instance
+
+		this will construct a new table, assign it as a class
+		instance, and call `new`
+
+		if you are defining a subclass, you will need to call
+		`self:super(...)` as part of `new` to complete superclass
+		construction - if done correctly this will propagate
+		up the chain and you wont have to think about it
 
 	classes are used as metatables directly so that
 	metamethods "just work" - except for index, which is
 	used to hook up instance methods
 
-	classes do use a prototype chain for inheritance, but
-	also copy their interfaces (including superclass)
+		classes do use a prototype chain for inheritance, but
+		also copy their interfaces (including superclass)
 
 		we copy interfaces in classes rather than relying on
 		a prototype chain, so that pairs on the class gets

@@ -14,7 +14,7 @@ local timer = class({
 })
 
 --create a timer, with optional callbacks
---callbacks recieve as arguments:
+--callbacks receive as arguments:
 --	the current progress as a number from 0 to 1, so can be used for lerps
 --	the timer object, so can be reset if needed
 function timer:new(time, on_progress, on_finish)

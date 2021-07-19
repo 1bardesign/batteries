@@ -31,7 +31,7 @@ end
 
 --subscribe to an event
 --can be a specifically named event, or "everything" to get notified for any event
---for "everything", the callback will recieve the event name as the first argument
+--for "everything", the callback will receive the event name as the first argument
 function pubsub:subscribe(event, callback)
 	local callbacks = self.subscriptions[event]
 	if not callbacks then

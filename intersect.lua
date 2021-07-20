@@ -1,20 +1,22 @@
 --[[
 	geometric intersection routines
+
 	from simple point tests to shape vs shape tests
 
-	optimised pretty well in most places.
+	optimised pretty well in most places
 
-	options for boolean or minimum separating vector results
-
-	continuous sweeps (where provided) also return the
-	time-domain position of first intersection
-
-	TODO: refactor vector storage to be pooled where needed
+	tests provided:
+		overlap
+			boolean "is overlapping"
+		collide
+			nil for no collision
+			minimum separating vector on collision
+				provided in the direction of the first object
+			optional output parameters to avoid garbage generation
 ]]
 
 local path = (...):gsub("intersect", "")
 local vec2 = require(path .. "vec2")
-local functional = require(path .. "functional")
 
 --module storage
 local intersect = {}
@@ -190,11 +192,6 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 				intersected = "a"
 			else
 				intersected = "both"
-				--collision point =
-				--[[vec2:xy(
-					a_start.x + mua * dx1,
-					a_start.y + mua * dy1,
-				)]]
 			end
 		end
 	end
@@ -219,9 +216,14 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 			table.insert(search_tab, {intersect._line_to_point(a_start, a_end, b_end),   -1})
 		end
 
-		local best = functional.find_best(search_tab, function(v)
-			return -(v[1]:length_squared())
-		end)
+		local best = nil
+		local best_len = nil
+		for _, v in ipairs(search_tab) do
+			local len = v[1]:length_squared()
+			if not best_len or len < best_len then
+				best = v
+			end
+		end
 
 		--fix direction
 		into:vset(best[1]):smuli(best[2])
@@ -298,129 +300,6 @@ function intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, b_hs, into)
 	return res
 end
 
---return normal and fraction of dt encountered on collision, false otherwise
---TODO: re-pool storage here
-function intersect.aabb_aabb_collide_continuous(
-	a_startpos, a_endpos, a_hs,
-	b_startpos, b_endpos, b_hs,
-	into
-)
-	if not into then into = vec2:zero() end
-
-	--compute delta motion
-	local _self_delta_motion = a_endpos:vsub(a_startpos)
-	local _other_delta_motion = b_endpos:vsub(b_startpos)
-
-	--cheap "is this even possible" early-out
-	do
-		local _self_half_delta = _self_delta_motion:smul(0.5)
-		local _self_bounds_pos = _self_half_delta:vadd(a_endpos)
-		local _self_bounds_hs = _self_half_delta:vadd(a_hs)
-
-		local _other_half_delta = _other_delta_motion:smul(0.5)
-		local _other_bounds_pos = _other_half_delta:vadd(b_endpos)
-		local _other_bounds_hs = _other_half_delta:vadd(b_hs)
-
-		if not body._overlap_raw(
-			_self_bounds_pos, _self_bounds_hs,
-			_other_bounds_pos, _other_bounds_hs
-		) then
-			return false
-		end
-	end
-
-	--get ccd minkowski box
-	--this is a relative-space box
-	local _relative_delta_motion = _self_delta_motion:vsub(_other_delta_motion)
-	local _minkowski_halfsize = a_hs:vadd(b_hs)
-	local _minkowski_pos = b_startpos:vsub(a_startpos)
-
-	--if a line seg from our relative motion hits the minkowski box, we're in luck
-	--slab raycast is speedy
-
-	--alias
-	local _rmx = _relative_delta_motion.x
-	local _rmy = _relative_delta_motion.y
-
-	local _inv_x = math.huge
-	if _rmx ~= 0 then _inv_x = 1 / _rmx end
-	local _inv_y = math.huge
-	if _rmy ~= 0 then _inv_y = 1 / _rmy end
-
-	local _minkowski_tl = _minkowski_pos:vsub(_minkowski_halfsize)
-	local _minkowski_br = _minkowski_pos:vadd(_minkowski_halfsize)
-
-	--clip x
-	--get edge t along line
-	local tx1 = (_minkowski_tl.x) * _inv_x
-	local tx2 = (_minkowski_br.x) * _inv_x
-	--clip to existing clip space
-	local txmin = math.min(tx1, tx2)
-	local txmax = math.max(tx1, tx2)
-	--clip y
-	--get edge t along line
-	local ty1 = (_minkowski_tl.y) * _inv_y
-	local ty2 = (_minkowski_br.y) * _inv_y
-	--clip to existing clip space
-	local tymin = math.min(ty1, ty2)
-	local tymax = math.max(ty1, ty2)
-
-	--clip space
-	local tmin = math.max(0, txmin, tymin)
-	local tmax = math.min(1, txmax, tymax)
-
-	--still some unclipped? collision!
-	if tmin <= tmax then
-		--"was colliding at start"
-		if tmin == 0 then
-			--todo: maybe collide at old pos, not new pos
-			local msv = self:collide(other, into)
-			if msv then
-				return msv, tmin
-			else
-				return false
-			end
-		end
-
-		--delta before colliding
-		local _self_collide_pre = _self_delta_motion:smul(tmin)
-		--delta after colliding (to be discarded or projected or whatever)
-		local _self_collide_post = _self_delta_motion:smul(1.0 - tmin)
-		--get the collision normal
-		--(whichever boundary crossed _last_ -> normal)
-		local _self_collide_normal = vec2:zero()
-		if txmin > tymin then
-			_self_collide_normal.x = -math.sign(_self_delta_motion.x)
-		else
-			_self_collide_normal.y = -math.sign(_self_delta_motion.y)
-		end
-
-		--travelling away from normal?
-		if _self_collide_normal:dot(_self_delta_motion) >= 0 then
-			return false
-		end
-
-		--just "slide" projection for now
-		_self_collide_post:vreji(_self_collide_normal)
-
-		--combine
-		local _final_delta = _self_collide_pre:vadd(_self_collide_post)
-
-		--construct the target position
-		local _target_pos = a_startpos:vadd(_final_delta)
-
-		--return delta to target pos
-		local msv = _target_pos:vsub(a_endpos)
-
-		if math.abs(msv.x) > COLLIDE_EPS or math.abs(msv.y) > COLLIDE_EPS then
-			into:vset(msv)
-			return into, tmin
-		end
-	end
-
-	return false
-end
-
 -- helper function to clamp point to aabb
 function intersect.aabb_point_clamp(pos, hs, v, into)
 	local v_min = pos:pooled_copy():vsubi(hs)
@@ -449,7 +328,7 @@ function intersect.aabb_circle_collide(a_pos, a_hs, b_pos, b_rad, into)
 	--
 	local result
 	if like_aabb then
-		local pretend_hs = vec2:pooled():sset(b_rad)
+		local pretend_hs = vec2:pooled():sset()
 		result = intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, pretend_hs, into)
 		pretend_hs:release()
 	else
@@ -553,8 +432,7 @@ function intersect.mutual_bounce(velocity_a, velocity_b, normal, conservation)
 	velocity_a:fmai(b_remaining, conservation)
 	velocity_b:fmai(a_remaining, conservation)
 	--clean up
-	a_remaining:release()
-	b_remaining:release()
+	vec2.release(a_remaining, b_remaining)
 end
 
 return intersect

@@ -135,9 +135,9 @@ I'd strongly recommend that if you find yourself frustrated with the above, stop
 
 ## Git Submodule or Static Install?
 
-`batteries` is fairly easily used as a git submodule - this is how I use it in my own projects, because updating is just a `git pull`.
+`batteries` is fairly easily used as a git submodule - this is how I use it in my own projects, because updating is as quick and easy as a `git pull`, and it's easy to roll back changes if needed, and to contribute changes back upstream.
 
-A static install is harder to update, but easier to trim down if you only need some of the functionality provided. It can also _never_ mysteriously break when updating, which might be appealing to those who just cant help themselves from using the latest and greatest.
+A static install is harder to update, but easier to trim down if you only need some of the functionality provided. It can also _never_ mysteriously break when updating, which might be appealing to those who just cant stop themselves using the latest and greatest.
 
 ## Stripping down `batteries`
 
@@ -147,7 +147,7 @@ Many of them depend on `class`, which can be included alongside pretty easily.
 
 There are some other inter-dependencies in the larger modules, which should be straightforward to detect and figure out the best course of action (include or strip out) if you want to make a stripped-down version for distribution.
 
-Currently the lib is 30kb or so compressed, including this readme, so do think carefully whether you really need to worry!
+Currently (july 2021) the lib is 40kb or so compressed, including this readme, so do think carefully whether you really need to worry!
 
 ## Versioning?
 
@@ -159,7 +159,9 @@ If there is a large enough user base in the future to make a versioning scheme +
 
 ## snake_case? Why?
 
-I personally prefer it, but I accept that it's a matter of taste and puts people off. I'm considering an automatic camelCase API conversion that you can opt in to, this will be updated if that eventuates.
+I personally prefer it, but I accept that it's a matter of taste and puts people off.
+
+I've implemented experimental automatic lowerCamelCase API conversion that you can opt in to by calling camelCase() before export(), let me know if you use it and encounter any issues.
 
 # License
 

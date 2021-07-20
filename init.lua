@@ -55,9 +55,9 @@ end
 
 --easy export globally if required
 function _batteries:export()
-	--export all key strings globally, if doesn't always exist
+	--export all key strings globally, if doesn't already exist
 	for k, v in pairs(self) do
-		if not _G[k] then
+		if _G[k] == nil then
 			_G[k] = v
 		end
 	end
@@ -79,6 +79,46 @@ function _batteries:export()
 
 	--export the whole library to global `batteries`
 	batteries = self
+
+	return self
+end
+
+
+--convert naming, for picky eaters
+--experimental, let me know how it goes
+function _batteries:camelCase()
+	--convert something_like_this to somethingLikeThis
+	local function snake_to_camel(s)
+		local chunks = _batteries.sequence(_batteries.stringx.split(s, "_"))
+		local first = chunks:shift()
+		chunks:remap(function(v)
+			local head = v:sub(1,1)
+			local tail = v:sub(2)
+			return head:upper() .. tail
+		end)
+		chunks:unshift(first)
+		return chunks:concat("")
+	end
+	--convert all named properties
+	--(keep the old ones around as well)
+	for k, v in pairs(self) do
+		if
+			--only convert string properties
+			type(k) == "string"
+			--ignore private and metamethod properties
+			and not _batteries.stringx.starts_with(k, "_")
+		then
+			--convert and assign
+			local camel = snake_to_camel(k)
+			if k ~= camel and self[camel] == nil then
+				self[camel] = v
+			end
+			--recursively convert anything nested as well
+			if type(v) == "table" then
+				_batteries.camelCase(v)
+			end
+		end
+	end
 
 	return self
 end

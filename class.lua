@@ -1,14 +1,24 @@
 --[[
 	barebones oop basics
 
-	call the class object to construct a new instance
+	construction
+
+		call the class object to construct a new instance
+
+		this will construct a new table, assign it as a class
+		instance, and call `new`
+
+		if you are defining a subclass, you will need to call
+		`self:super(...)` as part of `new` to complete superclass
+		construction - if done correctly this will propagate
+		up the chain and you wont have to think about it
 
 	classes are used as metatables directly so that
 	metamethods "just work" - except for index, which is
 	used to hook up instance methods
 
-	classes do use a prototype chain for inheritance, but
-	also copy their interfaces (including superclass)
+		classes do use a prototype chain for inheritance, but
+		also copy their interfaces (including superclass)
 
 		we copy interfaces in classes rather than relying on
 		a prototype chain, so that pairs on the class gets
@@ -100,14 +110,24 @@ local function class(config)
 	--get the inherited class for super calls if/as needed
 	--allows overrides that still refer to superclass behaviour
 	c.__super = extends
-	--nop by default
-	function c:super() end
+
+	--perform a (partial) super construction for an instance
+	--for any nested super calls, it'll call the relevant one in the
+	--heirarchy, assuming no super calls have been missed
+	function c:super(...)
+		if not c.__super then return end
+		--hold reference so we can restore
+		local current_super = c.__super
+		--push next super
+		c.__super = c.__super.__super
+		--call
+		current_super.new(self, ...)
+		--restore
+		c.__super = current_super
+	end
+
 
 	if c.__super then
-		--perform a super construction for an instance
-		function c:super(...)
-			c.__super.new(self, ...)
-		end
 		--implement superclass interface
 		implement(c, c.__super)
 	end

@@ -21,7 +21,7 @@ function vec2:new(x, y)
 	if type(x) == "number" or type(x) == "nil" then
 		self:sset(x or 0, y)
 	elseif type(x) == "table" then
-		if x.type and x:type() == "vec2" then
+		if type(x.type) == "function" and x:type() == "vec2" then
 			self:vset(x)
 		elseif x[1] then
 			self:sset(x[1], x[2])

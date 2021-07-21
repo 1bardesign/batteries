@@ -137,7 +137,6 @@ function _batteries:camelCase()
 				--recursively convert anything nested as well
 				_batteries.camelCase(v)
 			end
-			print(camel)
 			--assign if the key changed and there isn't a matching key
 			if k ~= camel and self[camel] == nil then
 				self[camel] = v

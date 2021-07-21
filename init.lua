@@ -87,35 +87,60 @@ end
 --convert naming, for picky eaters
 --experimental, let me know how it goes
 function _batteries:camelCase()
+	--not part of stringx for now, because it's not necessarily utf8 safe
+	local function capitalise(s)
+		local head = s:sub(1,1)
+		local tail = s:sub(2)
+		return head:upper() .. tail
+	end
+
+	--any acronyms to fully capitalise to avoid "Rgb" and the like
+	local acronyms = _batteries.set{"rgb", "rgba", "argb", "hsl", "xy", "gc",}
+	local function caps_acronym(s)
+		if acronyms:has(s) then
+			s = s:upper()
+		end
+		return s
+	end
+
 	--convert something_like_this to somethingLikeThis
 	local function snake_to_camel(s)
 		local chunks = _batteries.sequence(_batteries.stringx.split(s, "_"))
+		chunks:remap(caps_acronym)
 		local first = chunks:shift()
-		chunks:remap(function(v)
-			local head = v:sub(1,1)
-			local tail = v:sub(2)
-			return head:upper() .. tail
-		end)
+		chunks:remap(capitalise)
 		chunks:unshift(first)
 		return chunks:concat("")
 	end
 	--convert all named properties
 	--(keep the old ones around as well)
-	for k, v in pairs(self) do
+	--(we take a copy of the keys here cause we're going to be inserting new keys as we go)
+	for _, k in ipairs(_batteries.tablex.keys(self)) do
+		local v = self[k]
 		if
 			--only convert string properties
 			type(k) == "string"
 			--ignore private and metamethod properties
 			and not _batteries.stringx.starts_with(k, "_")
 		then
-			--convert and assign
+			--convert
 			local camel = snake_to_camel(k)
+			if type(v) == "table" then
+				--capitalise classes
+				if v.__index == v then
+					camel = capitalise(camel)
+					--modify the internal name for :type()
+					--might be a problem for serialisation etc,
+					--but i imagine converting to/from camelCase mid-project is rare
+					v.__name = camel
+				end
+				--recursively convert anything nested as well
+				_batteries.camelCase(v)
+			end
+			print(camel)
+			--assign if the key changed and there isn't a matching key
 			if k ~= camel and self[camel] == nil then
 				self[camel] = v
-			end
-			--recursively convert anything nested as well
-			if type(v) == "table" then
-				_batteries.camelCase(v)
 			end
 		end
 	end

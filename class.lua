@@ -68,18 +68,18 @@ local function class(config)
 
 	local c = {}
 
-	--unique generated id per-class
-	c.__id = class_id
-
-	--the class name
-	c.__name = name
-
 	--prototype
 	c.__index = c
 
+	--unique generated id per-class
+	c.__id = class_id
+
+	--the class name for type calls
+	c.__type = name
+
 	--return the name of the class
 	function c:type()
-		return name
+		return self.__type
 	end
 
 	if config.default_tostring then

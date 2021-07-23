@@ -123,15 +123,17 @@ Endless, of course :)
 
 ## Export Globals
 
-You are strongly encouraged to use the library in a "fire and forget" manner through `require("batteries"):export()` (or whatever appropriate module path), which will modify builtin lua modules (such as `table` and `math`) and expose all the other modules directly as globals for convenience.
+You are strongly encouraged to use the library in a "fire and forget" manner through `require("batteries"):export()` (or whatever appropriate module path), which will modify builtin lua modules (such as `table` and `math`), and expose all the other modules directly as globals for your convenience.
 
-This eases consumption later on - you don't have to remember if say, `table.remove_value` is built in to lua or not, or get used to accessing the builtin table functions through `batteries.table` or `tablex`.
+This eases consumption across your project - you don't have to require modules everywhere, or remember if say, `table.remove_value` is built in to lua or not, or get used to accessing the builtin table functions through `batteries.table` or `tablex`.
 
-While this will likely sit badly with anyone who's had "no globals!" hammered into them, I believe for `batteries` (and many foundational libraries) it makes sense to just import once at boot. You're going to be pulling it in almost everywhere anyway; why bother making yourself jump through more hoops?
+While this will likely sit badly with anyone who's had "no globals! ever!" hammered into them, I believe that for `batteries` (and many foundational libraries) it makes sense to just import once at boot. You're going to be pulling it in almost everywhere anyway; why bother making yourself jump through more hoops?
 
-You can of course use the separate modules on their own, either with a single require for all of `batteries`, with use through something like `batteries.functional.map`; or requiring individual modules explicitly. This more careful approach _will_ let you be more clear about your dependencies, at the cost of more setup work needing to re-require batteries everywhere, or expose it as a global in the first place.
+You can, of course, use the separate modules on their own, either requiring individual modules explicitly, or a single require for all of `batteries` and use through something like `batteries.functional.map`. This more involved approach _will_ let you be more clear about your dependencies, if you care deeply about that - at the cost of more setup work needing to re-require batteries everywhere you use it, or expose it as a global in the first place.
 
-I'd strongly recommend that if you find yourself frustrated with the above, stop and think why/if you really want to avoid globals for a library intended to be commonly used across your entire codebase! You may wish to reconsider, and save yourself typing `batteries` a few hundred times :)
+I'd strongly recommend that if you find yourself frustrated with the above, stop and think why/if you really want to avoid globals for something intended to be commonly used across your entire codebase! Are you explicitly `require`ing `math` and `table` everywhere you use it too? Are you just as ideologically opposed to `require` being a global?
+
+You may wish to reconsider, and save yourself typing `batteries` a few hundred times :)
 
 ## Git Submodule or Static Install?
 
@@ -141,13 +143,13 @@ A static install is harder to update, but easier to trim down if you only need s
 
 ## Stripping down `batteries`
 
-Many of the modules "just work" on their own if you just want to grab something specific.
+Many of the modules "just work" on their own, if you just want to grab something specific.
 
-Many of them depend on `class`, which can be included alongside pretty easily.
+Some of them depend on `class`, which can be included alongside pretty easily.
 
-There are some other inter-dependencies in the larger modules, which should be straightforward to detect and figure out the best course of action (include or strip out) if you want to make a stripped-down version for distribution.
+There are some other inter-dependencies in the larger modules, which should be straightforward to detect and figure out the best course of action (either include the dependency or strip out dependent functionality), if you want to make a stripped-down version for your specific use case.
 
-Currently (july 2021) the lib is 40kb or so compressed, including this readme, so do think carefully whether you really need to worry!
+Currently (july 2021) the lib is 40kb or so compressed, including this readme, so do think carefully whether you really need to worry about it!
 
 ## Versioning?
 
@@ -159,9 +161,9 @@ If there is a large enough user base in the future to make a versioning scheme +
 
 ## snake_case? Why?
 
-I personally prefer it, but I accept that it's a matter of taste and puts people off.
+I personally prefer it, but I accept that it's a matter of taste and puts some people off.
 
-I've implemented experimental automatic lowerCamelCase API conversion that you can opt in to by calling camelCase() before export(), let me know if you use it and encounter any issues.
+I've implemented experimental automatic API conversion (UpperCamelCase for types, lowerCamelCase for methods) that you can opt in to by calling `:camelCase()` before `:export()`, let me know if you use it and encounter any issues.
 
 # License
 

@@ -4,28 +4,43 @@
 	specify a time budget and a memory ceiling per call.
 
 	called once per frame, this will spread any big collections
-	over a couple of frames, and "catch up" when there is. This
-	keeps GC burden much more predictable.
+	over several frames, and "catch up" when there is too much
+	work to do.
 
-	The memory ceiling provides some level of "relief valve" - if
-	exceeded it will trigger a "full" collection, but this is
-	likely to hurt performance. If you hit the ceiling, it
-	indicates you likely need to either generate less garbage
-	or spent more time each frame collecting.
+	This keeps GC time burden much more predictable.
 
-	1ms (1e-3) is a good place to start for the budget, adjust
-	down or up as needed. games that generate more garbage will
-	need to spend longer on gc each frame.
+	The memory ceiling provides a safety backstop.
+	if exceeded it will trigger a "full" collection, and this will
+	hurt performance - you'll notice the hitch. If you hit your ceiling,
+	it indicates you likely need to either find a way to generate less
+	garbage, or spend more time each frame collecting.
 
-	64mb is a good place to start for the memory ceiling, though
-	some games will need much more.
+	the function instructs the garbage collector only as small a step
+	as possible each iteration. this prevents the "spiky" collection
+	patterns, though with particularly large sets of tiny objects,
+	the start of a collection can still take longer than you might like.
 
-	the function steps the garbage collector only do a small step
-	each time. this prevents the start of collection from "spiking",
-	though it still causes some with particularly large sets
+	default values:
+
+	time_budget - 1ms (1e-3)
+		adjust down or up as needed. games that generate more garbage
+		will need to spend longer on gc each frame.
+
+	memory_ceiling - 64mb
+		a good place to start, though some games will need much more.
+		remember, this is lua memory, not the total memory consumption
+		of your game.
+
+	disable_otherwise - false
+		disabling the gc completely is dangerous - any big allocation
+		event (eg - level gen) could push you to an out of memory
+		situation and crash your game. test extensively before you
+		ship a game with this set true.
 ]]
 
-return function(time_budget, safetynet_megabytes, disable_otherwise)
+return function(time_budget, memory_ceiling, disable_otherwise)
+	time_budget = time_budget or 1e-3
+	memory_ceiling = memory_ceiling or 64
 	local max_steps = 1000
 	local steps = 0
 	local start_time = love.timer.getTime()
@@ -37,7 +52,7 @@ return function(time_budget, safetynet_megabytes, disable_otherwise)
 		steps = steps + 1
 	end
 	--safety net
-	if collectgarbage("count") / 1024 > safetynet_megabytes then
+	if collectgarbage("count") / 1024 > memory_ceiling then
 		collectgarbage("collect")
 	end
 	--don't collect gc outside this margin

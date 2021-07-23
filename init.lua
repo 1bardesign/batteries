@@ -95,7 +95,7 @@ function _batteries:camelCase()
 	end
 
 	--any acronyms to fully capitalise to avoid "Rgb" and the like
-	local acronyms = _batteries.set{"rgb", "rgba", "argb", "hsl", "xy", "gc",}
+	local acronyms = _batteries.set{"rgb", "rgba", "argb", "hsl", "xy", "gc", "aabb",}
 	local function caps_acronym(s)
 		if acronyms:has(s) then
 			s = s:upper()

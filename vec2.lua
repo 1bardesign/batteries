@@ -18,8 +18,6 @@ end
 
 --ctor
 function vec2:new(x, y)
-	--0 init by default
-	self:scalar_set(0)
 	if type(x) == "number" then
 		self:scalar_set(x, y)
 	elseif type(x) == "table" then
@@ -30,10 +28,12 @@ function vec2:new(x, y)
 		else
 			self:scalar_set(x.x, x.y)
 		end
+	else
+		self:scalar_set(0)
 	end
 end
 
---explicit ctors
+--explicit ctors; mostly vestigial at this point
 function vec2:copy()
 	return vec2(self.x, self.y)
 end

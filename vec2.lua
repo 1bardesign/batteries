@@ -479,6 +479,11 @@ vec2.mul_inplace = vec2.vector_mul_inplace
 vec2.div_inplace = vec2.vector_div_inplace
 vec2.set = vec2.vector_set
 
+--american spelling alias
+vec2.normalize_both_inplace = vec2.normalise_both_inplace
+vec2.normalize_inplace = vec2.normalise_inplace
+vec2.normalize_len_inplace = vec2.normalise_len_inplace
+
 --garbage generating functions that return a new vector rather than modifying self
 for _, inplace_name in ipairs({
 	"vector_add_inplace",
@@ -497,6 +502,9 @@ for _, inplace_name in ipairs({
 	"normalise_both_inplace",
 	"normalise_inplace",
 	"normalise_len_inplace",
+	"normalize_both_inplace",
+	"normalize_inplace",
+	"normalize_len_inplace",
 	"inverse_inplace",
 	"rotate_inplace",
 	"rotate_around_inplace",
@@ -558,6 +566,7 @@ for _, v in ipairs({
 	{"lerp", "lerp"},
 	{"rotate", "rotate"},
 	{"normalise", "normalise"},
+	{"normalize", "normalize"},
 }) do
 	local shorthand, original = v[1], v[2]
 	if vec2[shorthand] == nil then

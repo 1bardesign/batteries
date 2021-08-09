@@ -147,6 +147,14 @@ function vec2:vector_div_inplace(v)
 	return self
 end
 
+--(a + (b * t))
+--useful for integrating physics and adding directional offsets
+function vec2:fused_multiply_add_inplace(v, t)
+	self.x = self.x + (v.x * t)
+	self.y = self.y + (v.y * t)
+	return self
+end
+
 --scalar
 function vec2:scalar_add_inplace(x, y)
 	if not y then y = x end
@@ -173,14 +181,6 @@ function vec2:scalar_div_inplace(x, y)
 	if not y then y = x end
 	self.x = self.x / x
 	self.y = self.y / y
-	return self
-end
-
---(a + (b * t))
---useful for integrating physics and adding directional offsets
-function vec2:fused_multiply_add_inplace(v, t)
-	self.x = self.x + (v.x * t)
-	self.y = self.y + (v.y * t)
 	return self
 end
 
@@ -485,11 +485,15 @@ for _, inplace_name in ipairs({
 	"vector_sub_inplace",
 	"vector_mul_inplace",
 	"vector_div_inplace",
+	"fused_multiply_add_inplace",
+	"add_inplace",
+	"sub_inplace",
+	"mul_inplace",
+	"div_inplace",
 	"scalar_add_inplace",
 	"scalar_sub_inplace",
 	"scalar_mul_inplace",
 	"scalar_div_inplace",
-	"fused_multiply_add_inplace",
 	"normalise_both_inplace",
 	"normalise_inplace",
 	"normalise_len_inplace",
@@ -529,11 +533,11 @@ end
 --to understand when you come back, but i also appreciate wanting short code
 for _, v in ipairs({
 	{"sset", "scalar_set"},
-	{"vset", "vector_set"},
 	{"sadd", "scalar_add"},
 	{"ssub", "scalar_sub"},
 	{"smul", "scalar_mul"},
 	{"sdiv", "scalar_div"},
+	{"vset", "vector_set"},
 	{"vadd", "vector_add"},
 	{"vsub", "vector_sub"},
 	{"vmul", "vector_mul"},

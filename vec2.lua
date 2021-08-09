@@ -16,22 +16,24 @@ function vec2:__tostring()
 	return ("(%.2f, %.2f)"):format(self.x, self.y)
 end
 
---probably-too-flexible ctor
+--ctor
 function vec2:new(x, y)
-	if type(x) == "number" or type(x) == "nil" then
-		self:sset(x or 0, y)
+	if type(x) == "number" then
+		self:scalar_set(x, y)
 	elseif type(x) == "table" then
 		if type(x.type) == "function" and x:type() == "vec2" then
-			self:vset(x)
+			self:vector_set(x)
 		elseif x[1] then
-			self:sset(x[1], x[2])
+			self:scalar_set(x[1], x[2])
 		else
-			self:sset(x.x, x.y)
+			self:scalar_set(x.x, x.y)
 		end
+	else
+		self:scalar_set(0)
 	end
 end
 
---explicit ctors
+--explicit ctors; mostly vestigial at this point
 function vec2:copy()
 	return vec2(self.x, self.y)
 end
@@ -40,8 +42,12 @@ function vec2:xy(x, y)
 	return vec2(x, y)
 end
 
+function vec2:polar(length, angle)
+	return vec2(length, 0):rotate_inplace(angle)
+end
+
 function vec2:filled(v)
-	return vec2(v)
+	return vec2(v, v)
 end
 
 function vec2:zero()
@@ -63,28 +69,28 @@ make_pooled(vec2, 128)
 
 --get a pooled copy of an existing vector
 function vec2:pooled_copy()
-	return vec2:pooled():vset(self)
+	return vec2:pooled(self)
 end
 
 --modify
 
-function vec2:sset(x, y)
+function vec2:vector_set(v)
+	self.x = v.x
+	self.y = v.y
+	return self
+end
+
+function vec2:scalar_set(x, y)
 	if not y then y = x end
 	self.x = x
 	self.y = y
 	return self
 end
 
-function vec2:vset(v)
-	self.x = v.x
-	self.y = v.y
-	return self
-end
-
 function vec2:swap(v)
 	local sx, sy = self.x, self.y
-	self:vset(v)
-	v:sset(sx, sy)
+	self.x, self.y = v.x, v.y
+	v.x, v.y = sx, sy
 	return self
 end
 
@@ -116,106 +122,66 @@ end
 --arithmetic
 -----------------------------------------------------------
 
---immediate mode
-
 --vector
-function vec2:vaddi(v)
+function vec2:vector_add_inplace(v)
 	self.x = self.x + v.x
 	self.y = self.y + v.y
 	return self
 end
 
-function vec2:vsubi(v)
+function vec2:vector_sub_inplace(v)
 	self.x = self.x - v.x
 	self.y = self.y - v.y
 	return self
 end
 
-function vec2:vmuli(v)
+function vec2:vector_mul_inplace(v)
 	self.x = self.x * v.x
 	self.y = self.y * v.y
 	return self
 end
 
-function vec2:vdivi(v)
+function vec2:vector_div_inplace(v)
 	self.x = self.x / v.x
 	self.y = self.y / v.y
 	return self
 end
 
+--(a + (b * t))
+--useful for integrating physics and adding directional offsets
+function vec2:fused_multiply_add_inplace(v, t)
+	self.x = self.x + (v.x * t)
+	self.y = self.y + (v.y * t)
+	return self
+end
+
 --scalar
-function vec2:saddi(x, y)
+function vec2:scalar_add_inplace(x, y)
 	if not y then y = x end
 	self.x = self.x + x
 	self.y = self.y + y
 	return self
 end
 
-function vec2:ssubi(x, y)
+function vec2:scalar_sub_inplace(x, y)
 	if not y then y = x end
 	self.x = self.x - x
 	self.y = self.y - y
 	return self
 end
 
-function vec2:smuli(x, y)
+function vec2:scalar_mul_inplace(x, y)
 	if not y then y = x end
 	self.x = self.x * x
 	self.y = self.y * y
 	return self
 end
 
-function vec2:sdivi(x, y)
+function vec2:scalar_div_inplace(x, y)
 	if not y then y = x end
 	self.x = self.x / x
 	self.y = self.y / y
 	return self
-end
-
---garbage mode
-
-function vec2:vadd(v)
-	return self:copy():vaddi(v)
-end
-
-function vec2:vsub(v)
-	return self:copy():vsubi(v)
-end
-
-function vec2:vmul(v)
-	return self:copy():vmuli(v)
-end
-
-function vec2:vdiv(v)
-	return self:copy():vdivi(v)
-end
-
-function vec2:sadd(x, y)
-	return self:copy():saddi(x, y)
-end
-
-function vec2:ssub(x, y)
-	return self:copy():ssubi(x, y)
-end
-
-function vec2:smul(x, y)
-	return self:copy():smuli(x, y)
-end
-
-function vec2:sdiv(x, y)
-	return self:copy():sdivi(x, y)
-end
-
---fused multiply-add (a + (b * t))
-
-function vec2:fmai(v, t)
-	self.x = self.x + (v.x * t)
-	self.y = self.y + (v.y * t)
-	return self
-end
-
-function vec2:fma(v, t)
-	return self:copy():fmai(v, t)
 end
 
 -----------------------------------------------------------
@@ -240,31 +206,31 @@ function vec2:distance(other)
 	return math.sqrt(self:distance_squared(other))
 end
 
---immediate mode
-
-function vec2:normalisei_both()
+function vec2:normalise_both_inplace()
 	local len = self:length()
 	if len == 0 then
 		return self, 0
 	end
-	return self:sdivi(len), len
+	return self:scalar_div_inplace(len), len
 end
 
-function vec2:normalisei()
-	local v, len = self:normalisei_both()
+function vec2:normalise_inplace()
+	local v, len = self:normalise_both_inplace()
 	return v
 end
 
-function vec2:normalisei_len()
-	local v, len = self:normalisei_both()
+function vec2:normalise_len_inplace()
+	local v, len = self:normalise_both_inplace()
 	return len
 end
 
-function vec2:inversei()
-	return self:smuli(-1)
+function vec2:inverse_inplace()
+	return self:scalar_mul_inplace(-1)
 end
 
-function vec2:rotatei(angle)
+-- angle/direction specific
+
+function vec2:rotate_inplace(angle)
 	local s = math.sin(angle)
 	local c = math.cos(angle)
 	local ox = self.x
@@ -274,7 +240,15 @@ function vec2:rotatei(angle)
 	return self
 end
 
-function vec2:rot90ri()
+function vec2:rotate_around_inplace(angle, pivot)
+	self:vector_sub_inplace(pivot)
+	self:rotate_inplace(angle)
+	self:vector_add_inplace(pivot)
+	return self
+end
+
+--fast quarter/half rotations
+function vec2:rot90r_inplace()
 	local ox = self.x
 	local oy = self.y
 	self.x = -oy
@@ -282,7 +256,7 @@ function vec2:rot90ri()
 	return self
 end
 
-function vec2:rot90li()
+function vec2:rot90l_inplace()
 	local ox = self.x
 	local oy = self.y
 	self.x = oy
@@ -290,50 +264,7 @@ function vec2:rot90li()
 	return self
 end
 
-vec2.rot180i = vec2.inversei --alias
-
-function vec2:rotate_aroundi(angle, pivot)
-	self:vsubi(pivot)
-	self:rotatei(angle)
-	self:vaddi(pivot)
-	return self
-end
-
---garbage mode
-
-function vec2:normalised()
-	return self:copy():normalisei()
-end
-
-function vec2:normalised_len()
-	local v = self:copy()
-	local len = v:normalisei_len()
-	return v, len
-end
-
-function vec2:inverse()
-	return self:copy():inversei()
-end
-
-function vec2:rotate(angle)
-	return self:copy():rotatei(angle)
-end
-
-function vec2:rot90r()
-	return self:copy():rot90ri()
-end
-
-function vec2:rot90l()
-	return self:copy():rot90li()
-end
-
-vec2.rot180 = vec2.inverse --alias
-
-function vec2:rotate_around(angle, pivot)
-	return self:copy():rotate_aroundi(angle, pivot)
-end
-
--- angle/direction specific
+vec2.rot180_inplace = vec2.inverse_inplace --alias
 
 --get the angle of this vector relative to (1, 0) 
 function vec2:angle()
@@ -347,180 +278,125 @@ end
 
 --lerp towards the direction of a provided vector
 --(length unchanged)
-function vec2:lerp_directioni(v, t)
-	return self:rotatei(self:angle_difference(v) * t)
-end
-
-function vec2:lerp_direction(v, t)
-	return self:copy():lerp_directioni(v, t)
+function vec2:lerp_direction_inplace(v, t)
+	return self:rotate_inplace(self:angle_difference(v) * t)
 end
 
 -----------------------------------------------------------
 -- per-component clamping ops
 -----------------------------------------------------------
 
-function vec2:mini(v)
+function vec2:min_inplace(v)
 	self.x = math.min(self.x, v.x)
 	self.y = math.min(self.y, v.y)
 	return self
 end
 
-function vec2:maxi(v)
+function vec2:max_inplace(v)
 	self.x = math.max(self.x, v.x)
 	self.y = math.max(self.y, v.y)
 	return self
 end
 
-function vec2:clampi(min, max)
+function vec2:clamp_inplace(min, max)
 	self.x = math.clamp(self.x, min.x, max.x)
 	self.y = math.clamp(self.y, min.y, max.y)
 	return self
-end
-
-function vec2:min(v)
-	return self:copy():mini(v)
-end
-
-function vec2:max(v)
-	return self:copy():maxi(v)
-end
-
-function vec2:clamp(min, max)
-	return self:copy():clampi(min, max)
 end
 
 -----------------------------------------------------------
 -- absolute value
 -----------------------------------------------------------
 
-function vec2:absi()
+function vec2:abs_inplace()
 	self.x = math.abs(self.x)
 	self.y = math.abs(self.y)
 	return self
-end
-
-function vec2:abs()
-	return self:copy():absi()
 end
 
 -----------------------------------------------------------
 -- sign
 -----------------------------------------------------------
 
-function vec2:signi()
+function vec2:sign_inplace()
 	self.x = math.sign(self.x)
 	self.y = math.sign(self.y)
 	return self
-end
-
-function vec2:sign()
-	return self:copy():signi()
 end
 
 -----------------------------------------------------------
 -- truncation/rounding
 -----------------------------------------------------------
 
-function vec2:floori()
+function vec2:floor_inplace()
 	self.x = math.floor(self.x)
 	self.y = math.floor(self.y)
 	return self
 end
 
-function vec2:ceili()
+function vec2:ceil_inplace()
 	self.x = math.ceil(self.x)
 	self.y = math.ceil(self.y)
 	return self
 end
 
-function vec2:roundi()
+function vec2:round_inplace()
 	self.x = math.round(self.x)
 	self.y = math.round(self.y)
 	return self
-end
-
-function vec2:floor()
-	return self:copy():floori()
-end
-
-function vec2:ceil()
-	return self:copy():ceili()
-end
-
-function vec2:round()
-	return self:copy():roundi()
 end
 
 -----------------------------------------------------------
 -- interpolation
 -----------------------------------------------------------
 
-function vec2:lerpi(other, amount)
+function vec2:lerp_inplace(other, amount)
 	self.x = math.lerp(self.x, other.x, amount)
 	self.y = math.lerp(self.y, other.y, amount)
 	return self
 end
 
-function vec2:lerp(other, amount)
-	return self:copy():lerpi(other, amount)
-end
-
-function vec2:lerp_epsi(other, amount, eps)
+function vec2:lerp_eps_inplace(other, amount, eps)
 	self.x = math.lerp_eps(self.x, other.x, amount, eps)
 	self.y = math.lerp_eps(self.y, other.y, amount, eps)
 	return self
-end
-
-function vec2:lerp_eps(other, amount, eps)
-	return self:copy():lerp_epsi(other, amount, eps)
 end
 
 -----------------------------------------------------------
 -- vector products and projections
 -----------------------------------------------------------
 
-function vec2.dot(a, b)
-	return a.x * b.x + a.y * b.y
+function vec2:dot(other)
+	return self.x * other.x + self.y * other.y
 end
 
 --"fake", but useful - also called the wedge product apparently
-function vec2.cross(a, b)
-	return a.x * b.y - a.y * b.x
+function vec2:cross(other)
+	return self.x * other.y - self.y * other.x
 end
 
---scalar projection a onto b
-function vec2.sproj(a, b)
-	local len = b:length()
+function vec2:scalar_projection(other)
+	local len = other:length()
 	if len == 0 then
 		return 0
 	end
-	return a:dot(b) / len
+	return self:dot(other) / len
 end
 
---vector projection a onto b (writes into a)
-function vec2.vproji(a, b)
-	local div = b:dot(b)
+function vec2:vector_projection_inplace(other)
+	local div = other:dot(other)
 	if div == 0 then
-		return a:sset(0,0)
+		return self:scalar_set(0)
 	end
-	local fac = a:dot(b) / div
-	return a:vset(b):smuli(fac)
+	local fac = self:dot(other) / div
+	return self:vector_set(other):scalar_mul_inplace(fac)
 end
 
-function vec2.vproj(a, b)
-	return a:copy():vproji(b)
-end
-
---vector rejection a onto b (writes into a)
-function vec2.vreji(a, b)
-	local tx, ty = a.x, a.y
-	a:vproji(b)
-	a:sset(tx - a.x, ty - a.y)
-	return a
-end
-
-function vec2.vrej(a, b)
-	return a:copy():vreji(b)
+function vec2:vector_rejection_inplace(other)
+	local tx, ty = self.x, self.y
+	self:vector_projection_inplace(other)
+	self:scalar_set(tx - self.x, ty - self.y)
+	return self
 end
 
 --get the winding side of p, relative to the line a-b
@@ -540,19 +416,19 @@ end
 -----------------------------------------------------------
 
 --"physical" friction
-local _v_friction = vec2:zero() --avoid alloc
-function vec2:apply_friction(mu, dt)
-	_v_friction:vset(self):smuli(mu * dt)
-	if _v_friction:length_squared() > self:length_squared() then
-		self:sset(0, 0)
+function vec2:apply_friction_inplace(mu, dt)
+	local friction = self:pooled_copy():scalar_mul_inplace(mu * dt)
+	if friction:length_squared() > self:length_squared() then
+		self:scalar_set(0, 0)
 	else
-		self:vsubi(_v_friction)
+		self:vector_sub_inplace(friction)
 	end
+	friction:release()
 	return self
 end
 
 --"gamey" friction in one dimension
-local function apply_friction_1d(v, mu, dt)
+local function _friction_1d(v, mu, dt)
 	local friction = mu * v * dt
 	if math.abs(friction) > math.abs(v) then
 		return 0
@@ -562,9 +438,9 @@ local function apply_friction_1d(v, mu, dt)
 end
 
 --"gamey" friction in both dimensions
-function vec2:apply_friction_xy(mu_x, mu_y, dt)
-	self.x = apply_friction_1d(self.x, mu_x, dt)
-	self.y = apply_friction_1d(self.y, mu_y, dt)
+function vec2:apply_friction_xy_inplace(mu_x, mu_y, dt)
+	self.x = _friction_1d(self.x, mu_x, dt)
+	self.y = _friction_1d(self.y, mu_y, dt)
 	return self
 end
 
@@ -578,7 +454,7 @@ function vec2:maxcomp()
 end
 
 -- mask out min component, with preference to keep x
-function vec2:majori()
+function vec2:major_inplace()
 	if self.x > self.y then
 		self.y = 0
 	else
@@ -587,7 +463,7 @@ function vec2:majori()
 	return self
 end
 -- mask out max component, with preference to keep x
-function vec2:minori()
+function vec2:minor_inplace()
 	if self.x < self.y then
 		self.y = 0
 	else
@@ -596,14 +472,103 @@ function vec2:minori()
 	return self
 end
 
+--vector_ free alias; we're a vector library, so semantics should default to vector
+vec2.add_inplace = vec2.vector_add_inplace
+vec2.sub_inplace = vec2.vector_sub_inplace
+vec2.mul_inplace = vec2.vector_mul_inplace
+vec2.div_inplace = vec2.vector_div_inplace
+vec2.set = vec2.vector_set
 
---garbage generating versions
-function vec2:major(axis)
-	return self:copy():majori(axis)
+--garbage generating functions that return a new vector rather than modifying self
+for _, inplace_name in ipairs({
+	"vector_add_inplace",
+	"vector_sub_inplace",
+	"vector_mul_inplace",
+	"vector_div_inplace",
+	"fused_multiply_add_inplace",
+	"add_inplace",
+	"sub_inplace",
+	"mul_inplace",
+	"div_inplace",
+	"scalar_add_inplace",
+	"scalar_sub_inplace",
+	"scalar_mul_inplace",
+	"scalar_div_inplace",
+	"normalise_both_inplace",
+	"normalise_inplace",
+	"normalise_len_inplace",
+	"inverse_inplace",
+	"rotate_inplace",
+	"rotate_around_inplace",
+	"rot90r_inplace",
+	"rot90l_inplace",
+	"lerp_direction_inplace",
+	"min_inplace",
+	"max_inplace",
+	"clamp_inplace",
+	"abs_inplace",
+	"sign_inplace",
+	"floor_inplace",
+	"ceil_inplace",
+	"round_inplace",
+	"lerp_inplace",
+	"lerp_eps_inplace",
+	"vector_projection_inplace",
+	"vector_rejection_inplace",
+	"apply_friction_inplace",
+	"apply_friction_xy_inplace",
+	"major_inplace",
+	"minor_inplace",
+}) do
+	local garbage_name = inplace_name:gsub("_inplace", "")
+	vec2[garbage_name] = function(self, ...)
+		self = self:copy()
+		return self[inplace_name](self, ...)
+	end
 end
 
-function vec2:minor(axis)
-	return self:copy():minori(axis)
+--"hungarian" shorthand aliases for compatibility and short names
+--
+--i do encourage using the longer versions above as it makes code easier
+--to understand when you come back, but i also appreciate wanting short code
+for _, v in ipairs({
+	{"sset", "scalar_set"},
+	{"sadd", "scalar_add"},
+	{"ssub", "scalar_sub"},
+	{"smul", "scalar_mul"},
+	{"sdiv", "scalar_div"},
+	{"vset", "vector_set"},
+	{"vadd", "vector_add"},
+	{"vsub", "vector_sub"},
+	{"vmul", "vector_mul"},
+	{"vdiv", "vector_div"},
+	--(no plain addi etc, imo it's worth differentiating vaddi vs saddi)
+	{"fma", "fused_multiply_add"},
+	{"vproj", "vector_projection"},
+	{"vrej", "vector_rejection"},
+	--just for the _inplace -> i shorthand, mostly for backwards compatibility
+	{"min", "min"},
+	{"max", "max"},
+	{"clamp", "clamp"},
+	{"abs", "abs"},
+	{"sign", "sign"},
+	{"floor", "floor"},
+	{"ceil", "ceil"},
+	{"round", "round"},
+	{"lerp", "lerp"},
+	{"rotate", "rotate"},
+	{"normalise", "normalise"},
+}) do
+	local shorthand, original = v[1], v[2]
+	if vec2[shorthand] == nil then
+		vec2[shorthand] = vec2[original]
+	end
+	--and inplace version
+	shorthand = shorthand .. "i"
+	original = original .. "_inplace"
+	if vec2[shorthand] == nil then
+		vec2[shorthand] = vec2[original]
+	end
 end
 
 return vec2

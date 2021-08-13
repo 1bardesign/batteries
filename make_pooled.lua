@@ -36,7 +36,7 @@ return function(class, limit)
 		return instance
 	end
 
-	--release a object to the pool
+	--release an object back to the pool
 	function class:release()
 		if #_pool < _pool_limit then
 			table.insert(_pool, self)

@@ -161,6 +161,9 @@ function pretty._process(input, config, processing_state)
 	--drop depth
 	processing_state.depth = processing_state.depth - 1
 
+	--remove circular
+	circular_references[input] = nil
+
 	local multiline = #chunks > 1
 	local separator = (indent == "" or not multiline) and ", " or ",\n"..indent
 

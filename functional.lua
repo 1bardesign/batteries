@@ -257,7 +257,7 @@ function functional.generate_2d(width, height, f)
 			end
 		end
 	end
-	return r
+	return result
 end
 
 -----------------------------------------------------------

@@ -92,7 +92,7 @@ end
 
 --pingpong from 0 to 1 and back again
 function mathx.pingpong(f)
-	return math.abs(f - 0.5) * 2
+	return 1 - math.abs(f - 0.5) * 2
 end
 
 --quadratic ease in

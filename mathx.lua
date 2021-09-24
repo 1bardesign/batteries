@@ -77,21 +77,53 @@ function mathx.bilerp(a, b, c, d, u, v)
 	)
 end
 
+--easing curves
+--(generally only "safe" for 0-1 range, see mathx.clamp01)
+
 --classic smoothstep
---(only "safe" for 0-1 range)
-function mathx.smoothstep(v)
-	return v * v * (3 - 2 * v)
+function mathx.smoothstep(f)
+	return f * f * (3 - 2 * f)
 end
 
 --classic smootherstep; zero 2nd order derivatives at 0 and 1
---(only safe for 0-1 range)
-function mathx.smootherstep(v)
-	return v * v * v * (v * (v * 6 - 15) + 10)
+function mathx.smootherstep(f)
+	return f * f * f * (f * (f * 6 - 15) + 10)
 end
 
---todo: various other easing curves (bounce etc)
+--pingpong from 0 to 1 and back again
+function mathx.pingpong(f)
+	return math.abs(f - 0.5) * 2
+end
 
---randomness helpers
+--quadratic ease in
+function mathx.ease_in(f)
+	return f * f
+end
+
+--quadratic ease out
+function mathx.ease_out(f)
+	local oneminus = (1 - f)
+	return 1 - oneminus * oneminus
+end
+
+--quadratic ease in and out
+--(a lot like smoothstep)
+function mathx.ease_inout(f)
+	if t < 0.5 then
+		return t * t * 2
+	end
+	local oneminus = (1 - f)
+	return 1 - 2 * oneminus * oneminus
+end
+
+--branchless but imperfect quartic in/out
+--either smooth or smootherstep are usually a better alternative
+function mathx.ease_inout_branchless(f)
+	local halfsquared = f * f / 2
+	return halfsquared * (1 - halfsquared) * 4
+end
+
+--todo: more easings - back, bounce, elastic
 
 --(internal; use a provided random generator object, or not)
 local function _random(_r, ...)

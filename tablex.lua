@@ -60,7 +60,24 @@ function tablex.swap_and_pop(t, i)
 	tablex.swap(t, i, #t)
 	return tablex.pop(t)
 end
-	
+
+--rotate the elements of a table t by amount slots
+-- amount 1: {1, 2, 3, 4} -> {2, 3, 4, 1}
+-- amount -1: {1, 2, 3, 4} -> {4, 1, 2, 3}
+function tablex.rotate(t, amount)
+	if #t > 1 then
+		while amount > 0 do
+			tablex.push(t, tablex.shift(t))
+			amount = amount - 1
+		end
+		while amount < 0 do
+			tablex.unshift(t, tablex.pop(t))
+			amount = amount + 1
+		end
+	end
+	return t
+end
+
 --default comparison; hoisted for clarity
 --(shared with sort.lua and suggests the sorted functions below should maybe be refactored there)
 local function default_less(a, b)

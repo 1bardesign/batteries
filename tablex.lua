@@ -66,11 +66,11 @@ end
 -- amount -1: {1, 2, 3, 4} -> {4, 1, 2, 3}
 function tablex.rotate(t, amount)
 	if #t > 1 then
-		while amount > 0 do
+		while amount >= 1 do
 			tablex.push(t, tablex.shift(t))
 			amount = amount - 1
 		end
-		while amount < 0 do
+		while amount <= -1 do
 			tablex.unshift(t, tablex.pop(t))
 			amount = amount + 1
 		end

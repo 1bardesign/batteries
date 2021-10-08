@@ -138,4 +138,9 @@ function async:add_interval(f, delay)
 	end)
 end
 
+function async.stall()
+	return coroutine.yield("stall")
+end
+
+
 return async

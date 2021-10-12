@@ -111,7 +111,7 @@ function functional.filter_inplace(t, f)
 			t[i] = nil
 		end
 	end
-	return r
+	return t
 end
 
 -- complement of filter

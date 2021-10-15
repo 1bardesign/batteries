@@ -215,7 +215,7 @@ function functional.cycle(t, f)
 	local result = {}
 	for i, a in ipairs(t) do
 		local b = t[mathx.wrap(i + 1, 1, #t + 1)]
-		local v = f(a, b, i)
+		local v = f(a, b)
 		if v ~= nil then
 			table.insert(result, v)
 		end
@@ -224,6 +224,25 @@ function functional.cycle(t, f)
 end
 
 functional.map_cycle = functional.cycle
+
+--maps a sequence {a, b, c} -> { f(a, b), f(b, c) }
+-- useful for inter-dependent data
+-- (automatically drops any nils, same as map)
+
+function functional.chain(t, f)
+	local result = {}
+	for i = 2, #t do
+		local a = t[i-1]
+		local b = t[i]
+		local v = f(a, b)
+		if v ~= nil then
+			table.insert(result, v)
+		end
+	end
+	return result
+end
+
+functional.map_chain = functional.chain
 
 
 -----------------------------------------------------------

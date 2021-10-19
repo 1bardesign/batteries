@@ -2,6 +2,8 @@
 	add pooling functionality to a class
 
 	adds a handful of class and instance methods to do with pooling
+
+	todo: automatically use the pool by replacing __call, so you really just need to :release()
 ]]
 
 return function(class, limit)

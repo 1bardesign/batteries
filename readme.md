@@ -26,6 +26,7 @@ Use find-in-all from your editor, or just browse through the code. The [module o
 - `require` the base `batteries` directory - the one with `init.lua` in it.
 	- Don't forget to use dot syntax on the path!
 	- With a normal `require` setup (ie stock LÖVE or lua), `init.lua` will pull in all the submodules.
+	- Batteries uses the (very common) init.lua convention. If your installation doesn't already have init.lua support (eg plain 5.1 on windows), add `package.path = package.path .. ";./?/init.lua"` before the require line. You can also modify your `LUA_PATH` environment variable.
 - (optionally) `export` everything to the global environment.
 
 ```lua
@@ -46,9 +47,9 @@ See [below](#export-globals) for a discussion of the pros and cons of `export`.
 
 Pull requests are welcome for anything - positive changes will be merged optimistically, and I'm happy to work with you to get anything sensible ready for inclusion.
 
-If you have something "big" to contribute _please_ do get in touch before starting work so we can make sure it fits, but I'm quite open minded!
+If you have something "big" to contribute _please_ get in touch before starting work so we can make sure it fits. I'm quite open minded!
 
-If you've had a good look for the answer and something remains unclear, raise an issue and I'll address it. If you _haven't_ had a good look for the answer, checking the source always helps!
+If you've had a good look for the answer but something remains unclear, raise an issue and I'll address it. If you _haven't_ had a good look for the answer, checking the source _always_ helps!
 
 If you'd prefer to talk with me about `batteries` in real time, I'm often available on the love2d discord.
 
@@ -102,7 +103,7 @@ Endless, of course :)
 
 - `colour` - Bidirectional hsv/hsl/etc conversion would fit nicely here.
 - Geometry:
-	- `vec3` - Needs more fleshing out for serious use.
+	- `vec3` - Needs more fleshing out for serious use, and a refactor to fit the same naming patterns as `vec2`.
 	- `matrix` - A geometry focussed matrix module would made 3d work a lot nicer. Possibly just `mat4`.
 	- `intersect` - More routines, more optimisation :)
 - Network:

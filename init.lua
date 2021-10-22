@@ -39,6 +39,7 @@ local _batteries = {
 	manual_gc = require_relative("manual_gc"),
 	colour = require_relative("colour"),
 	pretty = require_relative("pretty"),
+	measure = require_relative("measure"),
 	make_pooled = require_relative("make_pooled"),
 }
 

@@ -17,6 +17,7 @@
 
 local path = (...):gsub("intersect", "")
 local vec2 = require(path .. "vec2")
+local mathx = require(path .. "mathx")
 
 --module storage
 local intersect = {}
@@ -337,10 +338,10 @@ function intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, b_hs, into)
 		--actually collided
 		if abs_amount.x <= abs_amount.y then
 			--x min
-			res = into:scalar_set(abs_amount.x * math.sign(delta.x), 0)
+			res = into:scalar_set(abs_amount.x * mathx.sign(delta.x), 0)
 		else
 			--y min
-			res = into:scalar_set(0, abs_amount.y * math.sign(delta.y))
+			res = into:scalar_set(0, abs_amount.y * mathx.sign(delta.y))
 		end
 	end
 	return res

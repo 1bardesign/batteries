@@ -78,6 +78,9 @@ function _batteries:export()
 	--overwrite assert wholesale (it's compatible)
 	assert = self.assert
 
+	--like ipairs, but in reverse
+	ripairs = self.tablex.ripairs
+
 	--export the whole library to global `batteries`
 	batteries = self
 

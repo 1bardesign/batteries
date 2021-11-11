@@ -6,7 +6,7 @@
 --so it works "as if" it was the global table api
 --upgraded with these routines
 
-local path = (...):gsub(".tablex", ".")
+local path = (...):gsub("tablex", "")
 local assert = require(path .. "assert")
 
 local tablex = setmetatable({}, {

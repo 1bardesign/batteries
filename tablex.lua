@@ -417,4 +417,19 @@ function tablex.unpack8(t)
 	return t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8]
 end
 
+--internal: reverse iterator function
+local function _ripairs_iter(t, i)
+	i = i - 1
+	local v = t[i]
+	if v then
+		return i, v
+	end
+end
+
+--iterator that works like ipairs, but in reverse order, with indices from #t to 1
+--similar to ipairs, it will only consider sequential until the first nil value in the table.
+function tablex.ripairs(t)
+	return _ripairs_iter, t, #t + 1
+end
+
 return tablex

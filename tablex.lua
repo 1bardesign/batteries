@@ -202,6 +202,26 @@ function tablex.take_random(t, r)
 	return table.remove(t, tablex.random_index(t, r))
 end
 
+--return a random index based on weights provided
+--Example: { 0.3, 1, 6, 0.5 } (3rd index most likely)
+function tablex.weighted_random(t, r)
+	if #t == 0 then
+		return nil
+	end
+	local sum = 0
+	for _, weight in ipairs (t) do
+		sum = sum + weight
+	end
+	local rnd = _random(nil, nil, r) * sum
+	sum = 0
+	for i, weight in ipairs (t) do
+		sum = sum + weight
+		if rnd <= sum then
+			return i, weight
+		end
+	end
+end
+
 --shuffle the order of a table
 function tablex.shuffle(t, r)
 	for i = 1, #t do

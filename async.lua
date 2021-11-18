@@ -146,7 +146,7 @@ function async.wait(time)
 		error("attempt to wait in main thread, this will block forever")
 	end
 	local now = love.timer.getTime()
-	while love.timer.getTime() - now > time do
+	while love.timer.getTime() - now < time do
 		async.stall()
 	end
 end

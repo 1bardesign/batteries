@@ -113,34 +113,42 @@ end
 
 --add a function to run after a certain delay (in seconds)
 function async:add_timeout(f, delay)
-	local trigger_time = love.timer.getTime() + delay
 	self:call(function()
-		while love.timer.getTime() < trigger_time do
-			coroutine.yield("stall")
-		end
+		async.wait(delay)
 		f()
 	end)
 end
 
 --add a function to run repeatedly every delay (in seconds)
---note: not super useful currently unless you plan to destroy the async object
+--note: not super useful currently unless you plan to destroy the whole async kernel
 --		as there's no way to remove tasks :)
 function async:add_interval(f, delay)
-	local trigger_time = love.timer.getTime() + delay
 	self:call(function()
 		while true do
-			while love.timer.getTime() < trigger_time do
-				coroutine.yield("stall")
-			end
+			async.wait(delay)
 			f()
-			trigger_time = trigger_time + delay
 		end
 	end)
 end
 
+--static async operation helpers
+--	these are not methods on the async object, but are
+--	intended to be called with dot syntax on the class itself
+
+--stall the current coroutine
 function async.stall()
 	return coroutine.yield("stall")
 end
 
+--make the current coroutine wait
+function async.wait(time)
+	if not coroutine.running() then
+		error("attempt to wait in main thread, this will block forever")
+	end
+	local now = love.timer.getTime()
+	while love.timer.getTime() - now > time do
+		async.stall()
+	end
+end
 
 return async

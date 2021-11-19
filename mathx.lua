@@ -70,7 +70,7 @@ end
 
 --bilinear interpolation between 4 samples
 function mathx.bilerp(a, b, c, d, u, v)
-	return math.lerp(
+	return mathx.lerp(
 		math.lerp(a, b, u),
 		math.lerp(c, d, u),
 		v

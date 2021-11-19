@@ -71,8 +71,8 @@ end
 --bilinear interpolation between 4 samples
 function mathx.bilerp(a, b, c, d, u, v)
 	return mathx.lerp(
-		math.lerp(a, b, u),
-		math.lerp(c, d, u),
+		mathx.lerp(a, b, u),
+		mathx.lerp(c, d, u),
 		v
 	)
 end
@@ -139,7 +139,7 @@ end
 
 --return a random value between two numbers (continuous)
 function mathx.random_lerp(min, max, _r)
-	return math.lerp(min, max, _random(_r))
+	return mathx.lerp(min, max, _random(_r))
 end
 
 --nan checking

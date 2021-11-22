@@ -202,29 +202,31 @@ function tablex.take_random(t, r)
 	return table.remove(t, tablex.random_index(t, r))
 end
 
---return a random index based on weights provided (or nil if it's empty)
--- { 0.3, 1, 6, 0.5 } -> (3rd index most likely)
--- possible todo:
+--return a random value from table t based on weights w provided (or nil empty)
+--	w should be the same length as t
+-- todo:
 --	provide normalisation outside of this function, require normalised weights
---	provide table of values _and_ weights and return the value
-function tablex.weighted_random(t, r)
+function tablex.pick_weighted_random(t, w, r)
 	if #t == 0 then
 		return nil
 	end
+	if #w ~= #t then
+		error("tablex.pick_weighted_random weight and value tables should be the same length")
+	end
 	local sum = 0
-	for _, weight in ipairs(t) do
+	for _, weight in ipairs(w) do
 		sum = sum + weight
 	end
 	local rnd = _random(nil, nil, r) * sum
 	sum = 0
-	for i, weight in ipairs(t) do
+	for i, weight in ipairs(w) do
 		sum = sum + weight
 		if rnd <= sum then
-			return i
+			return t[i]
 		end
 	end
 	--shouldn't get here but safety if using a random that returns >= 1
-	return #t
+	return tablex.back(t)
 end
 
 --shuffle the order of a table

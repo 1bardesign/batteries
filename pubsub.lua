@@ -4,6 +4,8 @@
 
 local path = (...):gsub("pubsub", "")
 local class = require(path .. "class")
+local set = require(path .. "set")
+
 local pubsub = class({
 	name = "pubsub",
 })

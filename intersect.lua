@@ -90,7 +90,7 @@ function intersect.nearest_point_on_line(a_start, a_end, b_pos, into)
 		--solve for factor along segment
 		local point_to_start = b_pos:pooled_copy()
 			:vector_sub_inplace(a_start)
-		local factor = math.clamp01(point_to_start:dot(segment) / lensq)
+		local factor = mathx.clamp01(point_to_start:dot(segment) / lensq)
 		point_to_start:release()
 		into:set(segment)
 			:scalar_mul_inplace(factor)

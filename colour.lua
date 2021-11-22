@@ -134,8 +134,9 @@ function colour.rgb_to_hsl(r, g, b)
 	if max == min then return 0, 0, min end
 
 	local l, d = max + min, max - min
-	local s, h = d / (l > 1 and (2 - l) or l)
+	local s = d / (l > 1 and (2 - l) or l)
 	l = l / 2
+	local h = nil --depends on below
 	if max == r then
 		h = (g - b) / d
 		if g < b then h = h + 6 end

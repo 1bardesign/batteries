@@ -408,6 +408,48 @@ function tablex.collapse(t)
 	return r
 end
 
+--check if two tables have equal contents at the first level
+--slow, as it needs two loops
+function tablex.shallow_equal(a, b)
+	if a == b then return true end
+	for k, v in pairs(a) do
+		if b[k] ~= v then
+			return false
+		end
+	end
+	for k, v in pairs(b) do
+		if a[k] ~= v then
+			return false
+		end
+	end
+	return true
+end
+
+--check if two tables have equal contents all the way down
+--slow, as it needs two potentially recursive loops
+function tablex.deep_equal(a, b)
+	if a == b then return true end
+	--not equal on type
+	if type(a) ~= type(b) then
+		return false
+	end
+	--bottomed out
+	if type(a) ~= "table" then
+		return a == b
+	end
+	for k, v in pairs(a) do
+		if not tablex.deep_equal(v, b[k]) then
+			return false
+		end
+	end
+	for k, v in pairs(b) do
+		if not tablex.deep_equal(v, a[k]) then
+			return false
+		end
+	end
+	return true
+end
+
 --alias
 tablex.flatten = tablex.collapse
 

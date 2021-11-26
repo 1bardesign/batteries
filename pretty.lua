@@ -81,6 +81,7 @@ function pretty._process(input, config, processing_state)
 
 	processing_state.depth = processing_state.depth + 1
 	if processing_state.depth > depth then
+		processing_state.depth = processing_state.depth - 1
 		return "{...}"
 	end
 

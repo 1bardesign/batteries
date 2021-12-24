@@ -11,10 +11,13 @@ local stringx = setmetatable({}, {
 })
 
 --split a string on a delimiter into an ordered table
-function stringx.split(self, delim)
+function stringx.split(self, delim, max_split)
 	delim = delim or ""
+	max_split = max_split ~= nil and max_split or math.huge
+
 	assert:type(self, "string", "stringx.split - self", 1)
 	assert:type(delim, "string", "stringx.split - delim", 1)
+	assert:type(max_split, "number", "stringx.split - max_split", 1)
 
 	--we try to create as little garbage as possible!
 	--only one table to contain the result, plus the split strings.
@@ -46,7 +49,11 @@ function stringx.split(self, delim)
 				end
 			end
 			if has_whole_delim then
-				table.insert(res, i)
+				if #res < max_split then
+					table.insert(res, i)
+				else
+					break
+				end
 			end
 			--iterate forward
 			i = i + delim_length

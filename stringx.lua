@@ -19,6 +19,10 @@ function stringx.split(self, delim, max_split)
 	assert:type(delim, "string", "stringx.split - delim", 1)
 	assert:type(max_split, "number", "stringx.split - max_split", 1)
 
+	if max_split then
+        assert(max_split > 0, "max_split must be positive!")
+    end
+	
 	--we try to create as little garbage as possible!
 	--only one table to contain the result, plus the split strings.
 	--so we do two passes, and  work with the bytes underlying the string

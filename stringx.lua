@@ -20,7 +20,7 @@ function stringx.split(self, delim, max_split)
 	assert:type(max_split, "number", "stringx.split - max_split", 1)
 
 	if max_split then
-		assert(max_split > 0, "max_split must be positive!")
+        assert(max_split > 0, "max_split must be non-zero and positive!")
 	end
 	
 	--we try to create as little garbage as possible!

@@ -11,18 +11,18 @@ local stringx = setmetatable({}, {
 })
 
 --split a string on a delimiter into an ordered table
-function stringx.split(self, delim, max_split)
+function stringx.split(self, delim, limit)
 	delim = delim or ""
-	max_split = max_split ~= nil and max_split or math.huge
+	limit = (limit ~= nil and limit) or math.huge
 
 	assert:type(self, "string", "stringx.split - self", 1)
 	assert:type(delim, "string", "stringx.split - delim", 1)
-	assert:type(max_split, "number", "stringx.split - max_split", 1)
+	assert:type(limit, "number", "stringx.split - limit", 1)
 
-	if max_split then
-        assert(max_split > 0, "max_split must be non-zero and positive!")
+	if limit then
+		assert(limit >= 0, "max_split must be positive!")
 	end
-	
+
 	--we try to create as little garbage as possible!
 	--only one table to contain the result, plus the split strings.
 	--so we do two passes, and  work with the bytes underlying the string
@@ -53,7 +53,7 @@ function stringx.split(self, delim, max_split)
 				end
 			end
 			if has_whole_delim then
-				if #res < max_split then
+				if #res < limit then
 					table.insert(res, i)
 				else
 					break

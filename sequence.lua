@@ -71,7 +71,11 @@ for _, v in ipairs({
 	"remove_if",
 	"zip",
 	"stitch",
+	"map_stitch",
 	"cycle",
+	"map_cycle",
+	"chain",
+	"map_chain",
 }) do
 	local functional_f = functional[v]
 	sequence[v] = function(self, ...)

@@ -109,8 +109,8 @@ end
 --quadratic ease in and out
 --(a lot like smoothstep)
 function mathx.ease_inout(f)
-	if t < 0.5 then
-		return t * t * 2
+	if f < 0.5 then
+		return f * f * 2
 	end
 	local oneminus = (1 - f)
 	return 1 - 2 * oneminus * oneminus

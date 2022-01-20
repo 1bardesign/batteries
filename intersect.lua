@@ -508,11 +508,14 @@ function intersect.bounce_off(velocity, normal, conservation)
 	conservation = conservation or 1
 	--take a copy, we need it
 	local old_vel = velocity:pooled_copy()
-	--reject on the normal (keep velocity tangential to the normal)
-	velocity:vector_rejection_inplace(normal)
-	--add back the complement of the difference;
-	--basically "flip" the velocity in line with the normal.
-	velocity:fused_multiply_add_inplace(old_vel:vector_sub_inplace(velocity), -conservation)
+	--heading into the normal
+	if old_vel:dot(normal) < 0 then
+		--reject on the normal (keep velocity tangential to the normal)
+		velocity:vector_rejection_inplace(normal)
+		--add back the complement of the difference;
+		--basically "flip" the velocity in line with the normal.
+		velocity:fused_multiply_add_inplace(old_vel:vector_sub_inplace(velocity), -conservation)
+	end
 	--clean up
 	old_vel:release()
 	return velocity

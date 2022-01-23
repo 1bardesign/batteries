@@ -63,6 +63,23 @@ function functional.map(t, f)
 	return result
 end
 
+-- map a sequence (see functional.map)
+-- when the function returns an index, map it there
+function functional.map_index(t, f)
+	local result = {}
+	for i = 1, #t do
+		local v, pos = f(t[i], i)
+		if v ~= nil then
+            if not pos then
+				table.insert(result, v)
+            else
+             	result[pos] = v
+            end
+		end
+	end
+	return result
+end
+
 --maps a sequence inplace, modifying it {a, b, c} -> {f(a), f(b), f(c)}
 -- (automatically drops any nils, which can be used to simultaneously map and filter)
 function functional.map_inplace(t, f)

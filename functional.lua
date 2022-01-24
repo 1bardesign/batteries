@@ -84,6 +84,23 @@ end
 --alias
 functional.remap = functional.map_inplace
 
+--maps a sequence into a new index space (see functional.map)
+-- the function may return an index where the value will be stored in the result
+-- if no index (or a nil index) is provided, it will insert as normal
+function functional.splat(t, f)
+	local result = {}
+	for i = 1, #t do
+		local v, pos = f(t[i], i)
+		if v ~= nil then
+			if pos == nil then
+				pos = #result + 1
+			end
+			result[pos] = v
+		end
+	end
+	return result
+end
+
 --filters a sequence
 -- returns a table containing items where f(v, i) returns truthy
 function functional.filter(t, f)

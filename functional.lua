@@ -63,21 +63,6 @@ function functional.map(t, f)
 	return result
 end
 
--- map a sequence (see functional.map)
--- the function may return an optional index
--- if no index is provided, it will insert as normal
-function functional.splat(t, f)
-	local result = {}
-	for i = 1, #t do
-		local v, pos = f(t[i], i)
-		if v ~= nil then
-			pos = (pos == nil and #result + 1) or pos
-        	result[pos] = v
-		end
-	end
-	return result
-end
-
 --maps a sequence inplace, modifying it {a, b, c} -> {f(a), f(b), f(c)}
 -- (automatically drops any nils, which can be used to simultaneously map and filter)
 function functional.map_inplace(t, f)
@@ -98,6 +83,23 @@ end
 
 --alias
 functional.remap = functional.map_inplace
+
+--maps a sequence into a new index space (see functional.map)
+-- the function may return an index where the value will be stored in the result
+-- if no index (or a nil index) is provided, it will insert as normal
+function functional.splat(t, f)
+	local result = {}
+	for i = 1, #t do
+		local v, pos = f(t[i], i)
+		if v ~= nil then
+			if pos == nil then
+				pos = #result + 1
+			end
+			result[pos] = v
+		end
+	end
+	return result
+end
 
 --filters a sequence
 -- returns a table containing items where f(v, i) returns truthy

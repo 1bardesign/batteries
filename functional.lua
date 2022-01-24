@@ -64,12 +64,14 @@ function functional.map(t, f)
 end
 
 -- map a sequence (see functional.map)
--- the function must return an index and value to map appropriately
+-- the function may return an optional index
+-- if no index is provided, it will insert as normal
 function functional.splat(t, f)
 	local result = {}
 	for i = 1, #t do
 		local v, pos = f(t[i], i)
-		if v ~= nil and pos ~= nil then
+		if v ~= nil then
+			pos = (pos == nil and #result + 1) or pos
         	result[pos] = v
 		end
 	end

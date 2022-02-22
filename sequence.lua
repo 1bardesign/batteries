@@ -65,9 +65,7 @@ end
 --(common case where something returns another sequence for chaining)
 for _, v in ipairs({
 	"map",
-	"map_inplace",
 	"filter",
-	"filter_inplace",
 	"remove_if",
 	"zip",
 	"stitch",
@@ -85,6 +83,8 @@ end
 
 --(cases where we don't want to construct a new sequence)
 for _, v in ipairs({
+	"map_inplace",
+	"filter_inplace",
 	"foreach",
 	"reduce",
 	"any",

@@ -38,6 +38,7 @@ function functional.foreach(t, f)
 			return result
 		end
 	end
+	return t
 end
 
 --performs a left to right reduction of t using f, with seed as the initial value

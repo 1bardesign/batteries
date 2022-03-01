@@ -31,6 +31,7 @@ end
 
 --simple sequential iteration, f is called for all elements of t
 --f can return non-nil to break the loop (and return the value)
+--otherwise returns t for chaining
 function functional.foreach(t, f)
 	for i = 1, #t do
 		local result = f(t[i], i)
@@ -38,6 +39,7 @@ function functional.foreach(t, f)
 			return result
 		end
 	end
+	return t
 end
 
 --performs a left to right reduction of t using f, with seed as the initial value

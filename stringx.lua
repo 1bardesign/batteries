@@ -249,6 +249,7 @@ end
 
 --check if a given string starts with another
 --(without garbage)
+--Using loops is actually faster than string.find!
 function stringx.starts_with(s, prefix)
 	for i = 1, #prefix do
 		if s:byte(i) ~= prefix:byte(i) then

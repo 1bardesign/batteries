@@ -60,7 +60,7 @@ function pretty._process(input, config, processing_state)
 
 	--pull out config
 	config = table.overlay({}, pretty.default_config, config or {})
-	
+
 	local per_line = config.per_line
 	local depth = config.depth
 	local indent = config.indent

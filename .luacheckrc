@@ -15,9 +15,6 @@ return {
         "423", -- Shadowing a loop variable.
         "423", -- Shadowing a loop variable.
         "432", -- Shadowing an upvalue argument.
-        "611", -- A line consists of nothing but whitespace.
-        "612", -- A line contains trailing whitespace.
-        "614", -- Trailing whitespace in a comment.
         "631", -- Line is too long.
     },
     files = {

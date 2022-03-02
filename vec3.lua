@@ -343,7 +343,7 @@ local _euler_macro = {
 }
 function vec3:rotate_euleri(angle_x_axis, angle_y_axis, angle_z_axis)
 	for i, swizzle in ipairs(_euler_macro) do
-		local angle = 
+		local angle =
 			i == 1 and angle_x_axis
 			or i == 2 and angle_y_axis
 			or i == 3 and angle_z_axis

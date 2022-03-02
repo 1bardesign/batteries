@@ -1,12 +1,12 @@
 --[[
 	simple kernel for async tasks running in the background
-	
+
 	can "stall" a task by yielding the string "stall"
 		this will suspend the coroutine until the rest of
 		the queue has been processed or stalled
 		and can early-out update_for_time
 
-	todo: 
+	todo:
 		multiple types of callbacks
 			finish, error, step
 		getting a reference to the task for manipulation

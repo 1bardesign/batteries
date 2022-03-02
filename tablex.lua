@@ -282,7 +282,7 @@ function tablex.append_inplace(t1, t2, ...)
 		table.insert(t1, v)
 	end
 	if ... then
-		return table.append_inplace(t1, ...)
+		return tablex.append_inplace(t1, ...)
 	end
 	return t1
 end

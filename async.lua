@@ -49,6 +49,35 @@ function async:add(co, args, callback, error_callback)
 	})
 end
 
+local function process_resume(self, td, success, msg, ...)
+	local co, args, cb, error_cb = unpack(td)
+	--error?
+	if not success then
+		if error_cb then
+			error_cb(msg)
+		else
+			local err = ("failure in async task:\n\n\t%s\n")
+				:format(tostring(msg))
+			error(err)
+		end
+	end
+	--check done
+	if coroutine.status(co) == "dead" then
+		--done? run callback with result
+		if cb then
+			cb(msg, ...)
+		end
+	else
+		--if not completed, re-add to the appropriate queue
+		if msg == "stall" then
+			--add to stalled queue as signalled stall
+			table.insert(self.tasks_stalled, td)
+		else
+			table.insert(self.tasks, td)
+		end
+	end
+end
+
 --update some task in the kernel
 function async:update()
 	--grab task definition
@@ -65,34 +94,8 @@ function async:update()
 	end
 	--run a step
 	--(using unpack because coroutine is also nyi and it's core to this async model)
-	local co, args, cb, error_cb = unpack(td)
-	--(8 temps rather than table churn capturing varargs)
-	local success, a, b, c, d, e, f, g, h = coroutine.resume(co, unpack(args))
-	--error?
-	if not success then
-		if error_cb then
-			error_cb(a)
-		else
-			local err = ("failure in async task:\n\n\t%s\n")
-				:format(tostring(a))
-			error(err)
-		end
-	end
-	--check done
-	if coroutine.status(co) == "dead" then
-		--done? run callback with result
-		if cb then
-			cb(a, b, c, d, e, f, g, h)
-		end
-	else
-		--if not completed, re-add to the appropriate queue
-		if a == "stall" then
-			--add to stalled queue as signalled stall
-			table.insert(self.tasks_stalled, td)
-		else
-			table.insert(self.tasks, td)
-		end
-	end
+	local co, args = unpack(td)
+	process_resume(self, td, coroutine.resume(co, unpack(args)))
 
 	return true
 end

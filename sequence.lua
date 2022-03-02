@@ -44,8 +44,10 @@ for _, v in ipairs({
 	"dedupe",
 	"collapse",
 	"append",
-	"overlay",
-	"copy",
+	"shallow_overlay",
+	"deep_overlay",
+	"shallow_copy",
+	"deep_copy",
 }) do
 	local table_f = table[v]
 	sequence[v] = function(self, ...)

@@ -64,16 +64,16 @@ function _batteries:export()
 	end
 
 	--overlay tablex and functional and sort routines onto table
-	self.tablex.overlay(table, self.tablex)
+	self.tablex.shallow_overlay(table, self.tablex)
 	--now we can use it through table directly
-	table.overlay(table, self.functional)
+	table.shallow_overlay(table, self.functional)
 	self.sort:export()
 
 	--overlay onto global math table
-	table.overlay(math, self.mathx)
+	table.shallow_overlay(math, self.mathx)
 
 	--overlay onto string
-	table.overlay(string, self.stringx)
+	table.shallow_overlay(string, self.stringx)
 
 	--overwrite assert wholesale (it's compatible)
 	assert = self.assert

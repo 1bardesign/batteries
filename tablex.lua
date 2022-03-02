@@ -328,61 +328,81 @@ if not tablex.clear then
 	end
 end
 
---note:
---	copies and overlays are currently not satisfactory
---
---	i feel that copy especially tries to do too much and
---	probably they should be split into separate functions
---	to be both more explicit and performant, ie
---
---	shallow_copy, deep_copy, shallow_overlay, deep_overlay
---
---	input is welcome on this :)
-
---copy a table
---	deep_or_into is either:
---		a boolean value, used as deep flag directly
---		or a table to copy into, which implies a deep copy
---	if deep specified:
---		calls copy method of member directly if it exists
---		and recurses into all "normal" table children
---	if into specified, copies into that table
---		but doesn't clear anything out
---		(useful for deep overlays and avoiding garbage)
-function tablex.copy(t, deep_or_into)
+-- Copy a table
+--	See shallow_overlay to shallow copy into another table to avoid garbage.
+function tablex.shallow_copy(t)
 	assert:type(t, "table", "tablex.copy - t", 1)
-	local is_bool = type(deep_or_into) == "boolean"
-	local is_table = type(deep_or_into) == "table"
-
-	local deep = is_bool and deep_or_into or is_table
-	local into = is_table and deep_or_into or {}
+	local into = {}
 	for k, v in pairs(t) do
-		if deep and type(v) == "table" then
-			if type(v.copy) == "function" then
-				v = v:copy()
-			else
-				v = tablex.copy(v, deep)
-			end
-		end
 		into[k] = v
 	end
 	return into
 end
 
---overlay tables directly onto one another, shallow only
---takes as many tables as required,
---overlays them in passed order onto the first,
---and returns the first table with the overlay(s) applied
-function tablex.overlay(a, b, ...)
-	assert:type(a, "table", "tablex.overlay - a", 1)
-	assert:type(b, "table", "tablex.overlay - b", 1)
-	for k,v in pairs(b) do
-		a[k] = v
+local function deep_copy(t, copied)
+	-- TODO: consider supporting deep_copy(3) so you can always use deep_copy without type checking
+	local into = {}
+	for k, v in pairs(t) do
+		local clone = v
+		if type(v) == "table" then
+			if copied[v] then
+				clone = copied[v]
+			elseif type(v.copy) == "function" then
+				clone = v:copy()
+				assert:type(clone, "table", "copy() didn't return a copy")
+			else
+				clone = deep_copy(v, copied)
+				setmetatable(clone, getmetatable(v))
+			end
+			copied[v] = clone
+		end
+		into[k] = clone
 	end
-	if ... then
-		return tablex.overlay(a, ...)
+	return into
+end
+-- Recursively copy values of a table.
+-- Retains the same keys as original table -- they're not cloned.
+function tablex.deep_copy(t)
+	assert:type(t, "table", "tablex.deep_copy - t", 1)
+	return deep_copy(t, {})
+end
+
+-- Overlay tables directly onto one another, merging them together.
+-- Doesn't merge tables within.
+-- Takes as many tables as required,
+-- overlays them in passed order onto the first,
+-- and returns the first table.
+function tablex.shallow_overlay(dest, ...)
+	assert:type(dest, "table", "tablex.shallow_overlay - dest", 1)
+	for i = 1, select("#", ...) do
+		local t = select(i, ...)
+		assert:type(t, "table", "tablex.shallow_overlay - ...", 1)
+		for k,v in pairs(t) do
+			dest[k] = v
+		end
 	end
-	return a
+	return dest
+end
+
+-- Overlay tables directly onto one another, merging them together into something like a union.
+-- Also overlays nested tables, but doesn't clone them (so a nested table may be added to dest).
+-- Takes as many tables as required,
+-- overlays them in passed order onto the first,
+-- and returns the first table.
+function tablex.deep_overlay(dest, ...)
+	assert:type(dest, "table", "tablex.deep_overlay - dest", 1)
+	for i = 1, select("#", ...) do
+		local t = select(i, ...)
+		assert:type(t, "table", "tablex.deep_overlay - ...", 1)
+		for k,v in pairs(t) do
+			if type(v) == "table" and type(dest[k]) == "table" then
+				tablex.deep_overlay(dest[k], v)
+			else
+				dest[k] = v
+			end
+		end
+	end
+	return dest
 end
 
 --collapse the first level of a table into a new table of reduced dimensionality

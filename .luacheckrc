@@ -5,7 +5,6 @@ return {
         "212", -- Unused argument.
         "212/self", -- Unused argument self.
         "213", -- Unused loop variable.
-        "231", -- Local variable is set but never accessed.
         "311", -- Value assigned to a local variable is unused.
         "631", -- Line is too long.
     },

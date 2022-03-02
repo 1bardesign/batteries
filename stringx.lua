@@ -171,9 +171,7 @@ function stringx.deindent(s, keep_trailing_empty)
 	--split along newlines
 	local lines = stringx.split(s, newline)
 	--detect and strip any leading blank lines
-	local leading_newline = false
 	while lines[1] == "" do
-		leading_newline = true
 		table.remove(lines, 1)
 	end
 

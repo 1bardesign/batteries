@@ -398,8 +398,8 @@ function tablex.collapse(t)
 	local r = {}
 	for _, v in ipairs(t) do
 		if type(v) == "table" then
-			for _, v in ipairs(v) do
-				table.insert(r, v)
+			for _, w in ipairs(v) do
+				table.insert(r, w)
 			end
 		else
 			table.insert(r, v)

@@ -8,13 +8,6 @@ return {
         "213", -- Unused loop variable.
         "231", -- Local variable is set but never accessed.
         "311", -- Value assigned to a local variable is unused.
-        "412", -- Redefining an argument.
-        "413", -- Redefining a loop variable.
-        "421", -- Shadowing a local variable.
-        "422", -- Shadowing an argument.
-        "423", -- Shadowing a loop variable.
-        "423", -- Shadowing a loop variable.
-        "432", -- Shadowing an upvalue argument.
         "631", -- Line is too long.
     },
     files = {

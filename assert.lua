@@ -75,7 +75,7 @@ end
 
 --replace everything in assert with nop functions that just return their second argument, for near-zero overhead on release
 function assert:nop()
-	local nop = function(self, a)
+	local nop = function(_, a)
 		return a
 	end
 	setmetatable(self, {

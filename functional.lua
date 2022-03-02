@@ -209,7 +209,7 @@ end
 function functional.stitch(t, f)
 	local result = {}
 	for i, v in ipairs(t) do
-		local v = f(v, i)
+		v = f(v, i)
 		if v ~= nil then
 			if type(v) == "table" then
 				for _, e in ipairs(v) do

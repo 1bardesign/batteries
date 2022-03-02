@@ -417,8 +417,9 @@ function tablex.shallow_equal(a, b)
 			return false
 		end
 	end
+	-- second loop to ensure a isn't missing any keys from b.
 	for k, v in pairs(b) do
-		if a[k] ~= v then
+		if a[k] == nil then
 			return false
 		end
 	end
@@ -442,8 +443,10 @@ function tablex.deep_equal(a, b)
 			return false
 		end
 	end
+	-- second loop to ensure a isn't missing any keys from b, so we can skip
+	-- recursion.
 	for k, v in pairs(b) do
-		if not tablex.deep_equal(v, a[k]) then
+		if a[k] == nil then
 			return false
 		end
 	end

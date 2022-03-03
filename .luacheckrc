@@ -2,7 +2,6 @@ return {
     std = "lua51+love",
     ignore = {
         "211", -- Unused local variable.
-        "212", -- Unused argument.
         "212/self", -- Unused argument self.
         "213", -- Unused loop variable.
         "311", -- Value assigned to a local variable is unused.

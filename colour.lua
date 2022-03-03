@@ -136,7 +136,7 @@ function colour.rgb_to_hsl(r, g, b)
 	local l, d = max + min, max - min
 	local s = d / (l > 1 and (2 - l) or l)
 	l = l / 2
-	local h = nil --depends on below
+	local h --depends on below
 	if max == r then
 		h = (g - b) / d
 		if g < b then h = h + 6 end
@@ -145,6 +145,7 @@ function colour.rgb_to_hsl(r, g, b)
 	else
 		h = (r - g) / d + 4
 	end
+	assert(h)
 	return h / 6, s, l
 end
 

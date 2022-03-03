@@ -186,7 +186,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 	local numerb = dx1 * dyab - dy1 * dxab
 
 	--check coincident lines
-	local intersected = "none"
+	local intersected
 	if
 		math.abs(numera) < COLLIDE_EPS and
 		math.abs(numerb) < COLLIDE_EPS and
@@ -215,6 +215,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 			end
 		end
 	end
+	assert(intersected)
 
 	if intersected == "both" then
 		--simply displace along A normal

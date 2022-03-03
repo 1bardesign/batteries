@@ -153,7 +153,6 @@ function pretty._process(input, config, processing_state)
 			end
 			if break_next then
 				table.insert(line_chunks, table.remove(chunks, 1))
-				break_next = false
 			end
 		end
 		chunks = line_chunks

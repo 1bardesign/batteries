@@ -60,7 +60,7 @@ function pretty._process(input, config, processing_state)
 
 	--pull out config
 	config = table.overlay({}, pretty.default_config, config or {})
-	
+
 	local per_line = config.per_line
 	local depth = config.depth
 	local indent = config.indent
@@ -153,7 +153,6 @@ function pretty._process(input, config, processing_state)
 			end
 			if break_next then
 				table.insert(line_chunks, table.remove(chunks, 1))
-				break_next = false
 			end
 		end
 		chunks = line_chunks

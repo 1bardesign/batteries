@@ -1,5 +1,8 @@
 --[[
 	set type with appropriate operations
+
+	NOTE: This is actually a unique list (ordered set). So it's more than just
+	a table with keys for values.
 ]]
 
 local path = (...):gsub("set", "")

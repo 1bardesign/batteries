@@ -282,7 +282,7 @@ function tablex.append_inplace(t1, t2, ...)
 		table.insert(t1, v)
 	end
 	if ... then
-		return table.append_inplace(t1, ...)
+		return tablex.append_inplace(t1, ...)
 	end
 	return t1
 end
@@ -398,8 +398,8 @@ function tablex.collapse(t)
 	local r = {}
 	for _, v in ipairs(t) do
 		if type(v) == "table" then
-			for _, v in ipairs(v) do
-				table.insert(r, v)
+			for _, w in ipairs(v) do
+				table.insert(r, w)
 			end
 		else
 			table.insert(r, v)

@@ -56,8 +56,8 @@ function sort._merge(array, workspace, low, middle, high, less)
 	local i, j, k
 	i = 1
 	-- copy first half of array to auxiliary array
-	for j = low, middle do
-		workspace[i] = array[j]
+	for w = low, middle do
+		workspace[i] = array[w]
 		i = i + 1
 	end
 	-- sieve through
@@ -78,8 +78,8 @@ function sort._merge(array, workspace, low, middle, high, less)
 		k = k + 1
 	end
 	-- copy back any remaining elements of first half
-	for k = k, j - 1 do
-		array[k] = workspace[i]
+	for w = k, j - 1 do
+		array[w] = workspace[i]
 		i = i + 1
 	end
 end
@@ -121,7 +121,8 @@ end
 
 function sort.stable_sort(array, less)
 	--setup
-	local trivial, n, less = sort._sort_setup(array, less)
+	local trivial, n
+	trivial, n, less = sort._sort_setup(array, less)
 	if not trivial then
 		--temp storage; allocate ahead of time
 		local workspace = {}
@@ -135,7 +136,8 @@ end
 
 function sort.insertion_sort(array, less)
 	--setup
-	local trivial, n, less = sort._sort_setup(array, less)
+	local trivial, n
+	trivial, n, less = sort._sort_setup(array, less)
 	if not trivial then
 		sort._insertion_sort_impl(array, 1, n, less)
 	end

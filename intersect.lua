@@ -186,7 +186,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 	local numerb = dx1 * dyab - dy1 * dxab
 
 	--check coincident lines
-	local intersected = "none"
+	local intersected
 	if
 		math.abs(numera) < COLLIDE_EPS and
 		math.abs(numerb) < COLLIDE_EPS and
@@ -215,6 +215,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 			end
 		end
 	end
+	assert(intersected)
 
 	if intersected == "both" then
 		--simply displace along A normal
@@ -454,11 +455,11 @@ function intersect.point_aabb_collide(a, b_pos, b_hs, into)
 end
 
 function intersect.circle_aabb_overlap(a, a_rad, b_pos, b_hs)
-	return intersect.aabb_circle_overlap(b_pos, b_pos, a, a_rad)
+	return intersect.aabb_circle_overlap(b_pos, b_hs, a, a_rad)
 end
 
 function intersect.circle_aabb_collide(a, a_rad, b_pos, b_hs, into)
-	return intersect.reverse_msv(intersect.aabb_circle_collide(b_pos, b_pos, a, a_rad, into))
+	return intersect.reverse_msv(intersect.aabb_circle_collide(b_pos, b_hs, a, a_rad, into))
 end
 
 function intersect.circle_line_collide(a, a_rad, b_start, b_end, b_rad, into)

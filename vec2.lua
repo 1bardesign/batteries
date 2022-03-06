@@ -266,7 +266,7 @@ end
 
 vec2.rot180_inplace = vec2.inverse_inplace --alias
 
---get the angle of this vector relative to (1, 0) 
+--get the angle of this vector relative to (1, 0)
 function vec2:angle()
 	return math.atan2(self.y, self.x)
 end

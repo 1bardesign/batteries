@@ -171,9 +171,7 @@ function stringx.deindent(s, keep_trailing_empty)
 	--split along newlines
 	local lines = stringx.split(s, newline)
 	--detect and strip any leading blank lines
-	local leading_newline = false
 	while lines[1] == "" do
-		leading_newline = true
 		table.remove(lines, 1)
 	end
 
@@ -249,6 +247,7 @@ end
 
 --check if a given string starts with another
 --(without garbage)
+--Using loops is actually faster than string.find!
 function stringx.starts_with(s, prefix)
 	for i = 1, #prefix do
 		if s:byte(i) ~= prefix:byte(i) then

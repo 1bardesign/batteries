@@ -115,7 +115,7 @@ end
 --hard-replace a state table
 --	if we're replacing the current state,
 --	exit is called on the old state and enter is called on the new state
---	mask_transitions can be used to prevent this if you need to 
+--	mask_transitions can be used to prevent this if you need to
 function state_machine:replace_state(name, state, mask_transitions)
 	local do_transitions = not mask_transitions and self:in_state(name)
 	if do_transitions then

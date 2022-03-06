@@ -328,61 +328,80 @@ if not tablex.clear then
 	end
 end
 
---note:
---	copies and overlays are currently not satisfactory
---
---	i feel that copy especially tries to do too much and
---	probably they should be split into separate functions
---	to be both more explicit and performant, ie
---
---	shallow_copy, deep_copy, shallow_overlay, deep_overlay
---
---	input is welcome on this :)
-
---copy a table
---	deep_or_into is either:
---		a boolean value, used as deep flag directly
---		or a table to copy into, which implies a deep copy
---	if deep specified:
---		calls copy method of member directly if it exists
---		and recurses into all "normal" table children
---	if into specified, copies into that table
---		but doesn't clear anything out
---		(useful for deep overlays and avoiding garbage)
-function tablex.copy(t, deep_or_into)
-	assert:type(t, "table", "tablex.copy - t", 1)
-	local is_bool = type(deep_or_into) == "boolean"
-	local is_table = type(deep_or_into) == "table"
-
-	local deep = is_bool and deep_or_into or is_table
-	local into = is_table and deep_or_into or {}
-	for k, v in pairs(t) do
-		if deep and type(v) == "table" then
-			if type(v.copy) == "function" then
-				v = v:copy()
-			else
-				v = tablex.copy(v, deep)
-			end
+-- Copy a table
+--	See shallow_overlay to shallow copy into an existing table to avoid garbage.
+function tablex.shallow_copy(t)
+	if type(t) == "table" then
+		local into = {}
+		for k, v in pairs(t) do
+			into[k] = v
 		end
-		into[k] = v
+		return into
 	end
-	return into
+	return t
 end
 
---overlay tables directly onto one another, shallow only
---takes as many tables as required,
---overlays them in passed order onto the first,
---and returns the first table with the overlay(s) applied
-function tablex.overlay(a, b, ...)
-	assert:type(a, "table", "tablex.overlay - a", 1)
-	assert:type(b, "table", "tablex.overlay - b", 1)
-	for k,v in pairs(b) do
-		a[k] = v
+local function deep_copy(t, copied)
+	local clone = t
+	if type(t) == "table" then
+		if copied[t] then
+			clone = copied[t]
+		elseif type(t.copy) == "function" then
+			clone = t:copy()
+			assert:type(clone, "table", "copy() didn't return a copy")
+		else
+			clone = {}
+			for k, v in pairs(t) do
+				clone[k] = deep_copy(v, copied)
+			end
+			setmetatable(clone, getmetatable(t))
+			copied[t] = clone
+		end
 	end
-	if ... then
-		return tablex.overlay(a, ...)
+	return clone
+end
+-- Recursively copy values of a table.
+-- Retains the same keys as original table -- they're not cloned.
+function tablex.deep_copy(t)
+	return deep_copy(t, {})
+end
+
+-- Overlay tables directly onto one another, merging them together.
+-- Doesn't merge tables within.
+-- Takes as many tables as required,
+-- overlays them in passed order onto the first,
+-- and returns the first table.
+function tablex.shallow_overlay(dest, ...)
+	assert:type(dest, "table", "tablex.shallow_overlay - dest", 1)
+	for i = 1, select("#", ...) do
+		local t = select(i, ...)
+		assert:type(t, "table", "tablex.shallow_overlay - ...", 1)
+		for k,v in pairs(t) do
+			dest[k] = v
+		end
 	end
-	return a
+	return dest
+end
+
+-- Overlay tables directly onto one another, merging them together into something like a union.
+-- Also overlays nested tables, but doesn't clone them (so a nested table may be added to dest).
+-- Takes as many tables as required,
+-- overlays them in passed order onto the first,
+-- and returns the first table.
+function tablex.deep_overlay(dest, ...)
+	assert:type(dest, "table", "tablex.deep_overlay - dest", 1)
+	for i = 1, select("#", ...) do
+		local t = select(i, ...)
+		assert:type(t, "table", "tablex.deep_overlay - ...", 1)
+		for k,v in pairs(t) do
+			if type(v) == "table" and type(dest[k]) == "table" then
+				tablex.deep_overlay(dest[k], v)
+			else
+				dest[k] = v
+			end
+		end
+	end
+	return dest
 end
 
 --collapse the first level of a table into a new table of reduced dimensionality
@@ -417,8 +436,9 @@ function tablex.shallow_equal(a, b)
 			return false
 		end
 	end
+	-- second loop to ensure a isn't missing any keys from b.
 	for k, v in pairs(b) do
-		if a[k] ~= v then
+		if a[k] == nil then
 			return false
 		end
 	end
@@ -442,8 +462,10 @@ function tablex.deep_equal(a, b)
 			return false
 		end
 	end
+	-- second loop to ensure a isn't missing any keys from b, so we can skip
+	-- recursion.
 	for k, v in pairs(b) do
-		if not tablex.deep_equal(v, a[k]) then
+		if a[k] == nil then
 			return false
 		end
 	end

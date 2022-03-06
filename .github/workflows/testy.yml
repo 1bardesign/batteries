@@ -1,0 +1,27 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  testy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        # tests.lua expects top level folder to be 'batteries'
+        path: 'batteries'
+    - name: Setup Lua
+      uses: leafo/gh-actions-lua@v8
+      with:
+        luaVersion: 5.4
+    - name: Setup Lua Rocks
+      uses: leafo/gh-actions-luarocks@v4
+    - name: Setup testy
+      # Install from github because rock is 6+ years old.
+      run: luarocks install https://raw.githubusercontent.com/siffiejoe/lua-testy/master/testy-scm-0.rockspec
+    - name: Run tests
+      run: |
+        cd batteries
+        testy.lua tests.lua

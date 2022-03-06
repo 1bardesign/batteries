@@ -27,16 +27,32 @@ function async:new()
 	self.tasks_stalled = {}
 end
 
+local capture_callstacks
+if love.system.getOS() == 'Web' then
+	-- Do no extra wrapping under lovejs because using xpcall causes "attempt
+	-- to yield across metamethod/C-call boundary"
+	capture_callstacks = function(f)
+		return f
+	end
+else
+	capture_callstacks = function(f)
+		-- Report errors with the coroutine's callstack instead of one coming
+		-- from async:update.
+		return function(...)
+			local results = {xpcall(f, debug.traceback, ...)}
+			local success = table.remove(results, 1)
+			if not success then
+				error(table.remove(results, 1))
+			end
+			return unpack(results)
+		end
+	end
+end
+
 --add a task to the kernel
 function async:call(f, args, callback, error_callback)
-	self:add(coroutine.create(function(...)
-		local results = {xpcall(f, debug.traceback, ...)}
-		local success = table.remove(results, 1)
-		if not success then
-			error(table.remove(results, 1))
-		end
-		return unpack(results)
-	end), args, callback, error_callback)
+	f = capture_callstacks(f)
+	self:add(coroutine.create(f), args, callback, error_callback)
 end
 
 --add an already-existing coroutine to the kernel

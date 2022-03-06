@@ -16,6 +16,7 @@
 ]]
 
 local path = (...):gsub("async", "")
+local assert = require(path .. "assert")
 local class = require(path .. "class")
 
 local async = class({
@@ -51,6 +52,7 @@ end
 
 --add a task to the kernel
 function async:call(f, args, callback, error_callback)
+	assert:type_or_nil(args, "table", "async:call - args", 1)
 	f = capture_callstacks(f)
 	self:add(coroutine.create(f), args, callback, error_callback)
 end

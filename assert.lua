@@ -73,6 +73,15 @@ function assert:type(a, t, msg, stack_level)
 	return a
 end
 
+--assert a value is nil or a certain type.
+-- useful for optional parameters.
+function assert:type_or_nil(a, t, msg, stack_level)
+	if a ~= nil then
+		assert:type(a, t, msg, stack_level + 1)
+	end
+	return a
+end
+
 --replace everything in assert with nop functions that just return their second argument, for near-zero overhead on release
 function assert:nop()
 	local nop = function(self, a)

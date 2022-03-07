@@ -20,10 +20,6 @@ local function test_shallow_copy()
 	x = { a = { b = { 2 }, c = { 3 }, } }
 	r = tablex.shallow_copy(x)
 	assert:equal(r.a, x.a)
-
-	x = 10
-	r = tablex.shallow_copy(x)
-	assert:equal(r, x)
 end
 
 local function test_deep_copy()
@@ -39,10 +35,6 @@ local function test_deep_copy()
 	assert(r.a ~= x.a)
 	assert:equal(r.a.b[1], 2)
 	assert:equal(r.a.c[1], 3)
-
-	x = 10
-	r = tablex.deep_copy(x)
-	assert:equal(r, x)
 end
 
 

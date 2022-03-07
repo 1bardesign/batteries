@@ -80,7 +80,7 @@ end
 
 --get a copy of the values in the set, as a simple table
 function set:values()
-	return table.copy(self._ordered)
+	return table.shallow_copy(self._ordered)
 end
 
 --get a direct reference to the internal list of values in the set

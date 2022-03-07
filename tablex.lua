@@ -260,7 +260,7 @@ end
 --	this call will be slow but then following iterations can use ipairs)
 function tablex.keys(t)
 	local r = {}
-	for k,v in pairs(t) do
+	for k, v in pairs(t) do
 		table.insert(r, k)
 	end
 	return r
@@ -270,7 +270,7 @@ end
 --(shallow copy if it's already sequential)
 function tablex.values(t)
 	local r = {}
-	for k,v in pairs(t) do
+	for k, v in pairs(t) do
 		table.insert(r, v)
 	end
 	return r
@@ -278,7 +278,7 @@ end
 
 --append sequence t2 into t1, modifying t1
 function tablex.append_inplace(t1, t2, ...)
-	for i,v in ipairs(t2) do
+	for i, v in ipairs(t2) do
 		table.insert(t1, v)
 	end
 	if ... then
@@ -299,7 +299,7 @@ end
 function tablex.dedupe(t)
 	local seen = {}
 	local r = {}
-	for i,v in ipairs(t) do
+	for i, v in ipairs(t) do
 		if not seen[v] then
 			seen[v] = true
 			table.insert(r, v)
@@ -331,6 +331,7 @@ end
 -- Copy a table
 --	See shallow_overlay to shallow copy into an existing table to avoid garbage.
 function tablex.shallow_copy(t)
+	assert:type(t, "table", "tablex.shallow_copy - t", 1)
 	if type(t) == "table" then
 		local into = {}
 		for k, v in pairs(t) do
@@ -341,29 +342,39 @@ function tablex.shallow_copy(t)
 	return t
 end
 
-local function deep_copy(t, copied)
+--alias
+tablex.copy = tablex.shallow_copy
+
+--implementation for deep copy
+--traces stuff that has already been copied, to handle circular references
+local function _deep_copy_impl(t, already_copied)
 	local clone = t
 	if type(t) == "table" then
-		if copied[t] then
-			clone = copied[t]
+		if already_copied[t] then
+			--something we've already encountered before
+			clone = already_copied[t]
 		elseif type(t.copy) == "function" then
+			--something that provides its own copy function
 			clone = t:copy()
-			assert:type(clone, "table", "copy() didn't return a copy")
+			assert:type(clone, "table", "member copy() function didn't return a copy")
 		else
+			--a plain table to clone
 			clone = {}
 			for k, v in pairs(t) do
-				clone[k] = deep_copy(v, copied)
+				clone[k] = _deep_copy_impl(v, already_copied)
 			end
 			setmetatable(clone, getmetatable(t))
-			copied[t] = clone
+			already_copied[t] = clone
 		end
 	end
 	return clone
 end
+
 -- Recursively copy values of a table.
 -- Retains the same keys as original table -- they're not cloned.
 function tablex.deep_copy(t)
-	return deep_copy(t, {})
+	assert:type(t, "table", "tablex.deep_copy - t", 1)
+	return _deep_copy_impl(t, {})
 end
 
 -- Overlay tables directly onto one another, merging them together.
@@ -376,12 +387,14 @@ function tablex.shallow_overlay(dest, ...)
 	for i = 1, select("#", ...) do
 		local t = select(i, ...)
 		assert:type(t, "table", "tablex.shallow_overlay - ...", 1)
-		for k,v in pairs(t) do
+		for k, v in pairs(t) do
 			dest[k] = v
 		end
 	end
 	return dest
 end
+
+tablex.overlay = tablex.shallow_overlay
 
 -- Overlay tables directly onto one another, merging them together into something like a union.
 -- Also overlays nested tables, but doesn't clone them (so a nested table may be added to dest).
@@ -393,7 +406,7 @@ function tablex.deep_overlay(dest, ...)
 	for i = 1, select("#", ...) do
 		local t = select(i, ...)
 		assert:type(t, "table", "tablex.deep_overlay - ...", 1)
-		for k,v in pairs(t) do
+		for k, v in pairs(t) do
 			if type(v) == "table" and type(dest[k]) == "table" then
 				tablex.deep_overlay(dest[k], v)
 			else
@@ -437,6 +450,7 @@ function tablex.shallow_equal(a, b)
 		end
 	end
 	-- second loop to ensure a isn't missing any keys from b.
+	-- we don't compare the values - if any are missing we're not equal
 	for k, v in pairs(b) do
 		if a[k] == nil then
 			return false
@@ -462,8 +476,8 @@ function tablex.deep_equal(a, b)
 			return false
 		end
 	end
-	-- second loop to ensure a isn't missing any keys from b, so we can skip
-	-- recursion.
+	-- second loop to ensure a isn't missing any keys from b
+	-- we don't compare the values - if any are missing we're not equal
 	for k, v in pairs(b) do
 		if a[k] == nil then
 			return false

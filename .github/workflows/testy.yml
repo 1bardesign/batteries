@@ -24,4 +24,4 @@ jobs:
     - name: Run tests
       run: |
         cd batteries
-        testy.lua tests.lua
+        testy.lua .test/tests.lua

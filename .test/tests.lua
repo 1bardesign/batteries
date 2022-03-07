@@ -1,5 +1,5 @@
--- Run this file with testy:
---	  testy.lua tests.lua
+-- Run this file with testy from within batteries
+--	  testy.lua .tests/tests.lua
 -- testy sets `...` to "module.test", so ignore that and use module top-level paths.
 package.path = package.path .. ";../?.lua"
 

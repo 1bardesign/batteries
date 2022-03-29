@@ -153,7 +153,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 
 	--detect degenerate cases
 	local a_degen = a_dir:length_squared() <= COLLIDE_EPS
-	local b_degen = a_dir:length_squared() <= COLLIDE_EPS
+	local b_degen = b_dir:length_squared() <= COLLIDE_EPS
 	if a_degen or b_degen then
 		vec2.release(a_dir, b_dir)
 		if a_degen and b_degen then

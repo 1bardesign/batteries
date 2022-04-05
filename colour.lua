@@ -150,7 +150,42 @@ function colour.rgb_to_hsl(r, g, b)
 end
 
 --todo: hsv, other colour spaces
---todo: oklab https://bottosson.github.io/posts/oklab/
+
+--oklab https://bottosson.github.io/posts/oklab/
+function colour.oklab_to_rgb(l, a, b)
+	local _l = l + 0.3963377774 * a + 0.2158037573 * b
+	local _m = l - 0.1055613458 * a - 0.0638541728 * b
+	local _s = l - 0.0894841775 * a - 1.2914855480 * b
+
+	_l = math.pow(_l, 3.0)
+	_m = math.pow(_m, 3.0)
+	_s = math.pow(_s, 3.0)
+
+	local r, g, b = love.math.linearToGamma(
+		( 4.0767245293 * _l - 3.3072168827 * _m + 0.2307590544 * _s),
+		(-1.2681437731 * _l + 2.6093323231 * _m - 0.3411344290 * _s),
+		(-0.0041119885 * _l - 0.7034763098 * _m + 1.7068625689 * _s)
+	)
+	return r, g, b
+end
+
+function colour.rgb_to_oklab(r, g, b)
+	r, g, b = love.math.gammaToLinear(r, g, b)
+
+	local _l = 0.4121656120 * r + 0.5362752080 * g + 0.0514575653 * b
+	local _m = 0.2118591070 * r + 0.6807189584 * g + 0.1074065790 * b
+	local _s = 0.0883097947 * r + 0.2818474174 * g + 0.6302613616 * b
+
+	_l = math.pow(_l, 1.0 / 3.0)
+	_m = math.pow(_m, 1.0 / 3.0)
+	_s = math.pow(_s, 1.0 / 3.0)
+
+	local l = 0.2104542553 * _l + 0.7936177850 * _m - 0.0040720468 * _s
+	local a = 1.9779984951 * _l - 2.4285922050 * _m + 0.4505937099 * _s
+	local b = 0.0259040371 * _l + 0.7827717662 * _m - 0.8086757660 * _s
+
+	return l, a, b
+end
 
 --colour distance functions
 --distance of one colour to another (linear space)

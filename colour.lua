@@ -161,20 +161,20 @@ function colour.oklab_to_rgb(l, a, b)
 	_m = math.pow(_m, 3.0)
 	_s = math.pow(_s, 3.0)
 
-	local r, g, b = love.math.linearToGamma(
+	local red, green, blue = love.math.linearToGamma(
 		( 4.0767245293 * _l - 3.3072168827 * _m + 0.2307590544 * _s),
 		(-1.2681437731 * _l + 2.6093323231 * _m - 0.3411344290 * _s),
 		(-0.0041119885 * _l - 0.7034763098 * _m + 1.7068625689 * _s)
 	)
-	return r, g, b
+	return red, green, blue
 end
 
-function colour.rgb_to_oklab(r, g, b)
-	r, g, b = love.math.gammaToLinear(r, g, b)
+function colour.rgb_to_oklab(red, green, blue)
+	red, green, blue = love.math.gammaToLinear(red, green, blue)
 
-	local _l = 0.4121656120 * r + 0.5362752080 * g + 0.0514575653 * b
-	local _m = 0.2118591070 * r + 0.6807189584 * g + 0.1074065790 * b
-	local _s = 0.0883097947 * r + 0.2818474174 * g + 0.6302613616 * b
+	local _l = 0.4121656120 * red + 0.5362752080 * green + 0.0514575653 * blue
+	local _m = 0.2118591070 * red + 0.6807189584 * green + 0.1074065790 * blue
+	local _s = 0.0883097947 * red + 0.2818474174 * green + 0.6302613616 * blue
 
 	_l = math.pow(_l, 1.0 / 3.0)
 	_m = math.pow(_m, 1.0 / 3.0)

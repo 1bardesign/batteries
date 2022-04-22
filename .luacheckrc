@@ -4,6 +4,7 @@ return {
         "211", -- Unused local variable.
         "212/self", -- Unused argument self.
         "213", -- Unused loop variable.
+        "214", -- used _ prefix variable (we use this often to indicate private variables, not unused)
         "631", -- Line is too long.
     },
     files = {

@@ -126,20 +126,20 @@ end
 --todo: more easings - back, bounce, elastic
 
 --(internal; use a provided random generator object, or not)
-local function _random(_r, ...)
-	if _r then return _r:random(...) end
+local function _random(rng, ...)
+	if rng then return rng:random(...) end
 	if love then return love.math.random(...) end
 	return math.random(...)
 end
 
 --return a random sign
-function mathx.random_sign(_r)
-	return _random(_r) < 0.5 and -1 or 1
+function mathx.random_sign(rng)
+	return _random(rng) < 0.5 and -1 or 1
 end
 
 --return a random value between two numbers (continuous)
-function mathx.random_lerp(min, max, _r)
-	return mathx.lerp(min, max, _random(_r))
+function mathx.random_lerp(min, max, rng)
+	return mathx.lerp(min, max, _random(rng))
 end
 
 --nan checking

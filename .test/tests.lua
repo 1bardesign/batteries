@@ -116,3 +116,39 @@ local function test_deep_equal()
 	assert(not tablex.deep_equal(y, x))
 end
 
+local function test_spairs()
+	local t = {
+		player1 = {
+			name = "Joe",
+			score = 8
+		},
+		player2 = {
+			name = "Robert",
+			score = 7
+		},
+		player3 = {
+			name = "John",
+			score = 10
+		}
+	}
+	
+	local sorted_names = {}
+	local sorted_score = {}
+	
+	for k, v in tablex.spairs(t, function(t, a, b)
+		return t[a].score > t[b].score
+	end) do
+		tablex.push(sorted_names, v.name)
+		tablex.push(sorted_score, v.score)
+	end
+	
+	assert(tablex.deep_equal(sorted_names,
+	{
+		"John", "Joe", "Robert"
+	}))
+	
+	assert(tablex.deep_equal(sorted_score,
+	{
+		10, 8, 7
+	}))
+end

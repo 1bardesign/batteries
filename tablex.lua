@@ -537,4 +537,28 @@ function tablex.ripairs(t)
 	return _ripairs_iter, t, #t + 1
 end
 
+-- works like pairs, but returns sorted table
+function tablex.spairs(t, fn)
+	local keys = {}
+	for k in pairs(t) do
+		tablex.push(keys, k)
+	end
+
+	if fn then
+		table.sort(keys, function(a,b) return fn(t, a, b) end)
+	else
+		-- sort by keys if no function passed
+		table.sort(keys)
+	end
+
+	local i = 0
+	return function()
+		i = i + 1
+		if keys[i] then
+			return keys[i], t[keys[i]]
+		end
+	end
+end
+
+
 return tablex

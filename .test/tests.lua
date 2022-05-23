@@ -136,21 +136,21 @@ local function test_spairs()
 			score = 10
 		}
 	}
-	
+
 	local sorted_names = {}
 	local sorted_score = {}
-	
+
 	for k, v in tablex.spairs(t, function(a, b)
 		return t[a].score > t[b].score
 	end) do
 		tablex.push(sorted_names, v.name)
 		tablex.push(sorted_score, v.score)
 	end
-	
+
 	assert(tablex.deep_equal(sorted_names, {
 		"John", "Joe", "Robert"
 	}))
-	
+
 	assert(tablex.deep_equal(sorted_score, {
 		10, 8, 7
 	}))

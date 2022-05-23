@@ -97,7 +97,16 @@ function sort._merge_sort_impl(array, workspace, low, high, less)
 end
 
 --default comparison; hoisted for clarity
+local _sorted_types = {
+	--a list of types that will be sorted by default_less
+	--provide a custom sort function to sort other types
+	["string"] = true,
+	["number"] = true,
+}
 local function default_less(a, b)
+	if not _sorted_types[type(a)] or not _sorted_types[type(b)] then
+		return false
+	end
 	return a < b
 end
 

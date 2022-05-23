@@ -2,13 +2,17 @@
 	extra table routines
 ]]
 
---apply prototype to module if it isn't the global table
---so it works "as if" it was the global table api
---upgraded with these routines
-
 local path = (...):gsub("tablex", "")
 local assert = require(path .. "assert")
 
+--for spairs
+--(can be replaced with eg table.sort to use that instead)
+local sort = require(path .. "sort")
+local spairs_sort = sort.stable_sort
+
+--apply prototype to module if it isn't the global table
+--so it works "as if" it was the global table api
+--upgraded with these routines
 local tablex = setmetatable({}, {
 	__index = table,
 })
@@ -78,11 +82,8 @@ function tablex.rotate(t, amount)
 	return t
 end
 
---default comparison; hoisted for clarity
---(shared with sort.lua and suggests the sorted functions below should maybe be refactored there)
-local function default_less(a, b)
-	return a < b
-end
+--default comparison from sort.lua
+local default_less = sort.default_less
 
 --check if a function is sorted based on a "less" or "comes before" ordering comparison
 --if any item is "less" than the item before it, we are not sorted
@@ -537,19 +538,16 @@ function tablex.ripairs(t)
 	return _ripairs_iter, t, #t + 1
 end
 
--- works like pairs, but returns sorted table
-function tablex.spairs(t, fn)
-	local keys = {}
-	for k in pairs(t) do
-		tablex.push(keys, k)
-	end
+--works like pairs, but returns sorted table
+--	generates a fair bit of garbage but very nice for more stable output
+--	less function gets keys the of the table as its argument; if you want to sort on the values they map to then
+--		you'll likely need a closure
+function tablex.spairs(t, less)
+	less = less or default_less
+	--gather the keys
+	local keys = tablex.keys(t)
 
-	if fn then
-		table.sort(keys, function(a,b) return fn(t, a, b) end)
-	else
-		-- sort by keys if no function passed
-		table.sort(keys)
-	end
+	spairs_sort(keys, less)
 
 	local i = 0
 	return function()

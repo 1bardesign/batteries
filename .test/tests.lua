@@ -6,7 +6,6 @@ package.path = package.path .. ";../?.lua"
 local assert = require("batteries.assert")
 local tablex = require("batteries.tablex")
 
-
 -- tablex {{{
 
 local function test_shallow_copy()
@@ -47,8 +46,8 @@ local function test_shallow_overlay()
 		tablex.deep_equal(
 			r,
 			{ a = 1, b = 2, c = 8, d = 9 }
-			)
 		)
+	)
 
 	x = { b = { 2 }, c = { 3 }, }
 	y = { c = { 8 }, d = { 9 }, }
@@ -59,7 +58,9 @@ local function test_shallow_overlay()
 	assert(
 		tablex.deep_equal(
 			r,
-			{ b = { 2 }, c = { 8 }, d = { 9 }, }))
+			{ b = { 2 }, c = { 8 }, d = { 9 }, }
+		)
+	)
 end
 
 local function test_deep_overlay()
@@ -70,7 +71,9 @@ local function test_deep_overlay()
 	assert(
 		tablex.deep_equal(
 			r,
-			{ a = 1, b = 2, c = 8, d = 9 }))
+			{ a = 1, b = 2, c = 8, d = 9 }
+		)
+	)
 
 	x = { a = { b = { 2 }, c = { 3 }, } }
 	y = { a = { c = { 8 }, d = { 9 }, } }
@@ -78,7 +81,9 @@ local function test_deep_overlay()
 	assert(
 		tablex.deep_equal(
 			r,
-			{ a = { b = { 2 }, c = { 8 }, d = { 9 }, } }))
+			{ a = { b = { 2 }, c = { 8 }, d = { 9 }, } }
+		)
+	)
 end
 
 
@@ -135,20 +140,18 @@ local function test_spairs()
 	local sorted_names = {}
 	local sorted_score = {}
 	
-	for k, v in tablex.spairs(t, function(t, a, b)
+	for k, v in tablex.spairs(t, function(a, b)
 		return t[a].score > t[b].score
 	end) do
 		tablex.push(sorted_names, v.name)
 		tablex.push(sorted_score, v.score)
 	end
 	
-	assert(tablex.deep_equal(sorted_names,
-	{
+	assert(tablex.deep_equal(sorted_names, {
 		"John", "Joe", "Robert"
 	}))
 	
-	assert(tablex.deep_equal(sorted_score,
-	{
+	assert(tablex.deep_equal(sorted_score, {
 		10, 8, 7
 	}))
 end

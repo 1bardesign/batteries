@@ -1,14 +1,15 @@
 --[[
 	pretty formatting and printing for nested data structures
 
-	also able to be parsed by lua in many cases, but not always
+	also able to be parsed by lua in _many_ cases, but _not all cases_, be careful!
 
 	circular references and depth limit will cause the string to contain
 	things that cannot be parsed.
 
 	this isn't a full serialisation solution, it's for debugging and display to humans
 
-	all exposed functions take a config table, defaults found in pretty.default_config
+	all exposed functions take a config table,
+	defaults found (and can be modified) in pretty.default_config
 
 		indent
 			indentation to use for each line, or "" for single-line packed
@@ -117,7 +118,7 @@ function pretty._process(input, config, processing_state)
 		table.insert(chunks, internal_value(v))
 	end
 	--non sequential follows
-	for k, v in pairs(input) do
+	for k, v in tablex.spairs(input) do
 		if not seen[k] then
 			--encapsulate anything that's not a string
 			--todo: also keywords and strings with spaces

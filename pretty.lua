@@ -118,7 +118,7 @@ function pretty._process(input, config, processing_state)
 		table.insert(chunks, internal_value(v))
 	end
 	--non sequential follows
-	for k, v in tablex.spairs(input) do
+	for k, v in table.spairs(input) do
 		if not seen[k] then
 			--encapsulate anything that's not a string
 			--todo: also keywords and strings with spaces

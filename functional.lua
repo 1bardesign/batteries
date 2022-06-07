@@ -99,6 +99,23 @@ function functional.map_field(t, k)
 	return result
 end
 
+--maps a sequence
+-- if f is a string method name like "position", {a, b} -> {a:f(...), b:f(...)}
+-- if f is function reference like player.get_position, {a, b} -> {f(a, ...), f(b, ...)}
+-- (automatically drops any nils to keep a sequence)
+function functional.map_call(t, f, ...)
+	local result = {}
+	for i = 1, #t do
+		local v = t[i]
+		local f = type(f) == "function" and f or v[f]
+		v = f(v, ...)
+		if v ~= nil then
+			table.insert(result, v)
+		end
+	end
+	return result
+end
+
 --maps a sequence into a new index space (see functional.map)
 -- the function may return an index where the value will be stored in the result
 -- if no index (or a nil index) is provided, it will insert as normal

@@ -68,6 +68,7 @@ end
 for _, v in ipairs({
 	"map",
 	"map_field",
+	"map_call",
 	"filter",
 	"remove_if",
 	"zip",

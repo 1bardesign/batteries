@@ -22,7 +22,6 @@ function timer:new(time, on_progress, on_finish)
 	self.timer = 0
 	self.on_progress = on_progress
 	self.on_finish = on_finish
-	self.has_expired = false
 	self:reset(time)
 end
 
@@ -58,6 +57,7 @@ end
 function timer:reset(time)
 	self.timer = 0
 	self.time = math.max(time or self.time, 1e-6) --negative time not allowed
+	self.has_expired = false
 	return self
 end
 

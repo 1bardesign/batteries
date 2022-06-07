@@ -67,6 +67,7 @@ end
 --(common case where something returns another sequence for chaining)
 for _, v in ipairs({
 	"map",
+	"map_field",
 	"filter",
 	"remove_if",
 	"zip",

@@ -86,6 +86,19 @@ end
 --alias
 functional.remap = functional.map_inplace
 
+--maps a sequence {a, b, c} -> {a[k], b[k], c[k]}
+-- (automatically drops any nils to keep a sequence)
+function functional.map_field(t, k)
+	local result = {}
+	for i = 1, #t do
+		local v = t[i][k]
+		if v ~= nil then
+			table.insert(result, v)
+		end
+	end
+	return result
+end
+
 --maps a sequence into a new index space (see functional.map)
 -- the function may return an index where the value will be stored in the result
 -- if no index (or a nil index) is provided, it will insert as normal

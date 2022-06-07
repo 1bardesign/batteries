@@ -99,15 +99,15 @@ function functional.map_field(t, k)
 	return result
 end
 
---maps a sequence
--- if f is a string method name like "position", {a, b} -> {a:f(...), b:f(...)}
--- if f is function reference like player.get_position, {a, b} -> {f(a, ...), f(b, ...)}
+--maps a sequence by a method call
+-- if m is a string method name like "position", {a, b} -> {a:m(...), b:m(...)}
+-- if m is function reference like player.get_position, {a, b} -> {m(a, ...), m(b, ...)}
 -- (automatically drops any nils to keep a sequence)
-function functional.map_call(t, f, ...)
+function functional.map_call(t, m, ...)
 	local result = {}
 	for i = 1, #t do
 		local v = t[i]
-		local f = type(f) == "function" and f or v[f]
+		local f = type(m) == "function" and m or v[m]
 		v = f(v, ...)
 		if v ~= nil then
 			table.insert(result, v)

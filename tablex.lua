@@ -361,11 +361,11 @@ local function _deep_copy_impl(t, already_copied)
 		else
 			--a plain table to clone
 			clone = {}
+			already_copied[t] = clone
 			for k, v in pairs(t) do
 				clone[k] = _deep_copy_impl(v, already_copied)
 			end
 			setmetatable(clone, getmetatable(t))
-			already_copied[t] = clone
 		end
 	end
 	return clone

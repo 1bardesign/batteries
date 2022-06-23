@@ -333,14 +333,11 @@ end
 --	See shallow_overlay to shallow copy into an existing table to avoid garbage.
 function tablex.shallow_copy(t)
 	assert:type(t, "table", "tablex.shallow_copy - t", 1)
-	if type(t) == "table" then
-		local into = {}
-		for k, v in pairs(t) do
-			into[k] = v
-		end
-		return into
+	local into = {}
+	for k, v in pairs(t) do
+		into[k] = v
 	end
-	return t
+	return into
 end
 
 --alias

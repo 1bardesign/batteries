@@ -206,9 +206,9 @@ function stringx.deindent(s, keep_trailing_empty)
 		table.insert(res, line)
 	end
 
-	--should
+	--should we keep any trailing empty lines?
 	if not keep_trailing_empty then
-		if res[#res] == "" then
+		while res[#res] == "" do
 			table.remove(res)
 		end
 	end

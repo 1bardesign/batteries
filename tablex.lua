@@ -277,6 +277,33 @@ function tablex.values(t)
 	return r
 end
 
+--collect all values over a range into a new sequential table
+--useful where a range may have been modified to contain nils
+--	range can be a number, where it is used as a numeric limit (ie [1-range])
+--	range can be a table, where the sequential values are used as keys
+function tablex.compact(t, range)
+	local r = {}
+	if type(range) == "table" then
+		for _, k in ipairs(range) do
+			local v = t[k]
+			if v then
+				table.insert(r, v)
+			end
+		end
+	elseif type(range) == "number" then
+		for i = 1, range do
+			local v = t[i]
+			if v then
+				table.insert(r, v)
+			end
+		end
+	else
+		error("tablex.compact - range must be a number or table", 2)
+	end
+	return r
+
+end
+
 --append sequence t2 into t1, modifying t1
 function tablex.append_inplace(t1, t2, ...)
 	for i, v in ipairs(t2) do

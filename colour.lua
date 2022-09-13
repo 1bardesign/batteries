@@ -13,55 +13,110 @@ local colour = {}
 -- hex handling routines
 -- pack and unpack into 24 or 32 bit hex numbers
 
-local floor = math.floor
+local ok, bit = pcall(require, "bit")
+if ok then
+	--we have bit operations module, use the fast path
+	local band, bor = bit.band, bit.bor
+	local lshift, rshift = bit.lshift, bit.rshift
 
---rgb only (no alpha)
+	--rgb only (no alpha)
+	function colour.pack_rgb(r, g, b)
+		local br = lshift(band(0xff, r * 255), 16)
+		local bg = lshift(band(0xff, g * 255), 8)
+		local bb = lshift(band(0xff, b * 255), 0)
+		return bor( br, bg, bb )
+	end
 
-function colour.pack_rgb(r, g, b)
-	local br = floor(0xff * r) % 0x100 * 0x10000
-	local bg = floor(0xff * g) % 0x100 * 0x100
-	local bb = floor(0xff * b) % 0x100
-	return br + bg + bb
-end
+	function colour.unpack_rgb(rgb)
+		local r = rshift(band(rgb, 0x00ff0000), 16) / 255
+		local g = rshift(band(rgb, 0x0000ff00), 8)  / 255
+		local b = rshift(band(rgb, 0x000000ff), 0)  / 255
+		return r, g, b
+	end
 
-function colour.unpack_rgb(rgb)
-	local r = floor(rgb / 0x10000) % 0x100
-	local g = floor(rgb / 0x100) % 0x100
-	local b = floor(rgb) % 0x100
-	return r / 255, g / 255, b / 255
-end
+	--argb format (common for shared hex)
 
---argb format (common for shared hex)
+	function colour.pack_argb(r, g, b, a)
+		local ba = lshift(band(0xff, a * 255), 24)
+		local br = lshift(band(0xff, r * 255), 16)
+		local bg = lshift(band(0xff, g * 255), 8)
+		local bb = lshift(band(0xff, b * 255), 0)
+		return bor( br, bg, bb, ba )
+	end
 
-function colour.pack_argb(r, g, b, a)
-	local ba = floor(0xff * a) % 0x100 * 0x1000000
-	return colour.pack_rgb(r, g, b) + ba
-end
+	function colour.unpack_argb(argb)
+		local r = rshift(band(argb, 0x00ff0000), 16) / 255
+		local g = rshift(band(argb, 0x0000ff00), 8)  / 255
+		local b = rshift(band(argb, 0x000000ff), 0)  / 255
+		local a = rshift(band(argb, 0xff000000), 24) / 255
+		return r, g, b, a
+	end
 
-function colour.unpack_argb(argb)
-	local r, g, b = colour.unpack_rgb(argb)
-	local a = floor(argb / 0x1000000) % 0x100
-	return r, g, b, a / 255
-end
+	--rgba format
+	function colour.pack_rgba(r, g, b, a)
+		local br = lshift(band(0xff, r * 255), 24)
+		local bg = lshift(band(0xff, g * 255), 16)
+		local bb = lshift(band(0xff, b * 255), 8)
+		local ba = lshift(band(0xff, a * 255), 0)
+		return bor( br, bg, bb, ba )
+	end
 
---rgba format
+	function colour.unpack_rgba(rgba)
+		local r = rshift(band(rgba, 0xff000000), 24) / 255
+		local g = rshift(band(rgba, 0x00ff0000), 16) / 255
+		local b = rshift(band(rgba, 0x0000ff00), 8)  / 255
+		local a = rshift(band(rgba, 0x000000ff), 0)  / 255
+		return r, g, b, a
+	end
+else
+	--we don't have bitops, use a slower pure-float path
+	local floor = math.floor
 
-function colour.pack_rgba(r, g, b, a)
-	local ba = floor(0xff * a) % 0x100
-	return colour.pack_rgb(r, g, b) * 0x100 + ba
-end
+	--rgb only (no alpha)
+	function colour.pack_rgb(r, g, b)
+		local br = floor(0xff * r) % 0x100 * 0x10000
+		local bg = floor(0xff * g) % 0x100 * 0x100
+		local bb = floor(0xff * b) % 0x100
+		return br + bg + bb
+	end
 
-function colour.unpack_rgba(rgba)
-	local r, g, b = colour.unpack_rgb(floor(rgba / 0x100))
-	local a = floor(rgba) % 0x100
-	return r, g, b, a
+	function colour.unpack_rgb(rgb)
+		local r = floor(rgb / 0x10000) % 0x100
+		local g = floor(rgb / 0x100) % 0x100
+		local b = floor(rgb) % 0x100
+		return r / 255, g / 255, b / 255
+	end
+
+	--argb format (common for shared hex)
+	function colour.pack_argb(r, g, b, a)
+		local ba = floor(0xff * a) % 0x100 * 0x1000000
+		return colour.pack_rgb(r, g, b) + ba
+	end
+
+	function colour.unpack_argb(argb)
+		local r, g, b = colour.unpack_rgb(argb)
+		local a = floor(argb / 0x1000000) % 0x100
+		return r, g, b, a / 255
+	end
+
+	--rgba format
+	function colour.pack_rgba(r, g, b, a)
+		local ba = floor(0xff * a) % 0x100
+		return colour.pack_rgb(r, g, b) * 0x100 + ba
+	end
+
+	function colour.unpack_rgba(rgba)
+		local r, g, b = colour.unpack_rgb(floor(rgba / 0x100))
+		local a = floor(rgba) % 0x100
+		return r, g, b, a
+	end
 end
 
 
 -------------------------------------------------------------------------------
 -- colour space conversion
--- rgb is the common language but it's useful to have other spaces to work in
--- for us as humans :)
+-- rgb is the common language for computers
+-- but it's useful to have other spaces to work in for us as humans :)
 
 --convert hsl to rgb
 --all components are 0-1, hue is fraction of a turn rather than degrees or radians
@@ -115,11 +170,10 @@ function colour.rgb_to_hsl(r, g, b)
 	else
 		h = (r - g) / d + 4
 	end
-	assert(h)
 	return h / 6, s, l
 end
 
---todo: hsv, other colour spaces
+--todo: hsv
 
 --oklab https://bottosson.github.io/posts/oklab/
 function colour.oklab_to_rgb(l, a, b)

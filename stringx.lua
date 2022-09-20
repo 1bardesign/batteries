@@ -192,16 +192,18 @@ function stringx.deindent(s, keep_trailing_empty)
 	--de-indent the lines
 	local res = {}
 	for _, line in ipairs(lines) do
-		local line_start = line:sub(1, indent:len())
-		local start_len = line_start:len()
-		if
-			line_start == indent
-			or (
-				start_len < indent_len
-				and line_start == indent:sub(1, start_len)
-			)
-		then
-			line = line:sub(start_len + 1)
+		if line ~= "" then
+			local line_start = line:sub(1, indent:len())
+			local start_len = line_start:len()
+			if
+				line_start == indent
+				or (
+					start_len < indent_len
+					and line_start == indent:sub(1, start_len)
+				)
+			then
+				line = line:sub(start_len + 1)
+			end
 		end
 		table.insert(res, line)
 	end

@@ -166,6 +166,22 @@ function tablex.add_value(t, a)
 	return false
 end
 
+--get the next element in a sequential table
+--	wraps around such that the next element to the last in sequence is the first
+--	exists because builtin next may not behave as expected for mixed array/hash tables
+--	if the element passed is not present or is nil, will also get the first element
+--		but this should not be used to iterate the whole table; just use ipairs for that
+function tablex.next_element(t, v)
+	local i = tablex.index_of(t, v)
+	--not present? just get the front of the table
+	if not i then
+		return tablex.front(t)
+	end
+	--(not using mathx to avoid inter-dependency)
+	i = (i % #t) + 1
+	return t[i]
+end
+
 --note: keyed versions of the above aren't required; you can't double
 --up values under keys
 

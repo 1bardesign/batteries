@@ -265,6 +265,25 @@ end
 ------------------------------------------------------------------------------
 -- axis aligned bounding boxes
 
+--[[
+	Calculations are performed using the midpoint of the shape and half its size.
+
+	Assuming a 20x10 rectangle located at x = 50, y = 100:
+
+	   ◄──── w ────►
+	  tl───────────┐  ▲
+	   │           │  │
+	   │    pos    │  h
+	   │           │  │
+	   └───────────hs ▼
+
+	  w = 20
+	  h = 10
+	 hs = vec2(w/2, h/2) = vec2(10, 5)
+	 tl = vec2(50, 100)
+	pos = vec2(tl.x + hs.x, tl.y + hs.y) = vec2(60, 105)
+]]
+
 --return true on overlap, false otherwise
 function intersect.aabb_point_overlap(pos, hs, v)
 	local delta = pos

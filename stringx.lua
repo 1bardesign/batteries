@@ -272,4 +272,20 @@ function stringx.ends_with(s, suffix)
 	return true
 end
 
+--split elements by delimiter and trim the results, discarding empties
+--useful for hand-entered "permissive" data
+--	"a,b,  c, " -> {"a", "b", "c"}
+function stringx.split_and_trim(s, delim)
+	s = stringx.split(s, delim)
+	for i = #s, 1, -1 do
+		local v = stringx.trim(s[i])
+		if v == "" then
+			table.remove(s, i)
+		else
+			s[i] = v
+		end
+	end
+	return s
+end
+
 return stringx

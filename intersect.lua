@@ -264,6 +264,13 @@ end
 
 ------------------------------------------------------------------------------
 -- axis aligned bounding boxes
+--
+--	pos is the centre position of the box
+--	hs is the half-size of the box
+--		eg for a 10x8 box, vec2(5, 4)
+--
+--	we use half-sizes to keep these routines as fast as possible
+--	see intersect.rect_to_aabb for conversion from topleft corner and size
 
 --return true on overlap, false otherwise
 function intersect.aabb_point_overlap(pos, hs, v)
@@ -394,6 +401,18 @@ function intersect.aabb_circle_collide(a_pos, a_hs, b_pos, b_rad, into)
 		clamped:release()
 	end
 	return result
+end
+
+--convert raw x, y, w, h rectangle components to aabb vectors
+function intersect.rect_raw_to_aabb(x, y, w, h)
+	local hs = vec2(w, h):scalar_mul_inplace(0.5)
+	local pos = vec2(x, y):vector_add_inplace(hs)
+	return pos, hs
+end
+
+--convert (x, y), (w, h) rectangle vectors to aabb vectors
+function intersect.rect_to_aabb(pos, size)
+	return intersect.rect_raw_to_aabb(pos.x, pos.y, size.x, size.y)
 end
 
 --check if a point is in a polygon

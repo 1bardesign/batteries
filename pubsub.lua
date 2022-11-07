@@ -24,10 +24,10 @@ function pubsub:_deferred()
 end
 
 --(internal; enter deferred area)
-function pubsub:_push_defer()
+function pubsub:_push_defer(event)
 	self._defer_stack = self._defer_stack + 1
 	if self._defer_stack > 255 then
-		error("pubsub defer stack overflow; event infinite loop")
+		error("pubsub defer stack overflow; event infinite loop with event: "..tostring(event))
 	end
 end
 
@@ -42,10 +42,10 @@ function pubsub:_defer_call(defer_f, event, callback)
 end
 
 --(internal; unwind deferred sub/unsub)
-function pubsub:_pop_defer()
+function pubsub:_pop_defer(event)
 	self._defer_stack = self._defer_stack - 1
 	if self._defer_stack < 0 then
-		error("pubsub defer stack underflow; don't call the defer methods directly")
+		error("pubsub defer stack underflow; don't call the defer methods directly - event reported: "..tostring(event))
 	end
 	if self._defer_stack == 0 then
 		local defer_len = #self._defer
@@ -62,21 +62,21 @@ function pubsub:_pop_defer()
 end
 
 --(internal; notify a callback set of an event)
-function pubsub:_notify(callbacks, ...)
+function pubsub:_notify(event, callbacks, ...)
 	if callbacks then
-		self:_push_defer()
+		self:_push_defer(event)
 		for _, f in ipairs(callbacks:values()) do
 			f(...)
 		end
-		self:_pop_defer()
+		self:_pop_defer(event)
 	end
 end
 
 --publish an event, with optional arguments
 --notifies both the direct subscribers, and those subscribed to "everything"
 function pubsub:publish(event, ...)
-	self:_notify(self.subscriptions[event], ...)
-	self:_notify(self.subscriptions.everything, event, ...)
+	self:_notify(event, self.subscriptions[event], ...)
+	self:_notify(event, self.subscriptions.everything, event, ...)
 end
 
 --subscribe to an event
@@ -97,9 +97,13 @@ end
 
 --subscribe to an event, automatically unsubscribe once called
 function pubsub:subscribe_once(event, callback)
+	local called = false
 	f = function(...)
-		callback(...)
-		self:unsubscribe(event, f)
+		if not called then
+			callback(...)
+			self:unsubscribe(event, f)
+			called = true
+		end
 	end
 	self:subscribe(event, f)
 end

@@ -97,8 +97,9 @@ end
 
 --subscribe to an event, automatically unsubscribe once called
 function pubsub:subscribe_once(event, callback)
+	local f
 	local called = false
-	local f = function(...)
+	f = function(...)
 		if not called then
 			callback(...)
 			self:unsubscribe(event, f)

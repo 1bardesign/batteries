@@ -29,4 +29,51 @@ function uuid.uuid4(rng)
 	return out
 end
 
+-- Crockford's Base32 https://en.wikipedia.org/wiki/Base32
+local _encoding = {
+	"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+	"A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "M",
+	"N", "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z"
+}
+
+--since ulid needs time since unix epoch with miliseconds, we can just
+--use socket. if that's not loaded, they'll have to provide their own
+local function _now(time_func, ...)
+	if package.loaded.socket then return package.loaded.socket.gettime(...) end
+	if require("socket") then return require("socket").gettime(...) end
+	if time_func then return time_func(...) end
+	error("assertion failed: socket can't be found and no time function provided")
+end
+
+--generate the time part of an ulid
+local function _encode_time(time)
+	time = math.floor((time or _now()) * 1000)
+
+	local out = {}
+
+	for i = 10, 1, -1 do
+		local mod = time % #_encoding
+		out[i] = _encoding[mod + 1]
+		time = (time - mod) / #_encoding
+	end
+
+	return table.concat(out)
+end
+
+local function _encode_random(rng)
+	local out = {}
+
+	for i = 1, 10 do
+		out[i] = _encoding[math.floor(_random(rng) * #_encoding) + 1]
+	end
+
+	return table.concat(out)
+end
+
+--generate an ULID (see https://github.com/ulid/spec)
+--implementation based on https://github.com/Tieske/ulid.lua
+function uuid.ulid(rng, time_func)
+	return _encode_time() .. _encode_random()
+end
+
 return uuid

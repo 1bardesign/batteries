@@ -74,8 +74,8 @@ end
 --generate an ULID using this rng at this time
 --see https://github.com/ulid/spec
 --implementation based on https://github.com/Tieske/ulid.lua
-function uuid.ulid(rng, time_func)
-	return _encode_time() .. _encode_random()
+function uuid.ulid(rng, time)
+	return _encode_time(time) .. _encode_random(rng)
 end
 
 return uuid

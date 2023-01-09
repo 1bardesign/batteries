@@ -9,7 +9,7 @@ local uuid = {}
 --(internal; use a provided random generator object, or not)
 local function _random(rng, ...)
 	if rng then return rng:random(...) end
-	if love then return nlove.math.random(...) end
+	if love then return love.math.random(...) end
 	return math.random(...)
 end
 

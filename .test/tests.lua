@@ -5,6 +5,7 @@ package.path = package.path .. ";../?.lua"
 
 local assert = require("batteries.assert")
 local tablex = require("batteries.tablex")
+local uuid = require("batteries.uuid")
 
 -- tablex {{{
 
@@ -154,4 +155,27 @@ local function test_spairs()
 	assert(tablex.deep_equal(sorted_score, {
 		10, 8, 7
 	}))
+end
+
+local function test_uuid4()
+	for i = 1, 100 do
+		local id = uuid.uuid4()
+
+		-- right len
+		assert(#id == 36)
+		-- right amount of non hyphen characters
+		assert(#id:gsub("-", "") == 32)
+
+		-- 15th char is always a 4
+		assert(id:sub(15, 15) == "4")
+		-- 20th char is always between 0x8 and 0xb
+		local y = tonumber("0x" .. id:sub(20, 20))
+		assert(y >= 0x8 and y <= 0xb)
+
+		-- everything is a valid 8 bit num
+		for char in id:gsub("-", ""):gmatch(".") do
+			local num = assert(tonumber("0x" .. char))
+			assert(num >= 0 and num <= 0xf)
+		end
+	end
 end

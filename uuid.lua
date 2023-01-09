@@ -17,11 +17,11 @@ local function _random(min, max, r)
 		or _global_random(min, max)
 end
 
-local uuid4Template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+local uuid4_template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 
 --generate a UUID version 4 (random)
 function uuid.uuid4()
-    return uuid4Template:gsub("[xy]", function (c)
+    return uuid4_template:gsub("[xy]", function (c)
         -- x should be 0x0-0xF, the single y should be 0x8-0xB
         -- 4 should always just be 4 (denoting uuid version)
         return string.format("%x", c == "x" and _random(0x0, 0xF) or _random(0x8, 0xB))

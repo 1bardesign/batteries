@@ -1,5 +1,12 @@
 --[[
-    uuid generation
+    uuid/ulid generation
+
+	uuid is version 4, ulid is an alternative to uuid (see
+	https://github.com/ulid/spec).
+
+	todo:
+		this ulid isn't guaranteed to be sortable for ulids generated
+		within the same second yet
 ]]
 
 local path = (...):gsub("uuid", "")
@@ -15,21 +22,21 @@ end
 
 local uuid4_template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 
---generate a UUID version 4 (random)
+--generate a UUID version 4
 function uuid.uuid4(rng)
-	-- x should be 0x0-0xF, the single y should be 0x8-0xB
-	-- 4 should always just be 4 (denoting uuid version)
+	--x should be 0x0-0xf, the single y should be 0x8-0xb
+	--4 should always just be 4 (denoting uuid version)
     local out = uuid4_template:gsub("[xy]", function (c)
         return string.format(
 			"%x",
-			c == "x" and _random(rng, 0x0, 0xF) or _random(rng, 0x8, 0xB)
+			c == "x" and _random(rng, 0x0, 0xf) or _random(rng, 0x8, 0xb)
 		)
     end)
 
 	return out
 end
 
--- crockford's base32 https://en.wikipedia.org/wiki/Base32
+--crockford's base32 https://en.wikipedia.org/wiki/Base32
 local _encoding = {
 	"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 	"A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "M",
@@ -46,7 +53,6 @@ local function _now(time_func, ...)
 end
 
 --generate an ULID using this rng at this time (now by default)
---see https://github.com/ulid/spec
 --implementation based on https://github.com/Tieske/ulid.lua
 function uuid.ulid(rng, time)
 	time = math.floor((time or _now()) * 1000)

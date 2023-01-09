@@ -64,7 +64,7 @@ end
 local function _encode_random(rng)
 	local out = {}
 
-	for i = 1, 10 do
+	for i = 1, 16 do
 		out[i] = _encoding[math.floor(_random(rng) * #_encoding) + 1]
 	end
 

@@ -19,8 +19,11 @@ local uuid4_template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 function uuid.uuid4(rng)
 	-- x should be 0x0-0xF, the single y should be 0x8-0xB
 	-- 4 should always just be 4 (denoting uuid version)
-    local out, _ = uuid4_template:gsub("[xy]", function (c)
-        return string.format("%x", c == "x" and _random(rng, 0x0, 0xF) or _random(rng, 0x8, 0xB))
+    local out = uuid4_template:gsub("[xy]", function (c)
+        return string.format(
+			"%x",
+			c == "x" and _random(rng, 0x0, 0xF) or _random(rng, 0x8, 0xB)
+		)
     end)
 
 	return out

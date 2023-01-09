@@ -179,3 +179,17 @@ local function test_uuid4()
 		end
 	end
 end
+
+local function test_ulid()
+	for i = 1, 100 do
+		local ulid = assert(uuid.ulid())
+
+		-- right len
+		assert(#ulid == 26)
+		-- have the same timestamp with the same time
+		local a, b = uuid.ulid(nil, 1):sub(1, 10), uuid.ulid(nil, 1):sub(1, 10)
+		assert(a == b)
+		-- don't have characters out of crockford base32
+		assert(not ulid:match("[ILOU%l]"))
+	end
+end

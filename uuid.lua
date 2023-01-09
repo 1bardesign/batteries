@@ -29,7 +29,7 @@ function uuid.uuid4(rng)
 	return out
 end
 
--- Crockford's Base32 https://en.wikipedia.org/wiki/Base32
+-- crockford's base32 https://en.wikipedia.org/wiki/Base32
 local _encoding = {
 	"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 	"A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "M",
@@ -60,6 +60,7 @@ local function _encode_time(time)
 	return table.concat(out)
 end
 
+--generate the random part of an ulid
 local function _encode_random(rng)
 	local out = {}
 
@@ -70,7 +71,8 @@ local function _encode_random(rng)
 	return table.concat(out)
 end
 
---generate an ULID (see https://github.com/ulid/spec)
+--generate an ULID using this rng at this time
+--see https://github.com/ulid/spec
 --implementation based on https://github.com/Tieske/ulid.lua
 function uuid.ulid(rng, time_func)
 	return _encode_time() .. _encode_random()

@@ -45,37 +45,26 @@ local function _now(time_func, ...)
 	error("assertion failed: socket can't be found and no time function provided")
 end
 
---generate the time part of an ulid
-local function _encode_time(time)
-	time = math.floor((time or _now()) * 1000)
-
-	local out = {}
-
-	for i = 10, 1, -1 do
-		local mod = time % #_encoding
-		out[i] = _encoding[mod + 1]
-		time = (time - mod) / #_encoding
-	end
-
-	return table.concat(out)
-end
-
---generate the random part of an ulid
-local function _encode_random(rng)
-	local out = {}
-
-	for i = 1, 16 do
-		out[i] = _encoding[math.floor(_random(rng) * #_encoding) + 1]
-	end
-
-	return table.concat(out)
-end
-
---generate an ULID using this rng at this time
+--generate an ULID using this rng at this time (now by default)
 --see https://github.com/ulid/spec
 --implementation based on https://github.com/Tieske/ulid.lua
 function uuid.ulid(rng, time)
-	return _encode_time(time) .. _encode_random(rng)
+	time = math.floor((time or _now()) * 1000)
+
+	local time_part = {}
+	local random_part = {}
+
+	for i = 10, 1, -1 do
+		local mod = time % #_encoding
+		time_part[i] = _encoding[mod + 1]
+		time = (time - mod) / #_encoding
+	end
+
+	for i = 1, 16 do
+		random_part[i] = _encoding[math.floor(_random(rng) * #_encoding) + 1]
+	end
+
+	return table.concat(time_part) .. table.concat(random_part)
 end
 
 return uuid

@@ -192,23 +192,25 @@ function stringx.deindent(s, keep_trailing_empty)
 	--de-indent the lines
 	local res = {}
 	for _, line in ipairs(lines) do
-		local line_start = line:sub(1, indent:len())
-		local start_len = line_start:len()
-		if
-			line_start == indent
-			or (
-				start_len < indent_len
-				and line_start == indent:sub(1, start_len)
-			)
-		then
-			line = line:sub(start_len + 1)
+		if line ~= "" then
+			local line_start = line:sub(1, indent:len())
+			local start_len = line_start:len()
+			if
+				line_start == indent
+				or (
+					start_len < indent_len
+					and line_start == indent:sub(1, start_len)
+				)
+			then
+				line = line:sub(start_len + 1)
+			end
 		end
 		table.insert(res, line)
 	end
 
-	--should
+	--should we keep any trailing empty lines?
 	if not keep_trailing_empty then
-		if res[#res] == "" then
+		while res[#res] == "" do
 			table.remove(res)
 		end
 	end
@@ -268,6 +270,22 @@ function stringx.ends_with(s, suffix)
 		end
 	end
 	return true
+end
+
+--split elements by delimiter and trim the results, discarding empties
+--useful for hand-entered "permissive" data
+--	"a,b,  c, " -> {"a", "b", "c"}
+function stringx.split_and_trim(s, delim)
+	s = stringx.split(s, delim)
+	for i = #s, 1, -1 do
+		local v = stringx.trim(s[i])
+		if v == "" then
+			table.remove(s, i)
+		else
+			s[i] = v
+		end
+	end
+	return s
 end
 
 return stringx

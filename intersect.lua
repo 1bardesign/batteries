@@ -29,12 +29,12 @@ local COLLIDE_EPS = 1e-6
 -- circles
 
 function intersect.circle_point_overlap(pos, rad, v)
-	return pos:distance_squared(v) < rad * rad
+	return pos:distance_squared(v) <= rad * rad
 end
 
 function intersect.circle_circle_overlap(a_pos, a_rad, b_pos, b_rad)
 	local rad = a_rad + b_rad
-	return a_pos:distance_squared(b_pos) < rad * rad
+	return a_pos:distance_squared(b_pos) <= rad * rad
 end
 
 function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
@@ -46,7 +46,7 @@ function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
 	local rad = a_rad + b_rad
 	local dist = delta:length_squared()
 	local res = false
-	if dist < rad * rad then
+	if dist <= rad * rad then
 		if dist == 0 then
 			--singular case; just resolve vertically
 			dist = 1
@@ -264,6 +264,13 @@ end
 
 ------------------------------------------------------------------------------
 -- axis aligned bounding boxes
+--
+--	pos is the centre position of the box
+--	hs is the half-size of the box
+--		eg for a 10x8 box, vec2(5, 4)
+--
+--	we use half-sizes to keep these routines as fast as possible
+--	see intersect.rect_to_aabb for conversion from topleft corner and size
 
 --return true on overlap, false otherwise
 function intersect.aabb_point_overlap(pos, hs, v)
@@ -271,7 +278,7 @@ function intersect.aabb_point_overlap(pos, hs, v)
 		:pooled_copy()
 		:vector_sub_inplace(v)
 		:abs_inplace()
-	local overlap = delta.x < hs.x and delta.y < hs.y
+	local overlap = delta.x <= hs.x and delta.y <= hs.y
 	delta:release()
 	return overlap
 end
@@ -313,7 +320,7 @@ function intersect.aabb_aabb_overlap(a_pos, a_hs, b_pos, b_hs)
 	local total_size = a_hs
 		:pooled_copy()
 		:vector_add_inplace(b_hs)
-	local overlap = delta.x < total_size.x and delta.y < total_size.y
+	local overlap = delta.x <= total_size.x and delta.y <= total_size.y
 	vec2.release(delta, total_size)
 	return overlap
 end
@@ -368,7 +375,7 @@ function intersect.aabb_circle_overlap(a_pos, a_hs, b_pos, b_rad)
 	local clamped = intersect.aabb_point_clamp(a_pos, a_hs, b_pos, vec2:pooled())
 	local edge_distance_squared = clamped:distance_squared(b_pos)
 	clamped:release()
-	return edge_distance_squared < (b_rad * b_rad)
+	return edge_distance_squared <= (b_rad * b_rad)
 end
 
 -- return msv on collision, false otherwise
@@ -394,6 +401,18 @@ function intersect.aabb_circle_collide(a_pos, a_hs, b_pos, b_rad, into)
 		clamped:release()
 	end
 	return result
+end
+
+--convert raw x, y, w, h rectangle components to aabb vectors
+function intersect.rect_raw_to_aabb(x, y, w, h)
+	local hs = vec2(w, h):scalar_mul_inplace(0.5)
+	local pos = vec2(x, y):vector_add_inplace(hs)
+	return pos, hs
+end
+
+--convert (x, y), (w, h) rectangle vectors to aabb vectors
+function intersect.rect_to_aabb(pos, size)
+	return intersect.rect_raw_to_aabb(pos.x, pos.y, size.x, size.y)
 end
 
 --check if a point is in a polygon

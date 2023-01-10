@@ -166,6 +166,22 @@ function tablex.add_value(t, a)
 	return false
 end
 
+--get the next element in a sequential table
+--	wraps around such that the next element to the last in sequence is the first
+--	exists because builtin next may not behave as expected for mixed array/hash tables
+--	if the element passed is not present or is nil, will also get the first element
+--		but this should not be used to iterate the whole table; just use ipairs for that
+function tablex.next_element(t, v)
+	local i = tablex.index_of(t, v)
+	--not present? just get the front of the table
+	if not i then
+		return tablex.front(t)
+	end
+	--(not using mathx to avoid inter-dependency)
+	i = (i % #t) + 1
+	return t[i]
+end
+
 --note: keyed versions of the above aren't required; you can't double
 --up values under keys
 
@@ -277,6 +293,33 @@ function tablex.values(t)
 	return r
 end
 
+--collect all values over a range into a new sequential table
+--useful where a range may have been modified to contain nils
+--	range can be a number, where it is used as a numeric limit (ie [1-range])
+--	range can be a table, where the sequential values are used as keys
+function tablex.compact(t, range)
+	local r = {}
+	if type(range) == "table" then
+		for _, k in ipairs(range) do
+			local v = t[k]
+			if v then
+				table.insert(r, v)
+			end
+		end
+	elseif type(range) == "number" then
+		for i = 1, range do
+			local v = t[i]
+			if v then
+				table.insert(r, v)
+			end
+		end
+	else
+		error("tablex.compact - range must be a number or table", 2)
+	end
+	return r
+
+end
+
 --append sequence t2 into t1, modifying t1
 function tablex.append_inplace(t1, t2, ...)
 	for i, v in ipairs(t2) do
@@ -333,14 +376,11 @@ end
 --	See shallow_overlay to shallow copy into an existing table to avoid garbage.
 function tablex.shallow_copy(t)
 	assert:type(t, "table", "tablex.shallow_copy - t", 1)
-	if type(t) == "table" then
-		local into = {}
-		for k, v in pairs(t) do
-			into[k] = v
-		end
-		return into
+	local into = {}
+	for k, v in pairs(t) do
+		into[k] = v
 	end
-	return t
+	return into
 end
 
 --alias
@@ -361,11 +401,11 @@ local function _deep_copy_impl(t, already_copied)
 		else
 			--a plain table to clone
 			clone = {}
+			already_copied[t] = clone
 			for k, v in pairs(t) do
 				clone[k] = _deep_copy_impl(v, already_copied)
 			end
 			setmetatable(clone, getmetatable(t))
-			already_copied[t] = clone
 		end
 	end
 	return clone

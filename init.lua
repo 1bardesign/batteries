@@ -33,7 +33,6 @@ local _batteries = {
 	--
 	timer = require_relative("timer"),
 	pubsub = require_relative("pubsub"),
-	unique_mapping = require_relative("unique_mapping"),
 	state_machine = require_relative("state_machine"),
 	async = require_relative("async"),
 	manual_gc = require_relative("manual_gc"),

@@ -100,15 +100,25 @@ end
 local _sorted_types = {
 	--a list of types that will be sorted by default_less
 	--provide a custom sort function to sort other types
-	["string"] = true,
-	["number"] = true,
+	["number"] = 1,
+	["string"] = 2,
 }
 local function default_less(a, b)
-	if not _sorted_types[type(a)] or not _sorted_types[type(b)] then
+	local sort_a = _sorted_types[type(a)]
+	local sort_b = _sorted_types[type(b)]
+	if not sort_a or not sort_b then
 		return false
 	end
+	--different types, sorted by type
+	if sort_a ~= sort_b then
+		return sort_a < sort_b
+	end
+	--otherwise same type, use less
 	return a < b
 end
+
+--export it so others can use it
+sort.default_less = default_less
 
 --inline common setup stuff
 function sort._sort_setup(array, less)

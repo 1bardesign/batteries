@@ -30,7 +30,8 @@ function timer:update(dt)
 	if not self:expired() then
 		self.timer = self.timer + dt
 
-		--get the relevant callback
+		--set the expired state and get the relevant callback
+		self.has_expired = self.timer >= self.time
 		local cb = self:expired()
 			and self.on_finish
 			or self.on_progress
@@ -43,7 +44,7 @@ end
 
 --check if the timer has expired
 function timer:expired()
-	return self.timer >= self.time
+	return self.has_expired
 end
 
 --get the timer's progress from 0 to 1
@@ -56,6 +57,7 @@ end
 function timer:reset(time)
 	self.timer = 0
 	self.time = math.max(time or self.time, 1e-6) --negative time not allowed
+	self.has_expired = false
 	return self
 end
 

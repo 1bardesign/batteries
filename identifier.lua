@@ -1,5 +1,5 @@
 --[[
-    uuid/ulid generation
+	identifier generation
 
 	uuid is version 4, ulid is an alternative to uuid (see
 	https://github.com/ulid/spec).
@@ -9,9 +9,9 @@
 		within the same second yet
 ]]
 
-local path = (...):gsub("uuid", "")
+local path = (...):gsub("identifier", "")
 
-local uuid = {}
+local identifier = {}
 
 --(internal; use a provided random generator object, or not)
 local function _random(rng, ...)
@@ -23,7 +23,7 @@ end
 local uuid4_template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 
 --generate a UUID version 4
-function uuid.uuid4(rng)
+function identifier.uuid4(rng)
 	--x should be 0x0-0xf, the single y should be 0x8-0xb
 	--4 should always just be 4 (denoting uuid version)
     local out = uuid4_template:gsub("[xy]", function (c)
@@ -54,7 +54,7 @@ end
 
 --generate an ULID using this rng at this time (now by default)
 --implementation based on https://github.com/Tieske/ulid.lua
-function uuid.ulid(rng, time)
+function identifier.ulid(rng, time)
 	time = math.floor((time or _now()) * 1000)
 
 	local time_part = {}
@@ -73,4 +73,4 @@ function uuid.ulid(rng, time)
 	return table.concat(time_part) .. table.concat(random_part)
 end
 
-return uuid
+return identifier

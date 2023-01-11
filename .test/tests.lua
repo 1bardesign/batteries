@@ -5,7 +5,7 @@ package.path = package.path .. ";../?.lua"
 
 local assert = require("batteries.assert")
 local tablex = require("batteries.tablex")
-local uuid = require("batteries.uuid")
+local identifier = require("batteries.identifier")
 
 -- tablex {{{
 
@@ -159,7 +159,7 @@ end
 
 local function test_uuid4()
 	for i = 1, 100 do
-		local id = uuid.uuid4()
+		local id = identifier.uuid4()
 
 		-- right len
 		assert(#id == 36)
@@ -182,12 +182,12 @@ end
 
 local function test_ulid()
 	for i = 1, 100 do
-		local ulid = assert(uuid.ulid())
+		local ulid = assert(identifier.ulid())
 
 		-- right len
 		assert(#ulid == 26)
 		-- have the same timestamp with the same time
-		local a, b = uuid.ulid(nil, 1):sub(1, 10), uuid.ulid(nil, 1):sub(1, 10)
+		local a, b = identifier.ulid(nil, 1):sub(1, 10), identifier.ulid(nil, 1):sub(1, 10)
 		assert(a == b)
 		-- don't have characters out of crockford base32
 		assert(not ulid:match("[ILOU%l]"))

@@ -181,6 +181,9 @@ local function test_uuid4()
 end
 
 local function test_ulid()
+	-- bail if there's no appropriate time func
+	if select(2, pcall(identifier.ulid)):find('time function') then return end
+
 	for i = 1, 100 do
 		local ulid = assert(identifier.ulid())
 

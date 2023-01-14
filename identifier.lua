@@ -47,7 +47,7 @@ local _encoding = {
 --use socket. if that's not loaded, they'll have to provide their own
 local function _now(time_func, ...)
 	if package.loaded.socket then return package.loaded.socket.gettime(...) end
-	if require("socket") then return require("socket").gettime(...) end
+	if pcall(require, "socket") then return require("socket").gettime(...) end
 	if time_func then return time_func(...) end
 	error("assertion failed: socket can't be found and no time function provided")
 end

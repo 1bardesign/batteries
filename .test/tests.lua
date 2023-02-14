@@ -6,6 +6,7 @@ package.path = package.path .. ";../?.lua"
 local assert = require("batteries.assert")
 local tablex = require("batteries.tablex")
 local identifier = require("batteries.identifier")
+local stringx = require("batteries.stringx")
 
 -- tablex {{{
 
@@ -195,4 +196,11 @@ local function test_ulid()
 		-- don't have characters out of crockford base32
 		assert(not ulid:match("[ILOU%l]"))
 	end
+end
+
+-- stringx
+local function test_title_case()
+    local str = "the quick brown fox jumps over the lazy dog"
+
+    assert(stringx.title_case(str) == "The Quick Brown Fox Jumps Over The Lazy Dog")
 end

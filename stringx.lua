@@ -288,4 +288,13 @@ function stringx.split_and_trim(s, delim)
 	return s
 end
 
+--titlizes a string
+--"quick brown fox" becomes "Quick Brown Fox"
+function stringx.title_case(s)
+    s = s:gsub("%s%l", string.upper)
+    s = s:gsub("^%l", string.upper)
+
+    return s
+end
+
 return stringx

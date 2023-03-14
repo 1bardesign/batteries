@@ -5,6 +5,8 @@ package.path = package.path .. ";../?.lua"
 
 local assert = require("batteries.assert")
 local tablex = require("batteries.tablex")
+local identifier = require("batteries.identifier")
+local stringx = require("batteries.stringx")
 
 -- tablex {{{
 
@@ -154,4 +156,51 @@ local function test_spairs()
 	assert(tablex.deep_equal(sorted_score, {
 		10, 8, 7
 	}))
+end
+
+local function test_uuid4()
+	for i = 1, 5 do
+		local id = identifier.uuid4()
+
+		-- right len
+		assert(#id == 36)
+		-- right amount of non hyphen characters
+		assert(#id:gsub("-", "") == 32)
+
+		-- 15th char is always a 4
+		assert(id:sub(15, 15) == "4")
+		-- 20th char is always between 0x8 and 0xb
+		local y = tonumber("0x" .. id:sub(20, 20))
+		assert(y >= 0x8 and y <= 0xb)
+
+		-- everything is a valid 8 bit num
+		for char in id:gsub("-", ""):gmatch(".") do
+			local num = assert(tonumber("0x" .. char))
+			assert(num >= 0 and num <= 0xf)
+		end
+	end
+end
+
+local function test_ulid()
+	-- bail if there's no appropriate time func
+	if select(2, pcall(identifier.ulid)):find('time function') then return end
+
+	for i = 1, 5 do
+		local ulid = assert(identifier.ulid())
+
+		-- right len
+		assert(#ulid == 26)
+		-- have the same timestamp with the same time
+		local a, b = identifier.ulid(nil, 1):sub(1, 10), identifier.ulid(nil, 1):sub(1, 10)
+		assert(a == b)
+		-- don't have characters out of crockford base32
+		assert(not ulid:match("[ILOU%l]"))
+	end
+end
+
+-- stringx
+local function test_title_case()
+    local str = "the quick brown fox jumps over the lazy dog"
+
+    assert(stringx.title_case(str) == "The Quick Brown Fox Jumps Over The Lazy Dog")
 end

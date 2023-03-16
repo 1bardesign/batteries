@@ -219,7 +219,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 			end
 		end
 	end
-	assert:some(intersected)
+	assert(intersected)
 
 	if intersected == "both" then
 		--simply displace along A normal

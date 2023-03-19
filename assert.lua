@@ -10,6 +10,7 @@
 	can call nop() to dummy out everything for "release mode"
 	(if you're worried about that sort of thing)
 ]]
+
 local _assert = assert
 
 --proxy calls to global assert

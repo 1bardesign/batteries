@@ -10,7 +10,6 @@
 	can call nop() to dummy out everything for "release mode"
 	(if you're worried about that sort of thing)
 ]]
-
 local _assert = assert
 
 --proxy calls to global assert
@@ -79,6 +78,20 @@ function assert:type_or_nil(a, t, msg, stack_level)
 	if a ~= nil then
 		assert:type(a, t, msg, stack_level + 1)
 	end
+	return a
+end
+
+--assert a value is one of those in a table of options
+function assert:one_of(a, t, msg, stack_level)
+	local pass = false
+	for index = 1, #t do
+		if t[index] == a then
+			pass = true
+			break
+		end
+	end
+
+	assert:equal(pass, true, msg, stack_level)
 	return a
 end
 

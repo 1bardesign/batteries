@@ -84,16 +84,17 @@ end
 
 --assert a value is one of those in a table of options
 function assert:one_of(a, t, msg, stack_level)
-	local pass = false
-	for index = 1, #t do
-		if t[index] == a then
-			pass = true
-			break
+	for _, value in ipairs(t) do
+		if value == a then
+			return a
 		end
 	end
 
-	assert:equal(pass, true, msg, stack_level)
-	return a
+	error(("assertion failed: %s not one of %s %s"):format(
+		tostring(a),
+		table.concat(t, ", "),
+		_extra(msg)
+	), 2 + (stack_level or 0))
 end
 
 --replace everything in assert with nop functions that just return their second argument, for near-zero overhead on release

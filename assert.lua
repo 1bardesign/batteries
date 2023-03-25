@@ -82,6 +82,26 @@ function assert:type_or_nil(a, t, msg, stack_level)
 	return a
 end
 
+--assert a value is one of those in a table of options
+function assert:one_of(a, t, msg, stack_level)
+	for _, value in ipairs(t) do
+		if value == a then
+			return a
+		end
+	end
+
+    local values = {}
+    for index = 1, #t do
+        values[index] = tostring(t[index])
+    end
+
+	error(("assertion failed: %s not one of %s %s"):format(
+		tostring(a),
+		table.concat(values, ", "),
+		_extra(msg)
+	), 2 + (stack_level or 0))
+end
+
 --replace everything in assert with nop functions that just return their second argument, for near-zero overhead on release
 function assert:nop()
 	local nop = function(_, a)

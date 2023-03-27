@@ -91,10 +91,10 @@ function intersect.nearest_point_on_line(a_start, a_end, b_pos, into)
 		local point_to_start = b_pos:pooled_copy()
 			:vector_sub_inplace(a_start)
 		local factor = mathx.clamp01(point_to_start:dot(segment) / lensq)
-		point_to_start:release()
 		into:set(segment)
 			:scalar_mul_inplace(factor)
 			:vector_add_inplace(a_start)
+		point_to_start:release()
 	end
 	segment:release()
 	return into
@@ -137,8 +137,10 @@ end
 
 --collide a line segment with a circle
 function intersect.line_circle_collide(a_start, a_end, a_rad, b_pos, b_rad, into)
-	into = intersect._line_to_point(a_start, a_end, b_pos, into)
-	return intersect._line_displacement_to_sep(a_start, a_end, into, a_rad + b_rad)
+	local nearest = intersect.nearest_point_on_line(a_start, a_end, b_pos, vec2:pooled())
+	into = intersect.circle_circle_collide(nearest, a_rad, b_pos, b_rad, into)
+	nearest:release()
+	return into
 end
 
 --collide 2 line segments
@@ -165,6 +167,8 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 		elseif b_degen then
 			--b is just circle
 			return intersect.line_circle_collide(a_start, a_end, a_rad, b_start, b_rad, into)
+		else
+			error("should be unreachable")
 		end
 	end
 	--otherwise we're _actually_ 2 line segs :)
@@ -188,14 +192,14 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 	--check coincident lines
 	local intersected
 	if
-		math.abs(numera) < COLLIDE_EPS and
-		math.abs(numerb) < COLLIDE_EPS and
-		math.abs(denom) < COLLIDE_EPS
+		math.abs(numera) == 0 and
+		math.abs(numerb) == 0 and
+		math.abs(denom) == 0
 	then
 		intersected = "both"
 	else
 		--check parallel, non-coincident lines
-		if math.abs(denom) < COLLIDE_EPS then
+		if math.abs(denom) == 0 then
 			intersected = "none"
 		else
 			--get interpolants along segments
@@ -229,7 +233,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 
 	vec2.release(a_dir, b_dir)
 
-	--dumb as a rock check-corners approach
+	--dumb as a rocks check-corners approach
 	--todo: pool storage
 	--todo proper calculus from http://geomalgorithms.com/a07-_distance.html
 	local search_tab = {}

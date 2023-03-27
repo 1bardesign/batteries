@@ -90,10 +90,10 @@ function assert:one_of(a, t, msg, stack_level)
 		end
 	end
 
-    local values = {}
-    for index = 1, #t do
-        values[index] = tostring(t[index])
-    end
+	local values = {}
+	for index = 1, #t do
+		values[index] = tostring(t[index])
+	end
 
 	error(("assertion failed: %s not one of %s %s"):format(
 		tostring(a),

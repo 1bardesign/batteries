@@ -373,6 +373,17 @@ function functional.count(t, f)
 	return c
 end
 
+--counts the elements of t equal to v
+function functional.count_value(t, v)
+	local c = 0
+	for i = 1, #t do
+		if t[i] == v then
+			c = c + 1
+		end
+	end
+	return c
+end
+
 --true if the table contains element e
 function functional.contains(t, e)
 	for i = 1, #t do

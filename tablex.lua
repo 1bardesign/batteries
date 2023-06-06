@@ -124,7 +124,7 @@ end
 --or nil if nothing was found
 function tablex.index_of(t, a)
 	if a == nil then return nil end
-	for i,b in ipairs(t) do
+	for i, b in ipairs(t) do
 		if a == b then
 			return i
 		end

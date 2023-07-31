@@ -29,7 +29,7 @@ function async:new()
 end
 
 local capture_callstacks
-if love.system.getOS() == 'Web' then
+if love and love.system.getOS() == 'Web' then
 	-- Do no extra wrapping under lovejs because using xpcall causes "attempt
 	-- to yield across metamethod/C-call boundary"
 	capture_callstacks = function(f)

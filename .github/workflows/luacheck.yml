@@ -13,7 +13,7 @@ jobs:
         # Subdirectory to avoid linting luarocks code. Use same dir as testy.
         path: batteries
     - name: Setup Lua
-      uses: leafo/gh-actions-lua@v8
+      uses: leafo/gh-actions-lua@v10
       with:
         luaVersion: 5.4
     - name: Setup Lua Rocks

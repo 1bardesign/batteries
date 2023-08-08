@@ -18,6 +18,7 @@
 local path = (...):gsub("async", "")
 local assert = require(path .. "assert")
 local class = require(path .. "class")
+local tablex = require(path .. "tablex")
 
 local async = class({
 	name = "async",
@@ -72,10 +73,13 @@ end
 --remove a running task based on the reference we got earlier
 function async:remove(task)
 	task.remove = true
-	-- can't remove the currently running one from lists
-	if coroutine.status(task[1]) ~= "running" then
-		return table.remove_value(self.tasks, task)
-			or table.remove_value(self.tasks_stalled, task)
+	if coroutine.status(task[1]) == "running" then
+		--removed the current running task
+		return true
+	else
+		--remove from the queues
+		return tablex.remove_value(self.tasks, task)
+			or tablex.remove_value(self.tasks_stalled, task)
 	end
 end
 

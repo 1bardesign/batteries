@@ -77,6 +77,21 @@ function mathx.bilerp(a, b, c, d, u, v)
 	)
 end
 
+--get the lerp factor on a range, inverse_lerp(6, 0, 10) == 0.6
+function mathx.inverse_lerp(v, min, max)
+	return (v - min) / (max - min)
+end
+
+--remap a value from one range to another
+function mathx.remap_range(v, in_min, in_max, out_min, out_max)
+	return mathx.lerp(out_min, out_max, mathx.inverse_lerp(v, in_min, in_max))
+end
+
+--remap a value from one range to another, staying within that range
+function mathx.remap_range_clamped(v, in_min, in_max, out_min, out_max)
+	return mathx.lerp(out_min, out_max, mathx.clamp01(mathx.inverse_lerp(v, in_min, in_max)))
+end
+
 --easing curves
 --(generally only "safe" for 0-1 range, see mathx.clamp01)
 

@@ -144,6 +144,12 @@ function intersect.line_circle_collide(a_start, a_end, a_rad, b_pos, b_rad, into
 end
 
 --collide 2 line segments
+local _line_line_search_tab = {
+	{vec2(), 1},
+	{vec2(), 1},
+	{vec2(), -1},
+	{vec2(), -1},
+}
 function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_rad, into)
 	--segment directions from start points
 	local a_dir = a_end
@@ -234,28 +240,35 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 	vec2.release(a_dir, b_dir)
 
 	--dumb as a rocks check-corners approach
-	--todo: pool storage
 	--todo proper calculus from http://geomalgorithms.com/a07-_distance.html
-	local search_tab = {}
+	local search_tab = _line_line_search_tab
+	for i = 1, 4 do
+		search_tab[i][1]:sset(math.huge)
+	end
 	--only insert corners from the non-intersected line
 	--since intersected line is potentially the apex
 	if intersected ~= "a" then
 		--a endpoints
-		table.insert(search_tab, {intersect._line_to_point(b_start, b_end, a_start), 1})
-		table.insert(search_tab, {intersect._line_to_point(b_start, b_end, a_end),   1})
+		intersect._line_to_point(b_start, b_end, a_start, search_tab[1][1])
+		intersect._line_to_point(b_start, b_end, a_end, search_tab[2][1])
 	end
 	if intersected ~= "b" then
 		--b endpoints
-		table.insert(search_tab, {intersect._line_to_point(a_start, a_end, b_start), -1})
-		table.insert(search_tab, {intersect._line_to_point(a_start, a_end, b_end),   -1})
+		intersect._line_to_point(a_start, a_end, b_start, search_tab[3][1])
+		intersect._line_to_point(a_start, a_end, b_end, search_tab[4][1])
 	end
 
 	local best = nil
 	local best_len = nil
 	for _, v in ipairs(search_tab) do
-		local len = v[1]:length_squared()
-		if not best_len or len < best_len then
-			best = v
+		local delta = v[1]
+		if delta.x == math.huge then
+			--skip
+		else
+			local len = delta:length_squared()
+			if len < (best_len or math.huge) then
+				best = v
+			end
 		end
 	end
 

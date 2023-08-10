@@ -262,9 +262,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 	local best_len = nil
 	for _, v in ipairs(search_tab) do
 		local delta = v[1]
-		if delta.x == math.huge then
-			--skip
-		else
+		if delta.x ~= math.huge then
 			local len = delta:length_squared()
 			if len < (best_len or math.huge) then
 				best = v

@@ -8,7 +8,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         # tests.lua expects top level folder to be 'batteries'
         path: 'batteries'

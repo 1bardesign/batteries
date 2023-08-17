@@ -46,6 +46,7 @@ for _, v in ipairs({
 	"append",
 	"shallow_overlay",
 	"deep_overlay",
+	"copy",
 	"shallow_copy",
 	"deep_copy",
 }) do

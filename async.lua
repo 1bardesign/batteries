@@ -191,6 +191,18 @@ function async.wait(time)
 	end
 end
 
+--eventually get a result, inline
+--	repeatedly calls the provided function until it returns something,
+--	stalling each time it doesn't, returning the result in the end
+function async.value(f)
+	local r = f()
+	while not r do
+		async.stall()
+		r = f()
+	end
+	return r
+end
+
 --make an iterator or search function asynchronous, stalling every n (or 1) iterations
 --can be useful with functional queries as well, if they are done in a coroutine.
 function async.wrap_iterator(f, stall, n)

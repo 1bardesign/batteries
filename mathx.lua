@@ -95,6 +95,11 @@ end
 --easing curves
 --(generally only "safe" for 0-1 range, see mathx.clamp01)
 
+--no curve - can be used as a default to avoid needing a branch
+function mathx.identity(f)
+	return f
+end
+
 --classic smoothstep
 function mathx.smoothstep(f)
 	return f * f * (3 - 2 * f)

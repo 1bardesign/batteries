@@ -40,6 +40,7 @@ local _batteries = {
 	pretty = require_relative("pretty"),
 	measure = require_relative("measure"),
 	make_pooled = require_relative("make_pooled"),
+	pathfind = require_relative("pathfind"),
 }
 
 --assign aliases

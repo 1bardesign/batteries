@@ -26,7 +26,7 @@ local generate_constant = function() return 1 end
 --		can be used to speed up searches at the cost of accuracy by returning some proportion higher than the actual distance
 --		defaults to a constant value, which means the A* algorithm degrades to breadth-first search
 --		alias: h
-function pathfind(args)
+local function pathfind(args)
 	local start = args.start or args.start_node
 	local is_goal = args.is_goal or args.goal
 	local neighbours = args.neighbours or args.generate_neighbours
@@ -70,15 +70,13 @@ function pathfind(args)
 		return false
 	end
 
-	--build up the ordering
-	local path = {}
+	--build up result path
+	local result = {}
 	while current do
-		table.insert(path, 1, current)
+		table.insert(result, 1, current)
 		current = predecessor[current]
 	end
-
-	--return a path
-	return path
+	return result
 end
 
 -- Based on https://github.com/lewtds/pathfinder.lua/blob/master/pathfinder.lua

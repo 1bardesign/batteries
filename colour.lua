@@ -229,13 +229,13 @@ end
 --conversion between hsl and hsv
 function colour.hsl_to_hsv(h, s, l)
 	local v = l + s * math.min(l, 1 - l)
-	local s = (v == 0) and 0 or (2 * (1 - l / v))
+	s = (v == 0) and 0 or (2 * (1 - l / v))
 	return h, s, v
 end
 
 function colour.hsv_to_hsl(h, s, v)
 	local l = v * (1 - s / 2)
-	local s = (l == 0 or l == 1) and 0 or ((v - l) / math.min(l, 1 - l))
+	s = (l == 0 or l == 1) and 0 or ((v - l) / math.min(l, 1 - l))
 	return h, s, l
 end
 

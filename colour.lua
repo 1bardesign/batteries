@@ -173,7 +173,71 @@ function colour.rgb_to_hsl(r, g, b)
 	return h / 6, s, l
 end
 
---todo: hsv
+--convert hsv to rgb
+--all components are 0-1, hue is fraction of a turn rather than degrees or radians
+function colour.hsv_to_rgb(h, s, v)
+	--wedge slice
+	local w = (math.wrap(h, 0, 1) * 6)
+	--chroma
+	local c = v * s
+	--secondary
+	local x = c * (1 - math.abs(w % 2 - 1))
+	--match value
+	local m = v - c
+	--per-wedge logic
+	local r, g, b = m, m, m
+	if w < 1 then
+		r = r + c
+		g = g + x
+	elseif w < 2 then
+		r = r + x
+		g = g + c
+	elseif w < 3 then
+		g = g + c
+		b = b + x
+	elseif w < 4 then
+		g = g + x
+		b = b + c
+	elseif w < 5 then
+		b = b + c
+		r = r + x
+	else
+		b = b + x
+		r = r + c
+	end
+	return r, g, b
+end
+
+--convert rgb to hsv
+function colour.rgb_to_hsv(r, g, b)
+	local max, min = math.max(r, g, b), math.min(r, g, b)
+	if max == min then return 0, 0, min end
+	local v, d = max, max - min
+	local s = (max == 0) and 0 or (d / max)
+	local h --depends on below
+	if max == r then
+		h = (g - b) / d
+		if g < b then h = h + 6 end
+	elseif max == g then
+		h = (b - r) / d + 2
+	else
+		h = (r - g) / d + 4
+	end
+	return h / 6, s, v
+end
+
+--conversion between hsl and hsv
+function colour.hsl_to_hsv(h, s, l)
+	local v = l + s * math.min(l, 1 - l)
+	s = (v == 0) and 0 or (2 * (1 - l / v))
+	return h, s, v
+end
+
+function colour.hsv_to_hsl(h, s, v)
+	local l = v * (1 - s / 2)
+	s = (l == 0 or l == 1) and 0 or ((v - l) / math.min(l, 1 - l))
+	return h, s, l
+end
 
 --oklab https://bottosson.github.io/posts/oklab/
 function colour.oklab_to_rgb(l, a, b)

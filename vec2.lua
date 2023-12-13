@@ -453,29 +453,6 @@ function vec2:maxcomp()
 	return math.max(self.x, self.y)
 end
 
--- meta functions for mathmatical operations
-function vec2.__add(a, b)
-  return vec2(a.x + b.x, a.y + b.y)
-end
-
-function vec2.__sub(a, b)
-  return vec2(a.x - b.x, a.y - b.y)
-end
-
-function vec2.__mul(a, b)
-  if type(a) == "number" then
-    return vec2(a * b.x, a * b.y)
-  elseif type(b) == "number" then
-    return vec2(a.x * b, a.y * b)
-  else
-    return vec2(a.x * b.x, a.y * b.y)
-  end
-end
-
-function vec2.__div(a, b)
-  return vec2(a.x / b, a.y / b)
-end
-
 -- mask out min component, with preference to keep x
 function vec2:major_inplace()
 	if self.x > self.y then

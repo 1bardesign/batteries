@@ -455,25 +455,29 @@ end
 
 -- meta functions for mathmatical operations
 function vec2.__add(a, b)
-  return vec2(a.x + b.x, a.y + b.y)
+	return a:vector_add_inplace(b)
 end
 
 function vec2.__sub(a, b)
-  return vec2(a.x - b.x, a.y - b.y)
+	return a:vector_sub_inplace(b)
 end
 
 function vec2.__mul(a, b)
-  if type(a) == "number" then
-    return vec2(a * b.x, a * b.y)
-  elseif type(b) == "number" then
-    return vec2(a.x * b, a.y * b)
-  else
-    return vec2(a.x * b.x, a.y * b.y)
-  end
+	if type(a) == "number" then
+		return b:scalar_mul_inplace(a)
+	elseif type(b) == "number" then
+		return a:scalar_mul_inplace(b)
+	else
+		return a:vector_mul_inplace(b)
+	end
 end
 
 function vec2.__div(a, b)
-  return vec2(a.x / b, a.y / b)
+	if type(b) == "number" then
+		return a:scalar_div_inplace(b)
+	else
+		return a:vector_div_inplace(b)
+	end
 end
 
 -- mask out min component, with preference to keep x

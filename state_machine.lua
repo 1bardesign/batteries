@@ -33,7 +33,7 @@ local state_machine = class({
 function state_machine:new(states, start_in_state)
 	self.states = states or {}
 	self.current_state_name = ""
-  self.prev_state_name = ""
+	self.prev_state_name = ""
 	self.reset_state_name = start_in_state or ""
 	self:reset()
 end
@@ -88,7 +88,7 @@ end
 --add a state
 function state_machine:add_state(name, state)
 	if self:has_state(name) then
-		error("error: added duplicate state "..name)
+		error("error: added duplicate state " .. name)
 	else
 		self.states[name] = state
 		if self:in_state(name) then
@@ -102,7 +102,7 @@ end
 --remove a state
 function state_machine:remove_state(name)
 	if not self:has_state(name) then
-		error("error: removed missing state "..name)
+		error("error: removed missing state " .. name)
 	else
 		if self:in_state(name) then
 			self:_call("exit")
@@ -152,7 +152,7 @@ end
 function state_machine:set_state(name, reset)
 	if self.current_state_name ~= name or reset then
 		self:_call("exit")
-    self.prev_state_name = self.current_state_name
+		self.prev_state_name = self.current_state_name
 		self.current_state_name = name
 		self:_call_and_transition("enter", self)
 	end

@@ -171,6 +171,36 @@ function async:add_interval(f, delay)
 	end)
 end
 
+--await the result of a function or set of functions
+--return the results
+function async:await(to_call, args)
+	local single_call = false
+	if type(to_call) == "function" then
+		to_call = {to_call}
+		single_call = true
+	end
+
+	local awaiting = #to_call
+	local results = {}
+	for i, v in ipairs(to_call) do
+		self:call(function(...)
+			table.insert(results, {v(...)})
+			awaiting = awaiting - 1
+		end, args)
+	end
+
+	while awaiting > 0 do
+		async.stall()
+	end
+
+	--unwrap
+	if single_call then
+		results = results[1]
+	end
+
+	return results
+end
+
 --static async operation helpers
 --	these are not methods on the async object, but are
 --	intended to be called with dot syntax on the class itself

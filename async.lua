@@ -12,7 +12,7 @@
 		getting a reference to the task for manipulation
 			attaching multiple callbacks
 			cancelling
-`		proper error traces for coroutines with async:add, additional wrapper?
+		proper error traces for coroutines with async:add, additional wrapper?
 ]]
 
 local path = (...):gsub("async", "")

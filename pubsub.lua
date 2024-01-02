@@ -125,7 +125,7 @@ function pubsub:unsubscribe(event, callback)
 end
 
 --check if there is a subscriber for a given event
-function pubsub:has_subcriber(event)
+function pubsub:has_subscriber(event)
 	return self.subscriptions[event] ~= nil
 end
 

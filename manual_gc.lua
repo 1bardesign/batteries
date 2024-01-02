@@ -40,7 +40,7 @@
 
 return function(time_budget, memory_ceiling, disable_otherwise)
 	time_budget = time_budget or 1e-3
-	memory_ceiling = memory_ceiling or 64
+	memory_ceiling = memory_ceiling or math.huge
 	local max_steps = 1000
 	local steps = 0
 	local start_time = love.timer.getTime()

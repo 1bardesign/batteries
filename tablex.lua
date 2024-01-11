@@ -481,6 +481,24 @@ function tablex.collapse(t)
 	return r
 end
 
+--extract values of a table into nested tables of a set length
+--	extract({1, 2, 3, 4}, 2) -> {{1, 2}, {3, 4}}
+--	useful for working with "inlined" data in a more structured way
+--	can use collapse (or functional.stitch) to reverse the process once you're done if needed
+--	todo: support an ordered list of keys passed and extract them to names
+function tablex.extract(t, n)
+	assert:type(t, "table", "tablex.extract - t", 1)
+	assert:type(n, "number", "tablex.extract - n", 1)
+	local r = {}
+	for i = 1, #t, n do
+		r[i] = {}
+		for j = 1, n do
+			table.insert(r[i], t[i + j])
+		end
+	end
+	return r
+end
+
 --check if two tables have equal contents at the first level
 --slow, as it needs two loops
 function tablex.shallow_equal(a, b)

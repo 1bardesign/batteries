@@ -73,6 +73,7 @@ for _, v in ipairs({
 	"filter",
 	"remove_if",
 	"zip",
+	"combine",
 	"stitch",
 	"map_stitch",
 	"cycle",
@@ -124,6 +125,11 @@ end
 --(anything that needs bespoke wrapping)
 function sequence:partition(f)
 	local a, b = functional.partition(self, f)
+	return sequence(a), sequence(b)
+end
+
+function sequence:unzip(f)
+	local a, b = functional.unzip(self, f)
 	return sequence(a), sequence(b)
 end
 

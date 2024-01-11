@@ -209,11 +209,11 @@ function functional.group_by(t, f)
 	return result
 end
 
---zips two sequences together into a new table, based on another function
---iteration limited by min(#t1, #t2)
---function receives arguments (t1, t2, i)
---nil results ignored
-function functional.zip(t1, t2, f)
+--combines two same-length sequences through a function f
+--	f receives arguments (t1[i], t2[i], i)
+--	iteration limited by min(#t1, #t2)
+--	ignores nil results
+function functional.combine(t1, t2, f)
 	local ret = {}
 	local limit = math.min(#t1, #t2)
 	for i = 1, limit do
@@ -225,6 +225,31 @@ function functional.zip(t1, t2, f)
 		end
 	end
 	return ret
+end
+
+--zips two sequences together into a new table, alternating from t1 and t2
+--	zip({1, 2}, {3, 4}) -> {1, 3, 2, 4}
+--	iteration limited by min(#t1, #t2)
+function functional.zip(t1, t2)
+	local ret = {}
+	local limit = math.min(#t1, #t2)
+	for i = 1, limit do
+		table.insert(ret, t1[i])
+		table.insert(ret, t2[i])
+	end
+	return ret
+end
+
+--unzips a table into two new tables, alternating elements into each result
+--	{1, 2, 3, 4} -> {1, 3}, {2, 4}
+--	gets an extra result in the first result for odd-length tables
+function functional.unzip(t)
+	local a = {}
+	local b = {}
+	for i, v in ipairs(t) do
+		table.insert(i % 2 == 1 and a or b, v)
+	end
+	return a, b
 end
 
 -----------------------------------------------------------

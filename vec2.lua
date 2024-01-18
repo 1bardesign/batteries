@@ -455,28 +455,28 @@ end
 
 -- meta functions for mathmatical operations
 function vec2.__add(a, b)
-	return a:vector_add_inplace(b)
+	return a:vector_add(b)
 end
 
 function vec2.__sub(a, b)
-	return a:vector_sub_inplace(b)
+	return a:vector_sub(b)
 end
 
 function vec2.__mul(a, b)
 	if type(a) == "number" then
-		return b:scalar_mul_inplace(a)
+		return b:scalar_mul(a)
 	elseif type(b) == "number" then
-		return a:scalar_mul_inplace(b)
+		return a:scalar_mul(b)
 	else
-		return a:vector_mul_inplace(b)
+		return a:vector_mul(b)
 	end
 end
 
 function vec2.__div(a, b)
 	if type(b) == "number" then
-		return a:scalar_div_inplace(b)
+		return a:scalar_div(b)
 	else
-		return a:vector_div_inplace(b)
+		return a:vector_div(b)
 	end
 end
 

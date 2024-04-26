@@ -64,7 +64,17 @@ local function class(config)
 	config = config or {}
 	local extends = config.extends
 	local implements = config.implements
-	local name = config.name or ("unnamed class %d)"):format(class_id)
+	local src_location = "call location not available"
+	if debug and debug.getinfo then
+		local dinfo = debug.getinfo(2)
+		local src = dinfo.short_src
+		local line = dinfo.currentline
+		src_location = ("%s:%d"):format(src, line)
+	end
+	local name = config.name or ("unnamed class %d (%s)"):format(
+		class_id,
+		src_location
+	)
 
 	local c = {}
 

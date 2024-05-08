@@ -413,6 +413,11 @@ function vec2.winding_side(a, b, p)
 		 - (p.x - a.x) * (b.y - a.y)
 end
 
+--return whether a is nearer to v than b
+function vec2.nearer(v, a, b)
+	return v:distance_squared(a) < v:distance_squared(b)
+end
+
 -----------------------------------------------------------
 -- vector extension methods for special purposes
 --   (any common vector ops worth naming)

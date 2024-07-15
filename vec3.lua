@@ -73,7 +73,7 @@ end
 function vec3:sset(x, y, z)
 	self.x = x
 	self.y = y or x
-	self.z = z or y or z
+	self.z = z or y or x
 	return self
 end
 

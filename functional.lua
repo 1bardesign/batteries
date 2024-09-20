@@ -318,6 +318,24 @@ end
 
 functional.map_chain = functional.chain
 
+--maps a sequence {a, b, c, d} -> { f(a, b), f(a, c), f(a, d), f(b, c), f(b, d), f(c, d) }
+-- ie all distinct pairs are mapped, useful for any N^2 dataset (eg finding neighbours)
+
+function functional.map_pairs(t, f)
+	local result = {}
+	for i = 1, #t do
+		for j = i+1, #t do
+			local a = t[i]
+			local b = t[j]
+			local v = f(a, b)
+			if v ~= nil then
+				table.insert(result, v)
+			end
+		end
+	end
+	return result
+end
+
 
 -----------------------------------------------------------
 --generating data

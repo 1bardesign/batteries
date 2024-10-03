@@ -65,7 +65,7 @@ end
 function state_machine:_call_and_transition(name, ...)
 	local r = self:_call(name, ...)
 	if type(r) == "string" and self:has_state(r) then
-		self:set_state(r, r == self.current_state_name)
+		self:set_state(r, true)
 		return nil
 	end
 	return r

@@ -328,6 +328,9 @@ end
 --rotate around a swizzle
 --todo: angle-axis version
 function vec3:rotatei(swizzle, angle)
+	if angle == 0 then --early out
+		return self
+	end
 	local v = vec2:pooled()
 	self:extract_vec2(swizzle, v)
 	v:rotatei(angle)

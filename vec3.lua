@@ -339,19 +339,10 @@ function vec3:rotatei(swizzle, angle)
 	return self
 end
 
-local _euler_macro = {
-	"yz",
-	"xz",
-	"xy",
-}
 function vec3:rotate_euleri(angle_x_axis, angle_y_axis, angle_z_axis)
-	for i, swizzle in ipairs(_euler_macro) do
-		local angle =
-			i == 1 and angle_x_axis
-			or i == 2 and angle_y_axis
-			or i == 3 and angle_z_axis
-		self:rotatei(swizzle, angle)
-	end
+	self:rotatei("yz", angle_x_axis)
+	self:rotatei("xz", angle_y_axis)
+	self:rotatei("xy", angle_z_axis)
 	return self
 end
 

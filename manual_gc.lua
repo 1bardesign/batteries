@@ -48,7 +48,9 @@ return function(time_budget, memory_ceiling, disable_otherwise)
 		love.timer.getTime() - start_time < time_budget and
 		steps < max_steps
 	do
-		collectgarbage("step", 1)
+		if collectgarbage("step", 1) then
+			break
+		end
 		steps = steps + 1
 	end
 	--safety net

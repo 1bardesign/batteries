@@ -30,10 +30,10 @@ return function(class, limit)
 	--get a pooled object
 	--(re-initialised with new, or freshly constructed if the pool was empty)
 	function class:pooled(...)
-		if #_pool == 0 then
+		local instance = class:drain_pool()
+		if not instance then
 			return class(...)
 		end
-		local instance = class:drain_pool()
 		instance:new(...)
 		return instance
 	end

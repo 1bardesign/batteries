@@ -533,7 +533,7 @@ function intersect.balance_from_mass(a_mass, b_mass)
 
 	--get balance factor
 	local total = a_mass + b_mass
-	return a_mass / total
+	return b_mass / total
 end
 
 --bounce a velocity off of a normal (modifying velocity)

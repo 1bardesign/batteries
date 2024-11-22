@@ -39,9 +39,14 @@ return function(class, limit)
 	end
 
 	--release an object back to the pool
-	function class:release()
+	function class.release(instance, ...)
+		assert:equal(instance:type(), class:type(), "wrong class released to pool")
 		if #_pool < _pool_limit then
-			table.insert(_pool, self)
+			table.insert(_pool, instance)
+		end
+		--recurse
+		if ... then
+			return class.release(...)
 		end
 	end
 end

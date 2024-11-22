@@ -40,7 +40,7 @@ return function(class, limit)
 
 	--release an object back to the pool
 	function class.release(instance, ...)
-		assert:equal(instance:type(), class:type(), "wrong class released to pool")
+		assert(instance:type() == class:type(), "wrong class released to pool")
 		if #_pool < _pool_limit then
 			table.insert(_pool, instance)
 		end

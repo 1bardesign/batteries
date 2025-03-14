@@ -66,5 +66,5 @@ These modules are probably only useful to some folks in some circumstances, or a
 
 # License
 
-[original license](batteries.LICENSE)
-[this fork's license](wired_batteries.LICENSE) (only applies to the files prefixed with the matching MIT LICENSE text, e.g [logger.lua](./logger.lua)). Any file not prefixed with the specified text is under the original [zlib license](./batteries.LICENSE)
+- [original license](batteries.LICENSE)
+- [this fork's license](wired_batteries.LICENSE) (only applies to the files prefixed with the matching MIT LICENSE text, e.g [logger.lua](./logger.lua)). Any file not prefixed with the specified text is under the original [zlib license](./batteries.LICENSE)

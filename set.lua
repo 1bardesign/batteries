@@ -6,15 +6,19 @@
 ]]
 
 local path = (...):gsub("set", "")
-local class = require(path .. "class")
+---@type Class
+local Class = require(path .. "class")
+---@type TableX
 local table = require(path .. "tablex") --shadow global table module
 
-local set = class({
+---@class Set
+local set = Class({
 	name = "set",
 })
 
---construct a new set
---elements is an optional ordered table of elements to be added to the set
+---construct a new set
+---elements is an optional ordered table of elements to be added to the set
+---@param elements table
 function set:new(elements)
 	self._keyed = {}
 	self._ordered = {}
@@ -25,12 +29,15 @@ function set:new(elements)
 	end
 end
 
---check if an element is present in the set
+---check if an element is present in the set
+---@param v any
 function set:has(v)
 	return self._keyed[v] or false
 end
 
---add a value to the set, if it's not already present
+---add a value to the set, if it's not already present
+---@param v any
+---@return Set
 function set:add(v)
 	if not self:has(v) then
 		self._keyed[v] = true
@@ -39,7 +46,9 @@ function set:add(v)
 	return self
 end
 
---remove a value from the set, if it's present
+---remove a value from the set, if it's present
+---@param v any
+---@return Set
 function set:remove(v)
 	if self:has(v) then
 		self._keyed[v] = nil
@@ -48,7 +57,7 @@ function set:remove(v)
 	return self
 end
 
---remove all elements from the set
+---remove all elements from the set
 function set:clear()
 	if table.clear then
 		table.clear(self._keyed)
@@ -59,21 +68,24 @@ function set:clear()
 	end
 end
 
---get the number of distinct values in the set
+---get the number of distinct values in the set
+---@return number
 function set:size()
 	return #self._ordered
 end
 
---return a value from the set
---index must be between 1 and size() inclusive
---adding/removing invalidates indices
+---return a value from the set
+---index must be between 1 and size() inclusive
+---adding/removing invalidates indices
+---@param index number
+---@return any
 function set:get(index)
 	return self._ordered[index]
 end
 
---iterate the values in the set, along with their index
---the index is useless but harmless, and adding a custom iterator seems
---like a really easy way to encourage people to use slower-than-optimal code
+---iterate the values in the set, along with their index
+---the index is useless but harmless, and adding a custom iterator seems
+---like a really easy way to encourage people to use slower-than-optimal code
 function set:ipairs()
 	return ipairs(self._ordered)
 end
@@ -83,16 +95,16 @@ function set:values()
 	return table.shallow_copy(self._ordered)
 end
 
---get a direct reference to the internal list of values in the set
---do NOT modify the result, or you'll break the set!
---for read-only access it avoids a needless table copy
---(eg this is sensible to pass to functional apis)
+---get a direct reference to the internal list of values in the set
+---do NOT modify the result, or you'll break the set!
+---for read-only access it avoids a needless table copy
+---(eg this is sensible to pass to functional apis)
 function set:values_readonly()
 	return self._ordered
 end
 
---convert to an ordered table, destroying set-like properties
---and deliberately disabling the initial set object
+---convert to an ordered table, destroying set-like properties
+---and deliberately disabling the initial set object
 function set:to_table()
 	local r = self._ordered
 	self._ordered = nil
@@ -102,7 +114,9 @@ end
 
 --modifying operations
 
---add all the elements present in the other set
+---add all the elements present in the other set
+---@param other Set
+---@return Set
 function set:add_set(other)
 	for i, v in other:ipairs() do
 		self:add(v)
@@ -110,7 +124,9 @@ function set:add_set(other)
 	return self
 end
 
---remove all the elements present in the other set
+---remove all the elements present in the other set
+---@param other Set
+---@return Set
 function set:subtract_set(other)
 	for i, v in other:ipairs() do
 		self:remove(v)
@@ -120,13 +136,16 @@ end
 
 --new collection operations
 
---copy a set
+---copy a set
+---@return Set
 function set:copy()
 	return set():add_set(self)
 end
 
---create a new set containing the complement of the other set contained in this one
---the elements present in this set but not present in the other set will remain in the result
+---create a new set containing the complement of the other set contained in this one
+---the elements present in this set but not present in the other set will remain in the result
+---@param other Set
+---@return Set
 function set:complement(other)
 	return self:copy():subtract_set(other)
 end
@@ -134,14 +153,18 @@ end
 --alias
 set.difference = set.complement
 
---create a new set containing the union of this set with another
---an element present in either set will be present in the result
+---create a new set containing the union of this set with another
+---an element present in either set will be present in the result
+---@param other Set
+---@return Set
 function set:union(other)
 	return self:copy():add_set(other)
 end
 
---create a new set containing the intersection of this set with another
---only the elements present in both sets will remain in the result
+---create a new set containing the intersection of this set with another
+---only the elements present in both sets will remain in the result
+---@param other Set
+---@return Set
 function set:intersection(other)
 	local r = set()
 	for i, v in self:ipairs() do
@@ -152,12 +175,13 @@ function set:intersection(other)
 	return r
 end
 
---create a new set containing the symmetric difference of this set with another
---only the elements not present in both sets will remain in the result
---similiar to a logical XOR operation
---
---equal to self:union(other):subtract_set(self:intersection(other))
---	but with much less wasted effort
+---create a new set containing the symmetric difference of this set with another
+---only the elements not present in both sets will remain in the result
+---similiar to a logical XOR operation
+---equal to self:union(other):subtract_set(self:intersection(other))
+---but with much less wasted effort
+---@param other Set
+---@return Set
 function set:symmetric_difference(other)
 	local r = set()
 	for i, v in self:ipairs() do

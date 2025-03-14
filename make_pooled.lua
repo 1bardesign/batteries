@@ -1,25 +1,30 @@
---[[
-	add pooling functionality to a class
+---@diagnostic disable: inject-field
 
-	adds a handful of class and instance methods to do with pooling
+---@class PooledClass
+---@field pooled fun(self, ...): any
+---@field release fun(self, ...): any
+---@field flush_pool fun()
+---@field drain_pool fun()
 
-	todo: automatically use the pool by replacing __call, so you really just need to :release()
-]]
-
+---add pooling functionality to a class
+---adds a handful of class and instance methods to do with pooling
+---todo: automatically use the pool by replacing __call, so you really just need to :release()
+---@param class Class
+---@param limit number
 return function(class, limit)
 	--shared pooled storage
 	local _pool = {}
 	--size limit for tuning memory upper bound
 	local _pool_limit = limit or 128
 
-	--flush the entire pool
+	---flush the entire pool
 	function class:flush_pool()
 		if #_pool > 0 then
 			_pool = {}
 		end
 	end
 
-	--drain one element from the pool, if it exists
+	---drain one element from the pool, if it exists
 	function class:drain_pool()
 		if #_pool > 0 then
 			return table.remove(_pool)
@@ -27,8 +32,8 @@ return function(class, limit)
 		return nil
 	end
 
-	--get a pooled object
-	--(re-initialised with new, or freshly constructed if the pool was empty)
+	---get a pooled object
+	---(re-initialised with new, or freshly constructed if the pool was empty)
 	function class:pooled(...)
 		local instance = class:drain_pool()
 		if not instance then
@@ -38,7 +43,7 @@ return function(class, limit)
 		return instance
 	end
 
-	--release an object back to the pool
+	---release an object back to the pool
 	function class.release(instance, ...)
 		assert(instance:type() == class:type(), "wrong class released to pool")
 		if #_pool < _pool_limit then
@@ -50,3 +55,5 @@ return function(class, limit)
 		end
 	end
 end
+
+---@diagnostic enable: inject-field

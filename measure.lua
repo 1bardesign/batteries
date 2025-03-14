@@ -4,8 +4,11 @@
 ]]
 
 local path = (...):gsub("measure", "")
+
+---@type Functional
 local functional = require(path .. "functional")
 
+---@class Measure
 local measure = {}
 
 --replace this with whatever your highest accuracy timer is
@@ -16,10 +19,13 @@ if love and love.timer then
 	measure.get_time = love.timer.getTime
 end
 
---measure the mean, minimum, and maximum time taken in seconds to run test_function
---over several runs (default 1000).
---warmup_runs can be provided to give the JIT or cache some time to warm up, but
---are off by default
+---measure the mean, minimum, and maximum time taken in seconds to run test_function
+---over several runs (default 1000).
+---warmup_runs can be provided to give the JIT or cache some time to warm up, but
+---are off by default
+---@param test_function fun()
+---@param runs number
+---@param warmup_runs number
 function measure.time_taken(test_function, runs, warmup_runs)
 	--defaults
 	runs = runs or 1000
@@ -40,8 +46,11 @@ function measure.time_taken(test_function, runs, warmup_runs)
 	return mean, min, max
 end
 
---measure the mean, minimum, and maximum memory increase in kilobytes for a run of test_function
---doesn't modify the gc state each run, to emulate normal running conditions
+---measure the mean, minimum, and maximum memory increase in kilobytes for a run of test_function
+---doesn't modify the gc state each run, to emulate normal running conditions
+---@param test_function fun()
+---@param runs number
+---@param warmup_runs number
 function measure.memory_taken(test_function, runs, warmup_runs)
 	--defaults
 	runs = runs or 1000
@@ -62,8 +71,11 @@ function measure.memory_taken(test_function, runs, warmup_runs)
 	return mean, min, max
 end
 
---measure the mean, minimum, and maximum memory increase in kilobytes for a run of test_function
---performs a full collection each run and then stops the gc, so the amount reported is as close as possible to the total amount allocated each run
+---measure the mean, minimum, and maximum memory increase in kilobytes for a run of test_function
+---performs a full collection each run and then stops the gc, so the amount reported is as close as possible to the total amount allocated each run
+---@param test_function fun()
+---@param runs number
+---@param warmup_runs number
 function measure.memory_taken_strict(test_function, runs, warmup_runs)
 	--defaults
 	runs = runs or 1000

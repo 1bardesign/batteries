@@ -3,40 +3,53 @@
 ]]
 
 local path = (...):gsub("pathfind", "")
+---@type Sort
 local sort = require(path .. "sort")
 
 --helper to generate a constant value for default weight, heuristic
 local generate_constant = function() return 1 end
 
---find a path in a weighted graph
---	uses A* algorithm internally
---returns a table of all the nodes from the start to the goal,
---	or false if no path was found
---arguments table requires the following fields
---	start - the value of the node to start from
---		alias: start_node
---	is_goal - a function which takes a node, and returns true is a goal
---		alias: goal
---	neighbours - a function which takes a node, and returns a table of neighbour nodes
---		alias: generate_neighbours
---	distance - a function which given two nodes, returns the distance between them
---		defaults to a constant distance, which means all steps between nodes have the same cost
---		alias: weight, g
---	heuristic - a function which given a node, returns a heuristic indicative of the distance to the goal;
---		can be used to speed up searches at the cost of accuracy by returning some proportion higher than the actual distance
---		defaults to a constant value, which means the A* algorithm degrades to breadth-first search
---		alias: h
+---@class PathFindArgs
+---@field start number
+---@field is_goal boolean
+---@field generate_neighbours boolean?
+---@field distance fun(v1: number,v2: number): number
+---@field heuristic fun(v: number): number
+
+---find a path in a weighted graph
+---uses A* algorithm internally
+---returns a table of all the nodes from the start to the goal,
+---or false if no path was found
+---arguments table requires the following fields
+---start - the value of the node to start from
+---alias: start_node
+---is_goal - a function which takes a node, and returns true is a goal
+---alias: goal
+---neighbours - a function which takes a node, and returns a table of neighbour nodes
+---alias: generate_neighbours
+---distance - a function which given two nodes, returns the distance between them
+---defaults to a constant distance, which means all steps between nodes have the same cost
+---alias: weight, g
+---heuristic - a function which given a node, returns a heuristic indicative of the distance to the goal;
+---can be used to speed up searches at the cost of accuracy by returning some proportion higher than the actual distance
+---defaults to a constant value, which means the A* algorithm degrades to breadth-first search
+---alias: h
+---@param args PathFindArgs
 local function pathfind(args)
-	local start = args.start or args.start_node
-	local is_goal = args.is_goal or args.goal
-	local neighbours = args.neighbours or args.generate_neighbours
-	local distance = args.distance or args.weight or args.g or generate_constant
-	local heuristic = args.heuristic or args.h or generate_constant
+	local start = args.start
+	local is_goal = args.is_goal
+	local neighbours = args.generate_neighbours
+	local distance = args.distance or generate_constant
+	local heuristic = args.heuristic or generate_constant
+
+	if start == nil or is_goal == nil or neighbours == nil then
+		error("[PathFind] missing required arguments")
+	end
 
 	local predecessor = {}
 	local seen = {}
-	local f_score = {[start] = 0}
-	local g_score = {[start] = 0}
+	local f_score = { [start] = 0 }
+	local g_score = { [start] = 0 }
 
 	local function search_compare(a, b)
 		return

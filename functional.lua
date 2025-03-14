@@ -17,21 +17,30 @@
 ]]
 
 local path = (...):gsub("functional", "")
+---@type TableX
 local tablex = require(path .. "tablex")
+---@type MathX
 local mathx = require(path .. "mathx")
 
+---@class Functional
 local functional = setmetatable({}, {
-	__index = tablex,
+	__index = tablex --[[@as Functional]],
 })
 
---the identity function
+---the identity function
+---@generic T
+---@param v T
+---@return T
 function functional.identity(v)
 	return v
 end
 
---simple sequential iteration, f is called for all elements of t
---f can return non-nil to break the loop (and return the value)
---otherwise returns t for chaining
+---simple sequential iteration, f is called for all elements of t
+---f can return non-nil to break the loop (and return the value)
+---otherwise returns t for chaining
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.foreach(t, f)
 	for i = 1, #t do
 		local result = f(t[i], i)
@@ -42,9 +51,13 @@ function functional.foreach(t, f)
 	return t
 end
 
---performs a left to right reduction of t using f, with seed as the initial value
--- reduce({1, 2, 3}, 0, f) -> f(f(f(0, 1), 2), 3)
--- (but performed iteratively, so no stack smashing)
+---performs a left to right reduction of t using f, with seed as the initial value
+---reduce({1, 2, 3}, 0, f) -> f(f(f(0, 1), 2), 3)
+---(but performed iteratively, so no stack smashing)
+---@param t table
+---@param seed number
+---@param f fun(seed: number, v: any, i: number)
+---@return number
 function functional.reduce(t, seed, f)
 	for i = 1, #t do
 		seed = f(seed, t[i], i)
@@ -52,8 +65,11 @@ function functional.reduce(t, seed, f)
 	return seed
 end
 
---maps a sequence {a, b, c} -> {f(a), f(b), f(c)}
--- (automatically drops any nils to keep a sequence, so can be used to simultaneously map and filter)
+---maps a sequence {a, b, c} -> {f(a), f(b), f(c)}
+---(automatically drops any nils to keep a sequence, so can be used to simultaneously map and filter)
+---@param t table
+---@param f fun(v: any, i: number)
+---@return table
 function functional.map(t, f)
 	local result = {}
 	for i = 1, #t do
@@ -65,8 +81,11 @@ function functional.map(t, f)
 	return result
 end
 
---maps a sequence inplace, modifying it {a, b, c} -> {f(a), f(b), f(c)}
--- (automatically drops any nils, which can be used to simultaneously map and filter)
+---maps a sequence inplace, modifying it {a, b, c} -> {f(a), f(b), f(c)}
+---(automatically drops any nils, which can be used to simultaneously map and filter)
+---@param t table
+---@param f fun(v: any, i: number)
+---@return table
 function functional.map_inplace(t, f)
 	local write_i = 0
 	local n = #t --cache, so splitting the sequence doesn't stop iteration
@@ -86,8 +105,11 @@ end
 --alias
 functional.remap = functional.map_inplace
 
---maps a sequence {a, b, c} -> {a[k], b[k], c[k]}
--- (automatically drops any nils to keep a sequence)
+---maps a sequence {a, b, c} -> {a[k], b[k], c[k]}
+---(automatically drops any nils to keep a sequence)
+---@param t table
+---@param k string|number
+---@return table
 function functional.map_field(t, k)
 	local result = {}
 	for i = 1, #t do
@@ -99,10 +121,13 @@ function functional.map_field(t, k)
 	return result
 end
 
---maps a sequence by a method call
--- if m is a string method name like "position", {a, b} -> {a:m(...), b:m(...)}
--- if m is function reference like player.get_position, {a, b} -> {m(a, ...), m(b, ...)}
--- (automatically drops any nils to keep a sequence)
+---maps a sequence by a method call
+---if m is a string method name like "position", {a, b} -> {a:m(...), b:m(...)}
+---if m is function reference like player.get_position, {a, b} -> {m(a, ...), m(b, ...)}
+---(automatically drops any nils to keep a sequence)
+---@param t table
+---@param m string|fun(...): any
+---@return table
 function functional.map_call(t, m, ...)
 	local result = {}
 	for i = 1, #t do
@@ -116,9 +141,12 @@ function functional.map_call(t, m, ...)
 	return result
 end
 
---maps a sequence into a new index space (see functional.map)
--- the function may return an index where the value will be stored in the result
--- if no index (or a nil index) is provided, it will insert as normal
+---maps a sequence into a new index space (see functional.map)
+---the function may return an index where the value will be stored in the result
+---if no index (or a nil index) is provided, it will insert as normal
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.splat(t, f)
 	local result = {}
 	for i = 1, #t do
@@ -133,8 +161,11 @@ function functional.splat(t, f)
 	return result
 end
 
---filters a sequence
--- returns a table containing items where f(v, i) returns truthy
+---filters a sequence
+---returns a table containing items where f(v, i) returns truthy
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.filter(t, f)
 	local result = {}
 	for i = 1, #t do
@@ -146,7 +177,10 @@ function functional.filter(t, f)
 	return result
 end
 
---filters a sequence in place, modifying it
+---filters a sequence in place, modifying it
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.filter_inplace(t, f)
 	local write_i = 0
 	local n = #t --cache, so splitting the sequence doesn't stop iteration
@@ -163,9 +197,12 @@ function functional.filter_inplace(t, f)
 	return t
 end
 
--- complement of filter
--- returns a table containing items where f(v) returns falsey
--- nil results are included so that this is an exact complement of filter; consider using partition if you need both!
+---complement of filter
+---returns a table containing items where f(v) returns falsey
+---nil results are included so that this is an exact complement of filter; consider using partition if you need both!
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.remove_if(t, f)
 	local result = {}
 	for i = 1, #t do
@@ -177,8 +214,11 @@ function functional.remove_if(t, f)
 	return result
 end
 
---partitions a sequence into two, based on filter criteria
---simultaneous filter and remove_if
+---partitions a sequence into two, based on filter criteria
+---simultaneous filter and remove_if
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table, table
 function functional.partition(t, f)
 	local a = {}
 	local b = {}
@@ -193,9 +233,12 @@ function functional.partition(t, f)
 	return a, b
 end
 
--- returns a table where the elements in t are grouped into sequential tables by the result of f on each element.
---	more general than partition, but requires you to know your groups ahead of time
---	(or use numeric grouping and pre-seed) if you want to avoid pairs!
+---returns a table where the elements in t are grouped into sequential tables by the result of f on each element.
+---more general than partition, but requires you to know your groups ahead of time
+---(or use numeric grouping and pre-seed) if you want to avoid pairs!
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.group_by(t, f)
 	local result = {}
 	for i = 1, #t do
@@ -209,10 +252,14 @@ function functional.group_by(t, f)
 	return result
 end
 
---combines two same-length sequences through a function f
---	f receives arguments (t1[i], t2[i], i)
---	iteration limited by min(#t1, #t2)
---	ignores nil results
+---combines two same-length sequences through a function f
+---f receives arguments (t1[i], t2[i], i)
+---iteration limited by min(#t1, #t2)
+---ignores nil results
+---@param t1 table
+---@param t2 table
+---@param f fun(v1: any, v2:any, i: number): any
+---@return table
 function functional.combine(t1, t2, f)
 	local ret = {}
 	local limit = math.min(#t1, #t2)
@@ -227,9 +274,12 @@ function functional.combine(t1, t2, f)
 	return ret
 end
 
---zips two sequences together into a new table, alternating from t1 and t2
---	zip({1, 2}, {3, 4}) -> {1, 3, 2, 4}
---	iteration limited by min(#t1, #t2)
+---zips two sequences together into a new table, alternating from t1 and t2
+---zip({1, 2}, {3, 4}) -> {1, 3, 2, 4}
+---iteration limited by min(#t1, #t2)
+---@param t1 table
+---@param t2 table
+---@return table
 function functional.zip(t1, t2)
 	local ret = {}
 	local limit = math.min(#t1, #t2)
@@ -240,9 +290,11 @@ function functional.zip(t1, t2)
 	return ret
 end
 
---unzips a table into two new tables, alternating elements into each result
---	{1, 2, 3, 4} -> {1, 3}, {2, 4}
---	gets an extra result in the first result for odd-length tables
+---unzips a table into two new tables, alternating elements into each result
+---{1, 2, 3, 4} -> {1, 3}, {2, 4}
+---gets an extra result in the first result for odd-length tables
+---@param t table
+---@return table, table
 function functional.unzip(t)
 	local a = {}
 	local b = {}
@@ -257,10 +309,13 @@ end
 --	(experimental: let me know if you have better names for these!)
 -----------------------------------------------------------
 
---maps a sequence {a, b, c} -> collapse { f(a), f(b), f(c) }
--- (ie results from functions should generally be sequences,
---  which are appended onto each other, resulting in one big sequence)
--- (automatically drops any nils, same as map)
+---maps a sequence {a, b, c} -> collapse { f(a), f(b), f(c) }
+---(ie results from functions should generally be sequences,
+---which are appended onto each other, resulting in one big sequence)
+---(automatically drops any nils, same as map)
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.stitch(t, f)
 	local result = {}
 	for i, v in ipairs(t) do
@@ -281,10 +336,12 @@ end
 --alias
 functional.map_stitch = functional.stitch
 
---maps a sequence {a, b, c} -> { f(a, b), f(b, c), f(c, a) }
--- useful for inter-dependent data
--- (automatically drops any nils, same as map)
-
+---maps a sequence {a, b, c} -> { f(a, b), f(b, c), f(c, a) }
+---useful for inter-dependent data
+---(automatically drops any nils, same as map)
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.cycle(t, f)
 	local result = {}
 	for i, a in ipairs(t) do
@@ -299,14 +356,16 @@ end
 
 functional.map_cycle = functional.cycle
 
---maps a sequence {a, b, c} -> { f(a, b), f(b, c) }
--- useful for inter-dependent data
--- (automatically drops any nils, same as map)
-
+---maps a sequence {a, b, c} -> { f(a, b), f(b, c) }
+---useful for inter-dependent data
+---(automatically drops any nils, same as map)
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.chain(t, f)
 	local result = {}
 	for i = 2, #t do
-		local a = t[i-1]
+		local a = t[i - 1]
 		local b = t[i]
 		local v = f(a, b)
 		if v ~= nil then
@@ -318,13 +377,15 @@ end
 
 functional.map_chain = functional.chain
 
---maps a sequence {a, b, c, d} -> { f(a, b), f(a, c), f(a, d), f(b, c), f(b, d), f(c, d) }
--- ie all distinct pairs are mapped, useful for any N^2 dataset (eg finding neighbours)
-
+---maps a sequence {a, b, c, d} -> { f(a, b), f(a, c), f(a, d), f(b, c), f(b, d), f(c, d) }
+---ie all distinct pairs are mapped, useful for any N^2 dataset (eg finding neighbours)
+---@param t table
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.map_pairs(t, f)
 	local result = {}
 	for i = 1, #t do
-		for j = i+1, #t do
+		for j = i + 1, #t do
 			local a = t[i]
 			local b = t[j]
 			local v = f(a, b)
@@ -336,14 +397,16 @@ function functional.map_pairs(t, f)
 	return result
 end
 
-
 -----------------------------------------------------------
 --generating data
 -----------------------------------------------------------
 
---generate data into a table
---basically a map on numeric values from 1 to count
---nil values are omitted in the result, as for map
+---generate data into a table
+---basically a map on numeric values from 1 to count
+---nil values are omitted in the result, as for map
+---@param count table
+---@param f fun(i: number): any
+---@return table
 function functional.generate(count, f)
 	local result = {}
 	for i = 1, count do
@@ -355,9 +418,13 @@ function functional.generate(count, f)
 	return result
 end
 
---2d version of the above
---note: ends up with a 1d table;
---	if you need a 2d table, you should nest 1d generate calls
+---2d version of the above
+---note: ends up with a 1d table;
+---if you need a 2d table, you should nest 1d generate calls
+---@param width number
+---@param height number
+---@param f fun(v: any, i: number): any
+---@return table
 function functional.generate_2d(width, height, f)
 	local result = {}
 	for y = 1, height do
@@ -375,7 +442,10 @@ end
 --common queries and reductions
 -----------------------------------------------------------
 
---true if any element of the table matches f
+---true if any element of the table matches f
+---@param t table
+---@param f fun(v: any, i: number): boolean
+---@return boolean
 function functional.any(t, f)
 	for i = 1, #t do
 		if f(t[i], i) then
@@ -385,7 +455,10 @@ function functional.any(t, f)
 	return false
 end
 
---true if no element of the table matches f
+---true if no element of the table matches f
+---@param t table
+---@param f fun(v: any, i: number): boolean
+---@return boolean
 function functional.none(t, f)
 	for i = 1, #t do
 		if f(t[i], i) then
@@ -395,7 +468,10 @@ function functional.none(t, f)
 	return true
 end
 
---true if all elements of the table match f
+---true if all elements of the table match f
+---@param t table
+---@param f fun(v: any, i: number): boolean
+---@return boolean
 function functional.all(t, f)
 	for i = 1, #t do
 		if not f(t[i], i) then
@@ -405,7 +481,10 @@ function functional.all(t, f)
 	return true
 end
 
---counts the elements of t that match f
+---counts the elements of t that match f
+---@param t table
+---@param f fun(v: any, i: number): boolean
+---@return number
 function functional.count(t, f)
 	local c = 0
 	for i = 1, #t do
@@ -416,7 +495,10 @@ function functional.count(t, f)
 	return c
 end
 
---counts the elements of t equal to v
+---counts the elements of t equal to v
+---@param t table
+---@param v any
+---@return number
 function functional.count_value(t, v)
 	local c = 0
 	for i = 1, #t do
@@ -427,7 +509,10 @@ function functional.count_value(t, v)
 	return c
 end
 
---true if the table contains element e
+---true if the table contains element e
+---@param t table
+---@param e any
+---@return boolean
 function functional.contains(t, e)
 	for i = 1, #t do
 		if t[i] == e then
@@ -437,7 +522,9 @@ function functional.contains(t, e)
 	return false
 end
 
---return the numeric sum of all elements of t
+---return the numeric sum of all elements of t
+---@param t table
+---@return number
 function functional.sum(t)
 	local c = 0
 	for i = 1, #t do
@@ -446,7 +533,9 @@ function functional.sum(t)
 	return c
 end
 
---return the numeric mean of all elements of t
+---return the numeric mean of all elements of t
+---@param t table
+---@return number
 function functional.mean(t)
 	local len = #t
 	if len == 0 then
@@ -455,10 +544,12 @@ function functional.mean(t)
 	return functional.sum(t) / len
 end
 
---return the minimum and maximum of t in one pass
---or zero for both if t is empty
---	(would perhaps more correctly be math.huge, -math.huge
---	 but that tends to be surprising/annoying in practice)
+---return the minimum and maximum of t in one pass
+---or zero for both if t is empty
+---(would perhaps more correctly be math.huge, -math.huge
+---but that tends to be surprising/annoying in practice)
+---@param t table
+---@return number, number
 function functional.minmax(t)
 	local n = #t
 	if n == 0 then
@@ -474,20 +565,26 @@ function functional.minmax(t)
 	return min, max
 end
 
---return the maximum element of t or zero if t is empty
+---return the maximum element of t or zero if t is empty
+---@param t table
+---@return number
 function functional.max(t)
 	local min, max = functional.minmax(t)
 	return max
 end
 
---return the minimum element of t or zero if t is empty
+---return the minimum element of t or zero if t is empty
+---@param t table
+---@return number
 function functional.min(t)
 	local min, max = functional.minmax(t)
 	return min
 end
 
---return the element of the table that results in the lowest numeric value
---(function receives element and index respectively)
+---return the element of the table that results in the lowest numeric value
+---(function receives element and index respectively)
+---@param t table
+---@return number|nil
 function functional.find_min(t, f)
 	local current = nil
 	local current_min = math.huge
@@ -502,8 +599,11 @@ function functional.find_min(t, f)
 	return current
 end
 
---return the element of the table that results in the greatest numeric value
---(function receives element and index respectively)
+---return the element of the table that results in the greatest numeric value
+---(function receives element and index respectively)
+---@param t table
+---@param f fun(v: any, i: number): number
+---@return number|nil
 function functional.find_max(t, f)
 	local current = nil
 	local current_max = -math.huge
@@ -521,8 +621,12 @@ end
 --alias
 functional.find_best = functional.find_max
 
---return the element of the table that results in the value nearest to the passed value
---todo: optimise, inline as this generates a closure each time
+---return the element of the table that results in the value nearest to the passed value
+---todo: optimise, inline as this generates a closure each time
+---@param t table
+---@param f fun(v: any, i: number): number
+---@param target number
+---@return number|nil
 function functional.find_nearest(t, f, target)
 	local current = nil
 	local current_min = math.huge
@@ -540,7 +644,10 @@ function functional.find_nearest(t, f, target)
 	return current
 end
 
---return the first element of the table that results in a true filter
+---return the first element of the table that results in a true filter
+---@param t table
+---@param f fun(v: any): boolean
+---@return any|nil
 function functional.find_match(t, f)
 	for i = 1, #t do
 		local v = t[i]

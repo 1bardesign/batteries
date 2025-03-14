@@ -24,12 +24,18 @@
 ]]
 
 local path = (...):gsub("state_machine", "")
-local class = require(path .. "class")
+---@type Class
+local Class = require(path .. "class")
 
-local state_machine = class({
+---@class StateMachine
+local state_machine = Class({
 	name = "state_machine",
 })
 
+---@alias StateMachineState { enter: fun(parent: table?), exit: fun(), update: fun(dt: number), draw: fun() } | { [string]: fun(state: table, ...)}
+
+---@param states table<string, StateMachineState>
+---@param start_in_state string?
 function state_machine:new(states, start_in_state)
 	self.states = states or {}
 	self.current_state_name = ""
@@ -38,7 +44,8 @@ function state_machine:new(states, start_in_state)
 	self:reset()
 end
 
---get the current state table (or nil if it doesn't exist)
+---get the current state table (or nil if it doesn't exist)
+---@return StateMachineState
 function state_machine:current_state()
 	return self.states[self.current_state_name]
 end
@@ -46,7 +53,9 @@ end
 -------------------------------------------------------------------------------
 --internal helpers
 
---make an internal call
+---make an internal call
+---@param name string
+---@return any|nil
 function state_machine:_call(name, ...)
 	local state = self:current_state()
 	if state then
@@ -59,9 +68,11 @@ function state_machine:_call(name, ...)
 	return nil
 end
 
---make an internal call
---	transition if the return value is a valid state name - and return nil if so
---	return the call result if it isn't a valid state name
+---make an internal call
+---transition if the return value is a valid state name - and return nil if so
+---return the call result if it isn't a valid state name
+---@param name string
+---@return any|nil
 function state_machine:_call_and_transition(name, ...)
 	local r = self:_call(name, ...)
 	if type(r) == "string" and self:has_state(r) then
@@ -74,10 +85,14 @@ end
 -------------------------------------------------------------------------------
 --various checks
 
+---@param name string
+---@return boolean
 function state_machine:in_state(name)
 	return self.current_state_name == name
 end
 
+---@param name string
+---@return boolean
 function state_machine:has_state(name)
 	return self.states[name] ~= nil
 end
@@ -85,7 +100,10 @@ end
 -------------------------------------------------------------------------------
 --state management
 
---add a state
+---add a state
+---@param name string
+---@param state table
+---@return StateMachine
 function state_machine:add_state(name, state)
 	if self:has_state(name) then
 		error("error: added duplicate state " .. name)
@@ -99,7 +117,9 @@ function state_machine:add_state(name, state)
 	return self
 end
 
---remove a state
+---remove a state
+---@param name string
+---@return StateMachine
 function state_machine:remove_state(name)
 	if not self:has_state(name) then
 		error("error: removed missing state " .. name)
@@ -113,10 +133,14 @@ function state_machine:remove_state(name)
 	return self
 end
 
---hard-replace a state table
---	if we're replacing the current state,
---	exit is called on the old state and enter is called on the new state
---	mask_transitions can be used to prevent this if you need to
+---hard-replace a state table
+---if we're replacing the current state,
+---exit is called on the old state and enter is called on the new state
+---mask_transitions can be used to prevent this if you need to
+---@param name string
+---@param state table?
+---@param mask_transitions boolean?
+---@return StateMachine
 function state_machine:replace_state(name, state, mask_transitions)
 	local do_transitions = not mask_transitions and self:in_state(name)
 	if do_transitions then
@@ -130,7 +154,9 @@ function state_machine:replace_state(name, state, mask_transitions)
 	return self
 end
 
---ensure a state doesn't exist; transition out of it if we're currently in it
+---ensure a state doesn't exist; transition out of it if we're currently in it
+---@param name string
+---@return StateMachine
 function state_machine:clear_state(name)
 	return self:replace_state(name, nil)
 end
@@ -145,10 +171,13 @@ function state_machine:reset()
 	end
 end
 
---set the current state
---	if the enter callback of the target state returns a valid state name,
---		then it is transitioned to in turn,
---		and so on until the machine is at rest
+---set the current state
+---if the enter callback of the target state returns a valid state name,
+---then it is transitioned to in turn,
+---and so on until the machine is at rest
+---@param name string
+---@param reset boolean
+---@return StateMachine
 function state_machine:set_state(name, reset)
 	if self.current_state_name ~= name or reset then
 		self:_call("exit")
@@ -159,22 +188,25 @@ function state_machine:set_state(name, reset)
 	return self
 end
 
---perform an update
---pass in an optional delta time, which is passed as an arg to the state functions
---if the state update returns a string, and we have that state
---	then we change state (reset if it's the current state)
---	and return nil
---otherwise, the result is returned
+---perform an update
+---pass in an optional delta time, which is passed as an arg to the state functions
+---if the state update returns a string, and we have that state
+---then we change state (reset if it's the current state)
+---and return nil
+---otherwise, the result is returned
+---@param dt number
+---@return any|nil
 function state_machine:update(dt)
 	return self:_call_and_transition("update", dt)
 end
 
---draw the current state
+---draw the current state
 function state_machine:draw()
 	self:_call("draw")
 end
 
---for compatibility when a state machine is nested as a state in another machine
+---for compatibility when a state machine is nested as a state in another machine
+---@param parent table?
 function state_machine:enter(parent)
 	self.parent = parent
 	self:reset()

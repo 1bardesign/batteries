@@ -16,10 +16,13 @@
 ]]
 
 local path = (...):gsub("intersect", "")
+---@type Vec2
 local vec2 = require(path .. "vec2")
+---@type MathX
 local mathx = require(path .. "mathx")
 
 --module storage
+---@class Intersect
 local intersect = {}
 
 --epsilon for collisions
@@ -28,15 +31,30 @@ local COLLIDE_EPS = 1e-6
 ------------------------------------------------------------------------------
 -- circles
 
+---@param pos Vec2
+---@param rad number
+---@param v Vec2
+---@return boolean
 function intersect.circle_point_overlap(pos, rad, v)
 	return pos:distance_squared(v) <= rad * rad
 end
 
+---@param a_pos Vec2
+---@param a_rad number
+---@param b_pos Vec2
+---@param b_rad number
+---@return boolean
 function intersect.circle_circle_overlap(a_pos, a_rad, b_pos, b_rad)
 	local rad = a_rad + b_rad
 	return a_pos:distance_squared(b_pos) <= rad * rad
 end
 
+---@param a_pos Vec2
+---@param a_rad number
+---@param b_pos Vec2
+---@param b_rad number
+---@param into Vec2
+---@return Vec2|nil
 function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
 	--get delta
 	local delta = a_pos
@@ -45,7 +63,7 @@ function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
 	--squared threshold
 	local rad = a_rad + b_rad
 	local dist = delta:length_squared()
-	local res = false
+	local res = nil
 	if dist <= rad * rad then
 		if dist == 0 then
 			--singular case; just resolve vertically
@@ -68,6 +86,11 @@ function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
 	return res
 end
 
+---@param a_pos Vec2
+---@param a_rad number
+---@param b Vec2
+---@param into Vec2
+---@return Vec2|nil
 function intersect.circle_point_collide(a_pos, a_rad, b, into)
 	return intersect.circle_circle_collide(a_pos, a_rad, b, 0, into)
 end
@@ -76,7 +99,12 @@ end
 -- line segments
 -- todo: separate double-sided, one-sided, and pull-through (along normal) collisions?
 
---get the nearest point on the line segment a from point b
+---get the nearest point on the line segment a from point b
+---@param a_start Vec2
+---@param a_end Vec2
+---@param b_pos Vec2
+---@param into Vec2?
+---@return Vec2
 function intersect.nearest_point_on_line(a_start, a_end, b_pos, into)
 	if into == nil then into = vec2(0) end
 	--direction of segment
@@ -100,15 +128,25 @@ function intersect.nearest_point_on_line(a_start, a_end, b_pos, into)
 	return into
 end
 
---internal
---vector from line seg origin to point
+---internal
+---vector from line seg origin to point
+---@param a_start Vec2
+---@param a_end Vec2
+---@param b_pos Vec2
+---@param into Vec2?
+---@return Vec2
 function intersect._line_to_point(a_start, a_end, b_pos, into)
 	return intersect.nearest_point_on_line(a_start, a_end, b_pos, into)
 		:vector_sub_inplace(b_pos)
 end
 
---internal
---line displacement vector from separation vector
+---internal
+---line displacement vector from separation vector
+---@param a_start Vec2
+---@param a_end Vec2
+---@param separation Vec2
+---@param total_rad number
+---@return Vec2|nil
 function intersect._line_displacement_to_sep(a_start, a_end, separation, total_rad)
 	local distance = separation:normalise_len_inplace()
 	local sep = distance - total_rad
@@ -124,10 +162,16 @@ function intersect._line_displacement_to_sep(a_start, a_end, separation, total_r
 		end
 		return separation
 	end
-	return false
+	return nil
 end
 
---overlap a line segment with a circle
+---overlap a line segment with a circle
+---@param a_start Vec2
+---@param a_end Vec2
+---@param a_rad number
+---@param b_pos Vec2
+---@param b_rad number
+---@return boolean
 function intersect.line_circle_overlap(a_start, a_end, a_rad, b_pos, b_rad)
 	local nearest = intersect.nearest_point_on_line(a_start, a_end, b_pos, vec2:pooled())
 	local overlapped = intersect.circle_point_overlap(b_pos, a_rad + b_rad, nearest)
@@ -135,7 +179,13 @@ function intersect.line_circle_overlap(a_start, a_end, a_rad, b_pos, b_rad)
 	return overlapped
 end
 
---collide a line segment with a circle
+---collide a line segment with a circle
+---@param a_start Vec2
+---@param a_end Vec2
+---@param a_rad number
+---@param b_pos Vec2
+---@param b_rad number
+---@return Vec2|nil
 function intersect.line_circle_collide(a_start, a_end, a_rad, b_pos, b_rad, into)
 	local nearest = intersect.nearest_point_on_line(a_start, a_end, b_pos, vec2:pooled())
 	into = intersect.circle_circle_collide(nearest, a_rad, b_pos, b_rad, into)
@@ -145,11 +195,18 @@ end
 
 --collide 2 line segments
 local _line_line_search_tab = {
-	{vec2(), 1},
-	{vec2(), 1},
-	{vec2(), -1},
-	{vec2(), -1},
+	{ vec2(), 1 },
+	{ vec2(), 1 },
+	{ vec2(), -1 },
+	{ vec2(), -1 },
 }
+---@param a_start Vec2
+---@param a_end Vec2
+---@param a_rad number
+---@param b_start Vec2
+---@param b_end Vec2
+---@param into Vec2
+---@return Vec2|nil
 function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_rad, into)
 	--segment directions from start points
 	local a_dir = a_end
@@ -184,14 +241,14 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 
 	--(c to lua translation of paul bourke's
 	-- line intersection algorithm)
-	local dx1 =  (a_end.x   - a_start.x)
-	local dx2 =  (b_end.x   - b_start.x)
-	local dy1 =  (a_end.y   - a_start.y)
-	local dy2 =  (b_end.y   - b_start.y)
-	local dxab = (a_start.x - b_start.x)
-	local dyab = (a_start.y - b_start.y)
+	local dx1    = (a_end.x - a_start.x)
+	local dx2    = (b_end.x - b_start.x)
+	local dy1    = (a_end.y - a_start.y)
+	local dy2    = (b_end.y - b_start.y)
+	local dxab   = (a_start.x - b_start.x)
+	local dyab   = (a_start.y - b_start.y)
 
-	local denom  = dy2 * dx1  - dx2 * dy1
+	local denom  = dy2 * dx1 - dx2 * dy1
 	local numera = dx2 * dyab - dy2 * dxab
 	local numerb = dx1 * dyab - dy1 * dxab
 
@@ -243,7 +300,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 	--todo proper calculus from http://geomalgorithms.com/a07-_distance.html
 	local search_tab = _line_line_search_tab
 	for i = 1, 4 do
-		search_tab[i][1]:sset(math.huge)
+		search_tab[i][1]:scalar_set(math.huge)
 	end
 	--only insert corners from the non-intersected line
 	--since intersected line is potentially the apex
@@ -269,6 +326,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 			end
 		end
 	end
+	if best == nil then error("best is nil") end
 
 	--fix direction
 	into:set(best[1])
@@ -287,7 +345,11 @@ end
 --	we use half-sizes to keep these routines as fast as possible
 --	see intersect.rect_to_aabb for conversion from topleft corner and size
 
---return true on overlap, false otherwise
+---return true on overlap, false otherwise
+---@param pos Vec2
+---@param hs Vec2
+---@param v Vec2
+---@return boolean
 function intersect.aabb_point_overlap(pos, hs, v)
 	local delta = pos
 		:pooled_copy()
@@ -298,8 +360,13 @@ function intersect.aabb_point_overlap(pos, hs, v)
 	return overlap
 end
 
--- discrete displacement
--- return msv to push point to closest edge of aabb
+---discrete displacement
+---return msv to push point to closest edge of aabb
+---@param pos Vec2
+---@param hs Vec2
+---@param v Vec2
+---@param into Vec2
+---@return Vec2|nil
 function intersect.aabb_point_collide(pos, hs, v, into)
 	--separation between centres
 	local delta_c = v
@@ -309,24 +376,21 @@ function intersect.aabb_point_collide(pos, hs, v, into)
 	local delta_c_abs = delta_c
 		:pooled_copy()
 		:abs_inplace()
-	local res = false
+	local res = nil
 	if delta_c_abs.x < hs.x and delta_c_abs.y < hs.y then
-		res = (into or vec2(0))
-			--separating offset in both directions
-			:set(hs)
-			:vector_sub_inplace(delta_c_abs)
-			--minimum separating distance
-			:minor_inplace()
-			--in the right direction
-			:vector_mul_inplace(delta_c:sign_inplace())
-			--from the aabb's point of view
-			:inverse_inplace()
+		res = (into or vec2(0)):set(hs):vector_sub_inplace(delta_c_abs):minor_inplace():vector_mul_inplace(delta_c
+			:sign_inplace()):inverse_inplace()
 	end
 	vec2.release(delta_c, delta_c_abs)
 	return res
 end
 
---return true on overlap, false otherwise
+---return true on overlap, false otherwise
+---@param a_pos Vec2
+---@param a_hs Vec2
+---@param b_pos Vec2
+---@param b_hs Vec2
+---@return boolean
 function intersect.aabb_aabb_overlap(a_pos, a_hs, b_pos, b_hs)
 	local delta = a_pos
 		:pooled_copy()
@@ -340,8 +404,14 @@ function intersect.aabb_aabb_overlap(a_pos, a_hs, b_pos, b_hs)
 	return overlap
 end
 
---discrete displacement
---return msv on collision, false otherwise
+---discrete displacement
+---return msv on collision, false otherwise
+---@param a_pos Vec2
+---@param a_hs Vec2
+---@param b_pos Vec2
+---@param b_hs Vec2
+---@param into Vec2
+---@return Vec2|nil
 function intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, b_hs, into)
 	local delta = a_pos
 		:pooled_copy()
@@ -355,7 +425,7 @@ function intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, b_hs, into)
 	local abs_amount = size
 		:pooled_copy()
 		:vector_sub_inplace(abs_delta)
-	local res = false
+	local res = nil
 	if abs_amount.x > COLLIDE_EPS and abs_amount.y > COLLIDE_EPS then
 		if not into then into = vec2(0) end
 		--actually collided
@@ -370,7 +440,12 @@ function intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, b_hs, into)
 	return res
 end
 
--- helper function to clamp point to aabb
+---helper function to clamp point to aabb
+---@param pos Vec2
+---@param hs Vec2
+---@param v Vec2
+---@param into Vec2
+---@return Vec2
 function intersect.aabb_point_clamp(pos, hs, v, into)
 	local v_min = pos
 		:pooled_copy()
@@ -385,7 +460,12 @@ function intersect.aabb_point_clamp(pos, hs, v, into)
 	return into
 end
 
--- return true on overlap, false otherwise
+---return true on overlap, false otherwise
+---@param a_pos Vec2
+---@param a_hs Vec2
+---@param b_pos Vec2
+---@param b_rad number
+---@return boolean
 function intersect.aabb_circle_overlap(a_pos, a_hs, b_pos, b_rad)
 	local clamped = intersect.aabb_point_clamp(a_pos, a_hs, b_pos, vec2:pooled())
 	local edge_distance_squared = clamped:distance_squared(b_pos)
@@ -393,7 +473,13 @@ function intersect.aabb_circle_overlap(a_pos, a_hs, b_pos, b_rad)
 	return edge_distance_squared <= (b_rad * b_rad)
 end
 
--- return msv on collision, false otherwise
+---return msv on collision, false otherwise
+---@param a_pos Vec2
+---@param a_hs Vec2
+---@param b_pos Vec2
+---@param b_rad number
+---@param into Vec2
+---@return Vec2|nil
 function intersect.aabb_circle_collide(a_pos, a_hs, b_pos, b_rad, into)
 	local abs_delta = a_pos
 		:pooled_copy()
@@ -404,7 +490,7 @@ function intersect.aabb_circle_collide(a_pos, a_hs, b_pos, b_rad, into)
 	--(clean up)
 	abs_delta:release()
 	--
-	local result
+	local result = nil
 	if like_aabb then
 		local pretend_hs = vec2:pooled(0, 0)
 		result = intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, pretend_hs, into)
@@ -418,22 +504,32 @@ function intersect.aabb_circle_collide(a_pos, a_hs, b_pos, b_rad, into)
 	return result
 end
 
---convert raw x, y, w, h rectangle components to aabb vectors
+---convert raw x, y, w, h rectangle components to aabb vectors
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+---@return Vec2, Vec2
 function intersect.rect_raw_to_aabb(x, y, w, h)
 	local hs = vec2(w, h):scalar_mul_inplace(0.5)
 	local pos = vec2(x, y):vector_add_inplace(hs)
 	return pos, hs
 end
 
---convert (x, y), (w, h) rectangle vectors to aabb vectors
+---convert (x, y), (w, h) rectangle vectors to aabb vectors
+---@param pos Vec2
+---@param size Vec2
 function intersect.rect_to_aabb(pos, size)
 	return intersect.rect_raw_to_aabb(pos.x, pos.y, size.x, size.y)
 end
 
---check if a point is in a polygon
---point is the point to test
---poly is a list of points in order
---based on winding number, so re-intersecting areas are counted as solid rather than inverting
+---check if a point is in a polygon
+---point is the point to test
+---poly is a list of points in order
+---based on winding number, so re-intersecting areas are counted as solid rather than inverting
+---@param point Vec2
+---@param poly Vec2[]
+---@return boolean
 function intersect.point_in_poly(point, poly)
 	local wn = 0
 	for i, a in ipairs(poly) do
@@ -464,7 +560,9 @@ end
 
 --todo: ensure this is all of them
 
---(helper for reversing only if there's actually a vector, preserving false)
+---(helper for reversing only if there's actually a vector, preserving false)
+---@param result? Vec2|nil
+---@return Vec2|nil
 function intersect.reverse_msv(result)
 	if result then
 		result:inverse_inplace()
@@ -472,59 +570,102 @@ function intersect.reverse_msv(result)
 	return result
 end
 
+---@param a Vec2
+---@param b_pos Vec2
+---@param b_rad number
+---@return boolean
 function intersect.point_circle_overlap(a, b_pos, b_rad)
 	return intersect.circle_point_overlap(b_pos, b_rad, a)
 end
 
+---@param a Vec2
+---@param b_pos Vec2
+---@param b_rad number
+---@param into Vec2
+---@return Vec2|nil
 function intersect.point_circle_collide(a, b_pos, b_rad, into)
 	return intersect.reverse_msv(intersect.circle_circle_collide(b_pos, b_rad, a, 0, into))
 end
 
+---@param a Vec2
+---@param b_pos Vec2
+---@param b_hs Vec2
+---@return boolean
 function intersect.point_aabb_overlap(a, b_pos, b_hs)
 	return intersect.aabb_point_overlap(b_pos, b_hs, a)
 end
 
+---@param a Vec2
+---@param b_pos Vec2
+---@param b_hs Vec2
+---@param into Vec2
+---@return Vec2|nil
 function intersect.point_aabb_collide(a, b_pos, b_hs, into)
 	return intersect.reverse_msv(intersect.aabb_point_collide(b_pos, b_hs, a, into))
 end
 
+---@param a Vec2
+---@param a_rad number
+---@param b_pos Vec2
+---@param b_hs Vec2
+---@return boolean
 function intersect.circle_aabb_overlap(a, a_rad, b_pos, b_hs)
 	return intersect.aabb_circle_overlap(b_pos, b_hs, a, a_rad)
 end
 
+---@param a Vec2
+---@param a_rad number
+---@param b_pos Vec2
+---@param b_hs Vec2
+---@param into Vec2
+---@return Vec2|nil
 function intersect.circle_aabb_collide(a, a_rad, b_pos, b_hs, into)
 	return intersect.reverse_msv(intersect.aabb_circle_collide(b_pos, b_hs, a, a_rad, into))
 end
 
+---@param a Vec2
+---@param a_rad number
+---@param b_start Vec2
+---@param b_end Vec2
+---@param b_rad number
+---@param into Vec2
+---@return Vec2|nil
 function intersect.circle_line_collide(a, a_rad, b_start, b_end, b_rad, into)
 	return intersect.reverse_msv(intersect.line_circle_collide(b_start, b_end, b_rad, a, a_rad, into))
 end
 
 --resolution helpers
 
---resolve a collision between two bodies, given a (minimum) separating vector
---	from a's frame of reference, like the result of any of the _collide functions
---requires the two positions of the bodies, the msv, and a balance factor
---balance should be between 1 and 0;
---	1 is only a_pos moving to resolve
---	0 is only b_pos moving to resolve
---	0.5 is balanced between both (default)
---note: this wont work as-is for line segments, which have two separate position coordinates
---		you will need to understand what is going on and move the both coordinates yourself
+---resolve a collision between two bodies, given a (minimum) separating vector
+---from a's frame of reference, like the result of any of the _collide functions
+---requires the two positions of the bodies, the msv, and a balance factor
+---balance should be between 1 and 0;
+---1 is only a_pos moving to resolve
+---0 is only b_pos moving to resolve
+---0.5 is balanced between both (default)
+---note: this wont work as-is for line segments, which have two separate position coordinates
+---you will need to understand what is going on and move the both coordinates yourself
+---@param a_pos Vec2
+---@param b_pos Vec2
+---@param msv Vec2
+---@param balance number
 function intersect.resolve_msv(a_pos, b_pos, msv, balance)
 	balance = balance or 0.5
 	a_pos:fused_multiply_add_inplace(msv, balance)
 	b_pos:fused_multiply_add_inplace(msv, -(1 - balance))
 end
 
--- gets a normalised balance factor from two mass inputs, and treats <=0 or infinite or nil masses as static bodies
--- returns false if we're colliding two static bodies, as that's invalid
+---gets a normalised balance factor from two mass inputs, and treats <=0 or infinite or nil masses as static bodies
+---returns false if we're colliding two static bodies, as that's invalid
+---@param a_mass number
+---@param b_mass number
+---@return number|nil
 function intersect.balance_from_mass(a_mass, b_mass)
 	--static cases
 	local a_static = not a_mass or a_mass <= 0 or a_mass == math.huge
 	local b_static = not b_mass or b_mass <= 0 or b_mass == math.huge
 	if a_static and b_static then
-		return false --colliding two static bodies
+		return nil --colliding two static bodies
 	elseif a_static then
 		return 0.0
 	elseif b_static then
@@ -536,8 +677,11 @@ function intersect.balance_from_mass(a_mass, b_mass)
 	return b_mass / total
 end
 
---bounce a velocity off of a normal (modifying velocity)
---essentially flips the part of the velocity in the direction of the normal
+---bounce a velocity off of a normal (modifying velocity)
+---essentially flips the part of the velocity in the direction of the normal
+---@param velocity Vec2
+---@param normal Vec2
+---@param conservation number
 function intersect.bounce_off(velocity, normal, conservation)
 	--(default)
 	conservation = conservation or 1
@@ -556,7 +700,11 @@ function intersect.bounce_off(velocity, normal, conservation)
 	return velocity
 end
 
---mutual bounce; two similar bodies bounce off each other, transferring energy
+---mutual bounce; two similar bodies bounce off each other, transferring energy
+---@param velocity_a Vec2
+---@param velocity_b Vec2
+---@param normal Vec2
+---@param conservation number
 function intersect.mutual_bounce(velocity_a, velocity_b, normal, conservation)
 	--(default)
 	conservation = conservation or 1

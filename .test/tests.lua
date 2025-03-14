@@ -3,15 +3,19 @@
 -- testy sets `...` to "module.test", so ignore that and use module top-level paths.
 package.path = package.path .. ";../?.lua"
 
+---@type Assert
 local assert = require("batteries.assert")
+---@type TableX
 local tablex = require("batteries.tablex")
+---@type Identifier
 local identifier = require("batteries.identifier")
+---@type StringX
 local stringx = require("batteries.stringx")
 
 -- tablex {{{
 
 local function test_shallow_copy()
-	local x,r
+	local x, r
 	x = { a = 1, b = 2, c = 3 }
 	r = tablex.shallow_copy(x)
 	assert:equal(r.a, 1)
@@ -24,7 +28,7 @@ local function test_shallow_copy()
 end
 
 local function test_deep_copy()
-	local x,r
+	local x, r
 	x = { a = 1, b = 2, c = 3 }
 	r = tablex.deep_copy(x)
 	assert:equal(r.a, 1)
@@ -40,7 +44,7 @@ end
 
 
 local function test_shallow_overlay()
-	local x,y,r
+	local x, y, r
 	x = { a = 1, b = 2, c = 3 }
 	y = { c = 8, d = 9 }
 	r = tablex.shallow_overlay(x, y)
@@ -66,7 +70,7 @@ local function test_shallow_overlay()
 end
 
 local function test_deep_overlay()
-	local x,y,r
+	local x, y, r
 	x = { a = 1, b = 2, c = 3 }
 	y = { c = 8, d = 9 }
 	r = tablex.deep_overlay(x, y)
@@ -90,7 +94,7 @@ end
 
 
 local function test_shallow_equal()
-	local x,y
+	local x, y
 	x = { a = { b = { 2 }, } }
 	y = { a = { b = { 2 }, } }
 	assert(not tablex.shallow_equal(x, y))
@@ -107,7 +111,7 @@ local function test_shallow_equal()
 end
 
 local function test_deep_equal()
-	local x,y
+	local x, y
 	x = { a = { b = { 2 }, c = { 3 }, } }
 	y = { a = { b = { 2 }, c = { 3 }, } }
 	assert(tablex.deep_equal(x, y))
@@ -200,7 +204,7 @@ end
 
 -- stringx
 local function test_title_case()
-    local str = "the quick brown fox jumps over the lazy dog"
+	local str = "the quick brown fox jumps over the lazy dog"
 
-    assert(stringx.title_case(str) == "The Quick Brown Fox Jumps Over The Lazy Dog")
+	assert(stringx.title_case(str) == "The Quick Brown Fox Jumps Over The Lazy Dog")
 end

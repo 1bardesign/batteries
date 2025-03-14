@@ -38,6 +38,9 @@
 		ship a game with this set true.
 ]]
 
+---@param time_budget number
+---@param memory_ceiling number
+---@param disable_otherwise boolean
 return function(time_budget, memory_ceiling, disable_otherwise)
 	time_budget = time_budget or 1e-3
 	memory_ceiling = memory_ceiling or math.huge

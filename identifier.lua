@@ -11,6 +11,7 @@
 
 local path = (...):gsub("identifier", "")
 
+---@class Identifier
 local identifier = {}
 
 --(internal; use a provided random generator object, or not)
@@ -22,16 +23,17 @@ end
 
 local uuid4_template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 
---generate a UUID version 4
+---generate a UUID version 4
+---@param rng table?
 function identifier.uuid4(rng)
 	--x should be 0x0-0xf, the single y should be 0x8-0xb
 	--4 should always just be 4 (denoting uuid version)
-    local out = uuid4_template:gsub("[xy]", function (c)
-        return string.format(
+	local out = uuid4_template:gsub("[xy]", function(c)
+		return string.format(
 			"%x",
 			c == "x" and _random(rng, 0x0, 0xf) or _random(rng, 0x8, 0xb)
 		)
-    end)
+	end)
 
 	return out
 end
@@ -43,8 +45,9 @@ local _encoding = {
 	"N", "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z"
 }
 
---since ulid needs time since unix epoch with miliseconds, we can just
---use socket. if that's not loaded, they'll have to provide their own
+---since ulid needs time since unix epoch with miliseconds, we can just
+---use socket. if that's not loaded, they'll have to provide their own
+---@param time_func nil|fun(...): number
 local function _now(time_func, ...)
 	if package.loaded.socket then return package.loaded.socket.gettime(...) end
 	if pcall(require, "socket") then return require("socket").gettime(...) end
@@ -52,8 +55,10 @@ local function _now(time_func, ...)
 	error("assertion failed: socket can't be found and no time function provided")
 end
 
---generate an ULID using this rng at this time (now by default)
---implementation based on https://github.com/Tieske/ulid.lua
+--=generate an ULID using this rng at this time (now by default)
+--=implementation based on https://github.com/Tieske/ulid.lua
+---@param rng table?
+---@param time number?
 function identifier.ulid(rng, time)
 	time = math.floor((time or _now()) * 1000)
 

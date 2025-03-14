@@ -3,20 +3,28 @@
 ]]
 
 local path = (...):gsub("vec2", "")
-local class = require(path .. "class")
+---@type Class
+local Class = require(path .. "class")
+---@type MathX
 local math = require(path .. "mathx") --shadow global math module
+---@type fun(class: Class, limit: number): Class
 local make_pooled = require(path .. "make_pooled")
 
-local vec2 = class({
+---@class Vec2 : PooledClass
+---@overload fun(x: number?, y: number?): Vec2
+local vec2 = Class({
 	name = "vec2",
 })
 
---stringification
+---stringification
+---@return string
 function vec2:__tostring()
 	return ("(%.2f, %.2f)"):format(self.x, self.y)
 end
 
---ctor
+---ctor
+---@param x number
+---@param y number
 function vec2:new(x, y)
 	if type(x) == "number" then
 		self:scalar_set(x, y)
@@ -33,53 +41,66 @@ function vec2:new(x, y)
 	end
 end
 
---explicit ctors; mostly vestigial at this point
+---explicit ctors; mostly vestigial at this point
+---@return Vec2
 function vec2:copy()
 	return vec2(self.x, self.y)
 end
 
+---@return Vec2
 function vec2:xy(x, y)
 	return vec2(x, y)
 end
 
+---@return Vec2
 function vec2:polar(length, angle)
 	return vec2(length, 0):rotate_inplace(angle)
 end
 
+---@return Vec2
 function vec2:filled(v)
 	return vec2(v, v)
 end
 
+---@return Vec2
 function vec2:zero()
 	return vec2(0)
 end
 
---unpack for multi-args
+---unpack for multi-args
+---@return number x, number y
 function vec2:unpack()
 	return self.x, self.y
 end
 
---pack when a sequence is needed
+---pack when a sequence is needed
+---@return table
 function vec2:pack()
-	return {self:unpack()}
+	return { self:unpack() }
 end
 
 --shared pooled storage
-make_pooled(vec2, 128)
+make_pooled(vec2 --[[@as Class]], 128)
 
---get a pooled copy of an existing vector
+---get a pooled copy of an existing vector
+---@return Vec2
 function vec2:pooled_copy()
 	return vec2:pooled(self)
 end
 
 --modify
 
+---@param v Vec2
+---@return Vec2
 function vec2:vector_set(v)
 	self.x = v.x
 	self.y = v.y
 	return self
 end
 
+---@param x number
+---@param y number?
+---@return Vec2
 function vec2:scalar_set(x, y)
 	if not y then y = x end
 	self.x = x
@@ -87,6 +108,8 @@ function vec2:scalar_set(x, y)
 	return self
 end
 
+---@param v Vec2
+---@return Vec2
 function vec2:swap(v)
 	local sx, sy = self.x, self.y
 	self.x, self.y = v.x, v.y
@@ -101,7 +124,10 @@ end
 --threshold for equality in each dimension
 local EQUALS_EPSILON = 1e-9
 
---true if a and b are functionally equivalent
+---true if a and b are functionally equivalent
+---@param a Vec2
+---@param b Vec2
+---@return boolean
 function vec2.equals(a, b)
 	return (
 		math.abs(a.x - b.x) <= EQUALS_EPSILON and
@@ -109,8 +135,11 @@ function vec2.equals(a, b)
 	)
 end
 
---true if a and b are not functionally equivalent
---(very slightly faster than `not vec2.equals(a, b)`)
+---true if a and b are not functionally equivalent
+---(very slightly faster than `not vec2.equals(a, b)`)
+---@param a Vec2
+---@param b Vec2
+---@return boolean
 function vec2.nequals(a, b)
 	return (
 		math.abs(a.x - b.x) > EQUALS_EPSILON or
@@ -126,32 +155,44 @@ vec2.not_equals = vec2.nequals
 -----------------------------------------------------------
 
 --vector
+
+---@param v Vec2
+---@return Vec2
 function vec2:vector_add_inplace(v)
 	self.x = self.x + v.x
 	self.y = self.y + v.y
 	return self
 end
 
+---@param v Vec2
+---@return Vec2
 function vec2:vector_sub_inplace(v)
 	self.x = self.x - v.x
 	self.y = self.y - v.y
 	return self
 end
 
+---@param v Vec2
+---@return Vec2
 function vec2:vector_mul_inplace(v)
 	self.x = self.x * v.x
 	self.y = self.y * v.y
 	return self
 end
 
+---@param v Vec2
+---@return Vec2
 function vec2:vector_div_inplace(v)
 	self.x = self.x / v.x
 	self.y = self.y / v.y
 	return self
 end
 
---(a + (b * t))
---useful for integrating physics and adding directional offsets
+---(a + (b * t))
+---useful for integrating physics and adding directional offsets
+---@param v Vec2
+---@param t number
+---@return Vec2
 function vec2:fused_multiply_add_inplace(v, t)
 	self.x = self.x + (v.x * t)
 	self.y = self.y + (v.y * t)
@@ -159,6 +200,10 @@ function vec2:fused_multiply_add_inplace(v, t)
 end
 
 --scalar
+
+---@param x number
+---@param y number
+---@return Vec2
 function vec2:scalar_add_inplace(x, y)
 	if not y then y = x end
 	self.x = self.x + x
@@ -166,6 +211,9 @@ function vec2:scalar_add_inplace(x, y)
 	return self
 end
 
+---@param x number
+---@param y number
+---@return Vec2
 function vec2:scalar_sub_inplace(x, y)
 	if not y then y = x end
 	self.x = self.x - x
@@ -173,6 +221,9 @@ function vec2:scalar_sub_inplace(x, y)
 	return self
 end
 
+---@param x number
+---@param y number?
+---@return Vec2
 function vec2:scalar_mul_inplace(x, y)
 	if not y then y = x end
 	self.x = self.x * x
@@ -180,6 +231,9 @@ function vec2:scalar_mul_inplace(x, y)
 	return self
 end
 
+---@param x number
+---@param y number?
+---@return Vec2
 function vec2:scalar_div_inplace(x, y)
 	if not y then y = x end
 	self.x = self.x / x
@@ -191,24 +245,31 @@ end
 -- geometric methods
 -----------------------------------------------------------
 
+---@return number
 function vec2:length_squared()
 	return self.x * self.x + self.y * self.y
 end
 
+---@return number
 function vec2:length()
 	return math.sqrt(self:length_squared())
 end
 
+---@param other Vec2
+---@return number
 function vec2:distance_squared(other)
 	local dx = self.x - other.x
 	local dy = self.y - other.y
 	return dx * dx + dy * dy
 end
 
+---@param other Vec2
+---@return number
 function vec2:distance(other)
 	return math.sqrt(self:distance_squared(other))
 end
 
+---@return Vec2, number
 function vec2:normalise_both_inplace()
 	local len = self:length()
 	if len == 0 then
@@ -217,22 +278,27 @@ function vec2:normalise_both_inplace()
 	return self:scalar_div_inplace(len), len
 end
 
+---@return Vec2
 function vec2:normalise_inplace()
 	local v, len = self:normalise_both_inplace()
 	return v
 end
 
+---@return number
 function vec2:normalise_len_inplace()
 	local v, len = self:normalise_both_inplace()
 	return len
 end
 
+---@return Vec2
 function vec2:inverse_inplace()
 	return self:scalar_mul_inplace(-1)
 end
 
 -- angle/direction specific
 
+---@param angle number
+---@return Vec2
 function vec2:rotate_inplace(angle)
 	local s = math.sin(angle)
 	local c = math.cos(angle)
@@ -243,6 +309,9 @@ function vec2:rotate_inplace(angle)
 	return self
 end
 
+---@param angle number
+---@param pivot Vec2
+---@return Vec2
 function vec2:rotate_around_inplace(angle, pivot)
 	self:vector_sub_inplace(pivot)
 	self:rotate_inplace(angle)
@@ -251,6 +320,8 @@ function vec2:rotate_around_inplace(angle, pivot)
 end
 
 --fast quarter/half rotations
+
+---@return Vec2
 function vec2:rot90r_inplace()
 	local ox = self.x
 	local oy = self.y
@@ -259,6 +330,7 @@ function vec2:rot90r_inplace()
 	return self
 end
 
+---@return Vec2
 function vec2:rot90l_inplace()
 	local ox = self.x
 	local oy = self.y
@@ -269,18 +341,25 @@ end
 
 vec2.rot180_inplace = vec2.inverse_inplace --alias
 
---get the angle of this vector relative to (1, 0)
+---get the angle of this vector relative to (1, 0)
+---@return number
 function vec2:angle()
+	---@diagnostic disable-next-line: deprecated
 	return math.atan2(self.y, self.x)
 end
 
---get the normalised difference in angle between two vectors
+---get the normalised difference in angle between two vectors
+---@param v Vec2
+---@return number
 function vec2:angle_difference(v)
 	return math.angle_difference(self:angle(), v:angle())
 end
 
---lerp towards the direction of a provided vector
---(length unchanged)
+---lerp towards the direction of a provided vector
+---(length unchanged)
+---@param v Vec2
+---@param t number
+---@return Vec2
 function vec2:lerp_direction_inplace(v, t)
 	return self:rotate_inplace(self:angle_difference(v) * t)
 end
@@ -289,18 +368,25 @@ end
 -- per-component clamping ops
 -----------------------------------------------------------
 
+---@param v Vec2
+---@return Vec2
 function vec2:min_inplace(v)
 	self.x = math.min(self.x, v.x)
 	self.y = math.min(self.y, v.y)
 	return self
 end
 
+---@param v Vec2
+---@return Vec2
 function vec2:max_inplace(v)
 	self.x = math.max(self.x, v.x)
 	self.y = math.max(self.y, v.y)
 	return self
 end
 
+---@param min Vec2
+---@param max Vec2
+---@return Vec2
 function vec2:clamp_inplace(min, max)
 	self.x = math.clamp(self.x, min.x, max.x)
 	self.y = math.clamp(self.y, min.y, max.y)
@@ -311,6 +397,7 @@ end
 -- absolute value
 -----------------------------------------------------------
 
+---@return Vec2
 function vec2:abs_inplace()
 	self.x = math.abs(self.x)
 	self.y = math.abs(self.y)
@@ -321,6 +408,7 @@ end
 -- sign
 -----------------------------------------------------------
 
+---@return Vec2
 function vec2:sign_inplace()
 	self.x = math.sign(self.x)
 	self.y = math.sign(self.y)
@@ -331,18 +419,21 @@ end
 -- truncation/rounding
 -----------------------------------------------------------
 
+---@return Vec2
 function vec2:floor_inplace()
 	self.x = math.floor(self.x)
 	self.y = math.floor(self.y)
 	return self
 end
 
+---@return Vec2
 function vec2:ceil_inplace()
 	self.x = math.ceil(self.x)
 	self.y = math.ceil(self.y)
 	return self
 end
 
+---@return Vec2
 function vec2:round_inplace()
 	self.x = math.round(self.x)
 	self.y = math.round(self.y)
@@ -353,12 +444,19 @@ end
 -- interpolation
 -----------------------------------------------------------
 
+---@param other Vec2
+---@param amount number
+---@return Vec2
 function vec2:lerp_inplace(other, amount)
 	self.x = math.lerp(self.x, other.x, amount)
 	self.y = math.lerp(self.y, other.y, amount)
 	return self
 end
 
+---@param other Vec2
+---@param amount number
+---@param eps number
+---@return Vec2
 function vec2:lerp_eps_inplace(other, amount, eps)
 	self.x = math.lerp_eps(self.x, other.x, amount, eps)
 	self.y = math.lerp_eps(self.y, other.y, amount, eps)
@@ -369,15 +467,21 @@ end
 -- vector products and projections
 -----------------------------------------------------------
 
+---@param other Vec2
+---@return number
 function vec2:dot(other)
 	return self.x * other.x + self.y * other.y
 end
 
---"fake", but useful - also called the wedge product apparently
+---"fake", but useful - also called the wedge product apparently
+---@param other Vec2
+---@return number
 function vec2:cross(other)
 	return self.x * other.y - self.y * other.x
 end
 
+---@param other Vec2
+---@return number
 function vec2:scalar_projection(other)
 	local len = other:length()
 	if len == 0 then
@@ -386,6 +490,8 @@ function vec2:scalar_projection(other)
 	return self:dot(other) / len
 end
 
+---@param other Vec2
+---@return Vec2
 function vec2:vector_projection_inplace(other)
 	local div = other:dot(other)
 	if div == 0 then
@@ -395,6 +501,8 @@ function vec2:vector_projection_inplace(other)
 	return self:vector_set(other):scalar_mul_inplace(fac)
 end
 
+---@param other Vec2
+---@return Vec2
 function vec2:vector_rejection_inplace(other)
 	local tx, ty = self.x, self.y
 	self:vector_projection_inplace(other)
@@ -402,18 +510,26 @@ function vec2:vector_rejection_inplace(other)
 	return self
 end
 
---get the winding side of p, relative to the line a-b
--- (this is based on the signed area of the triangle a-b-p)
--- return value:
---	>0 when p left of line
---	=0 when p on line
---	<0 when p right of line
+---get the winding side of p, relative to the line a-b
+---(this is based on the signed area of the triangle a-b-p)
+---return value:
+--->0 when p left of line
+---=0 when p on line
+---<0 when p right of line
+---@param a Vec2
+---@param b Vec2
+---@param p Vec2
+---@return number
 function vec2.winding_side(a, b, p)
 	return (b.x - a.x) * (p.y - a.y)
-		 - (p.x - a.x) * (b.y - a.y)
+		- (p.x - a.x) * (b.y - a.y)
 end
 
---return whether a is nearer to v than b
+---return whether a is nearer to v than b
+---@param v Vec2
+---@param a Vec2
+---@param b Vec2
+---@return boolean
 function vec2.nearer(v, a, b)
 	return v:distance_squared(a) < v:distance_squared(b)
 end
@@ -423,7 +539,10 @@ end
 --   (any common vector ops worth naming)
 -----------------------------------------------------------
 
---"physical" friction
+---"physical" friction
+---@param mu number
+---@param dt number
+---@return Vec2
 function vec2:apply_friction_inplace(mu, dt)
 	local friction = self:pooled_copy():scalar_mul_inplace(mu * dt)
 	if friction:length_squared() > self:length_squared() then
@@ -435,7 +554,10 @@ function vec2:apply_friction_inplace(mu, dt)
 	return self
 end
 
---"gamey" friction in one dimension
+---"gamey" friction in one dimension
+---@param v number
+---@param mu number
+---@param dt number
 local function _friction_1d(v, mu, dt)
 	local friction = mu * v * dt
 	if math.abs(friction) > math.abs(v) then
@@ -445,7 +567,10 @@ local function _friction_1d(v, mu, dt)
 	end
 end
 
---"gamey" friction in both dimensions
+---"gamey" friction in both dimensions
+---@param mu_x number
+---@param mu_y number
+---@param dt number
 function vec2:apply_friction_xy_inplace(mu_x, mu_y, dt)
 	self.x = _friction_1d(self.x, mu_x, dt)
 	self.y = _friction_1d(self.y, mu_y, dt)
@@ -453,42 +578,59 @@ function vec2:apply_friction_xy_inplace(mu_x, mu_y, dt)
 end
 
 --minimum/maximum components
+
+---@return number
 function vec2:mincomp()
 	return math.min(self.x, self.y)
 end
 
+---@return number
 function vec2:maxcomp()
 	return math.max(self.x, self.y)
 end
 
 -- meta functions for mathmatical operations
+
+---@param a Vec2
+---@param b Vec2
+---@return Vec2
 function vec2.__add(a, b)
-	return a:vector_add(b)
+	return a:vector_add_inplace(b)
 end
 
+---@param a Vec2
+---@param b Vec2
+---@return Vec2
 function vec2.__sub(a, b)
-	return a:vector_sub(b)
+	return a:vector_sub_inplace(b)
 end
 
+---@param a Vec2
+---@param b Vec2
+---@return Vec2
 function vec2.__mul(a, b)
 	if type(a) == "number" then
-		return b:scalar_mul(a)
+		return b:scalar_mul_inplace(a)
 	elseif type(b) == "number" then
-		return a:scalar_mul(b)
+		return a:scalar_mul_inplace(b)
 	else
-		return a:vector_mul(b)
+		return a:vector_mul_inplace(b)
 	end
 end
 
+---@param a Vec2
+---@param b Vec2
+---@return Vec2
 function vec2.__div(a, b)
 	if type(b) == "number" then
-		return a:scalar_div(b)
+		return a:scalar_div_inplace(b)
 	else
-		return a:vector_div(b)
+		return a:vector_div_inplace(b)
 	end
 end
 
--- mask out min component, with preference to keep x
+---mask out min component, with preference to keep x
+---@return Vec2
 function vec2:major_inplace()
 	if self.x > self.y then
 		self.y = 0
@@ -497,7 +639,9 @@ function vec2:major_inplace()
 	end
 	return self
 end
--- mask out max component, with preference to keep x
+
+---mask out max component, with preference to keep x
+---@return Vec2
 function vec2:minor_inplace()
 	if self.x < self.y then
 		self.y = 0
@@ -575,33 +719,33 @@ end
 --i do encourage using the longer versions above as it makes code easier
 --to understand when you come back, but i also appreciate wanting short code
 for _, v in ipairs({
-	{"sset", "scalar_set"},
-	{"sadd", "scalar_add"},
-	{"ssub", "scalar_sub"},
-	{"smul", "scalar_mul"},
-	{"sdiv", "scalar_div"},
-	{"vset", "vector_set"},
-	{"vadd", "vector_add"},
-	{"vsub", "vector_sub"},
-	{"vmul", "vector_mul"},
-	{"vdiv", "vector_div"},
+	{ "sset",      "scalar_set" },
+	{ "sadd",      "scalar_add" },
+	{ "ssub",      "scalar_sub" },
+	{ "smul",      "scalar_mul" },
+	{ "sdiv",      "scalar_div" },
+	{ "vset",      "vector_set" },
+	{ "vadd",      "vector_add" },
+	{ "vsub",      "vector_sub" },
+	{ "vmul",      "vector_mul" },
+	{ "vdiv",      "vector_div" },
 	--(no plain addi etc, imo it's worth differentiating vaddi vs saddi)
-	{"fma", "fused_multiply_add"},
-	{"vproj", "vector_projection"},
-	{"vrej", "vector_rejection"},
+	{ "fma",       "fused_multiply_add" },
+	{ "vproj",     "vector_projection" },
+	{ "vrej",      "vector_rejection" },
 	--just for the _inplace -> i shorthand, mostly for backwards compatibility
-	{"min", "min"},
-	{"max", "max"},
-	{"clamp", "clamp"},
-	{"abs", "abs"},
-	{"sign", "sign"},
-	{"floor", "floor"},
-	{"ceil", "ceil"},
-	{"round", "round"},
-	{"lerp", "lerp"},
-	{"rotate", "rotate"},
-	{"normalise", "normalise"},
-	{"normalize", "normalize"},
+	{ "min",       "min" },
+	{ "max",       "max" },
+	{ "clamp",     "clamp" },
+	{ "abs",       "abs" },
+	{ "sign",      "sign" },
+	{ "floor",     "floor" },
+	{ "ceil",      "ceil" },
+	{ "round",     "round" },
+	{ "lerp",      "lerp" },
+	{ "rotate",    "rotate" },
+	{ "normalise", "normalise" },
+	{ "normalize", "normalize" },
 }) do
 	local shorthand, original = v[1], v[2]
 	if vec2[shorthand] == nil then

@@ -29,12 +29,18 @@
 
 -- (modifications by Max Cahill 2018, 2020)
 
+---@class Sort
 local sort = {}
 
 --tunable size for insertion sort "bottom out"
 sort.max_chunk_size = 32
 
---insertion sort on a section of array
+---insertion sort on a section of array
+---@generic T
+---@param array T[]
+---@param first number
+---@param last number
+---@param less fun(v1: T, v2: T): boolean
 function sort._insertion_sort_impl(array, first, last, less)
 	for i = first + 1, last do
 		local k = first
@@ -51,7 +57,14 @@ function sort._insertion_sort_impl(array, first, last, less)
 	end
 end
 
---merge sorted adjacent sections of array
+---merge sorted adjacent sections of array
+---@generic T
+---@param array T[]
+---@param workspace T[]
+---@param low number
+---@param middle number
+---@param high number
+---@param less fun(v1: T, v2: T): boolean
 function sort._merge(array, workspace, low, middle, high, less)
 	local i, j, k
 	i = 1
@@ -68,7 +81,7 @@ function sort._merge(array, workspace, low, middle, high, less)
 		if (k >= j) or (j > high) then
 			break
 		end
-		if less(array[j], workspace[i])  then
+		if less(array[j], workspace[i]) then
 			array[k] = array[j]
 			j = j + 1
 		else
@@ -84,7 +97,13 @@ function sort._merge(array, workspace, low, middle, high, less)
 	end
 end
 
---implementation for the merge sort
+---implementation for the merge sort
+---@generic T
+---@param array T[]
+---@param workspace T[]
+---@param low number
+---@param high number
+---@param less fun(v1: T, v2: T): boolean
 function sort._merge_sort_impl(array, workspace, low, high, less)
 	if high - low <= sort.max_chunk_size then
 		sort._insertion_sort_impl(array, low, high, less)
@@ -103,6 +122,10 @@ local _sorted_types = {
 	["number"] = 1,
 	["string"] = 2,
 }
+
+---@param a any
+---@param b any
+---@return boolean
 local function default_less(a, b)
 	local sort_a = _sorted_types[type(a)]
 	local sort_b = _sorted_types[type(b)]
@@ -120,7 +143,11 @@ end
 --export it so others can use it
 sort.default_less = default_less
 
---inline common setup stuff
+---inline common setup stuff
+---@generic T
+---@param array T[]
+---@param less fun(v1: T, v2: T): boolean
+---@return boolean, number, fun(v1: T, v2: T): boolean
 function sort._sort_setup(array, less)
 	--default less
 	less = less or default_less
@@ -138,6 +165,9 @@ function sort._sort_setup(array, less)
 	return trivial, n, less
 end
 
+---@generic T
+---@param array T[]
+---@param less fun(v1: T, v2: T): boolean
 function sort.stable_sort(array, less)
 	--setup
 	local trivial, n
@@ -148,11 +178,14 @@ function sort.stable_sort(array, less)
 		local middle = math.ceil(n / 2)
 		workspace[middle] = array[1]
 		--dive in
-		sort._merge_sort_impl( array, workspace, 1, n, less )
+		sort._merge_sort_impl(array, workspace, 1, n, less)
 	end
 	return array
 end
 
+---@generic T
+---@param array T[]
+---@param less fun(v1: T, v2: T): boolean
 function sort.insertion_sort(array, less)
 	--setup
 	local trivial, n
@@ -172,4 +205,5 @@ function sort:export()
 	table.unstable_sort = sort.unstable_sort
 end
 
+---@type Sort
 return sort

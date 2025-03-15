@@ -31,6 +31,7 @@ end
 ---@field font_manager FontManager
 ---@field setup_debugging fun()
 ---@field debug_physics fun(world: love.World, x: number, y: number, width: number, height: number)
+---@field ECS ECS
 
 ---A collection of helpful code to get your project off the ground faster
 local _batteries = {
@@ -60,7 +61,8 @@ local _batteries = {
 	logger = require_relative("logger"),
 	font_manager = require_relative("font_manager"),
 	setup_debugging = require_relative("setup_debugging"),
-	debug_physics = require_relative("debug_physics")
+	debug_physics = require_relative("debug_physics"),
+	ECS = require_relative("ecs")
 }
 
 return _batteries --[[@as Batteries]]

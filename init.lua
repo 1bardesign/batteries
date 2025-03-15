@@ -27,6 +27,7 @@ end
 ---@field make_pooled fun(class: Class, limit: number): Class
 ---@field pathfind fun(args: PathFindArgs): boolean|table
 ---@field identifier Identifier
+---@field logger Logger
 
 ---A collection of helpful code to get your project off the ground faster
 local _batteries = {
@@ -52,7 +53,8 @@ local _batteries = {
 	measure = require_relative("measure"),
 	make_pooled = require_relative("make_pooled"),
 	pathfind = require_relative("pathfind"),
-	identifier = require_relative("identifier")
+	identifier = require_relative("identifier"),
+	logger = require_relative("logger")
 }
 
 return _batteries --[[@as Batteries]]

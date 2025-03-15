@@ -28,6 +28,7 @@ end
 ---@field pathfind fun(args: PathFindArgs): boolean|table
 ---@field identifier Identifier
 ---@field logger Logger
+---@field font_manager FontManager
 
 ---A collection of helpful code to get your project off the ground faster
 local _batteries = {
@@ -54,7 +55,8 @@ local _batteries = {
 	make_pooled = require_relative("make_pooled"),
 	pathfind = require_relative("pathfind"),
 	identifier = require_relative("identifier"),
-	logger = require_relative("logger")
+	logger = require_relative("logger"),
+	font_manager = require_relative("font_manager")
 }
 
 return _batteries --[[@as Batteries]]

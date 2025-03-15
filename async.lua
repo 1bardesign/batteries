@@ -201,7 +201,7 @@ end
 
 ---await the result of a function or set of functions
 ---return the results
----@param to_call fun(...): any
+---@param to_call table<fun(...): any>|fun(...): any
 ---@param args any
 ---@return any
 function async:await(to_call, args)

@@ -80,6 +80,7 @@ for _, v in ipairs({
 	"map_cycle",
 	"chain",
 	"map_chain",
+	"map_pairs",
 }) do
 	local functional_f = functional[v]
 	sequence[v] = function(self, ...)

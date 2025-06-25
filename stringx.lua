@@ -225,7 +225,7 @@ stringx.dedent = stringx.deindent
 
 --apply a template to a string
 --supports $template style values, given as a table or function
--- ie ("hello $name"):format({name = "tom"}) == "hello tom"
+-- ie ("hello $name"):apply_template({name = "tom"}) == "hello tom"
 function stringx.apply_template(s, sub)
 	local r = s:gsub("%$([%w_]+)", sub)
 	return r

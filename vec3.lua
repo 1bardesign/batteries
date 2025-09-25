@@ -511,13 +511,18 @@ function vec3.dot(a, b)
 	return a.x * b.x + a.y * b.y + a.z * b.z
 end
 
-function vec3.cross(a, b, into)
-	if not into then into = vec3:zero() end
-	return into:sset(
+function vec3.crossi(a, b)
+	return a:sset(
 		a.y * b.z - a.z * b.y,
 		a.z * b.x - a.x * b.z,
 		a.x * b.y - a.y * b.x
 	)
+end
+
+vec3.cross_inplace = vec3.crossi
+
+function vec3:cross(b, into)
+	(into or self:copy()):crossi(b)
 end
 
 --scalar projection a onto b

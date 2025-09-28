@@ -205,6 +205,11 @@ end
 --	these are not methods on the async object, but are
 --	intended to be called with dot syntax on the class itself
 
+--alias
+function async.yield(...)
+	return coroutine.yield(...)
+end
+
 --stall the current coroutine
 function async.stall()
 	return coroutine.yield("stall")

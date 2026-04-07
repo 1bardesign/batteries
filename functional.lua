@@ -108,9 +108,11 @@ function functional.map_call(t, m, ...)
 	for i = 1, #t do
 		local v = t[i]
 		local f = type(m) == "function" and m or v[m]
-		v = f(v, ...)
-		if v ~= nil then
-			table.insert(result, v)
+		if f then
+			v = f(v, ...)
+			if v ~= nil then
+				table.insert(result, v)
+			end
 		end
 	end
 	return result

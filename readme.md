@@ -28,6 +28,7 @@ Use find-in-all from your editor, or just browse through the code. The [module o
 	- With a normal `require` setup (ie stock LÖVE or lua), `init.lua` will pull in all the submodules.
 	- Batteries uses the (very common) init.lua convention. If your installation doesn't already have init.lua support (eg plain 5.1 on windows), add `package.path = package.path .. ";./?/init.lua"` before the require line. You can also modify your `LUA_PATH` environment variable.
 - (optionally) `export` everything to the global environment.
+- If you want LSP support there's a community effort over [here](https://github.com/josh-perry/batteries-lsp-annotations).
 
 ```lua
 --everything as globals
@@ -165,6 +166,10 @@ If there is a large enough user base in the future to make a versioning scheme +
 I personally prefer it, but I accept that it's a matter of taste and puts some people off.
 
 I've implemented experimental automatic API conversion (UpperCamelCase for types, lowerCamelCase for methods) that you can opt in to by calling `:camelCase()` before `:export()`, let me know if you use it and encounter any issues.
+
+## Language Server Annotations?
+
+If you want to use a language server there's a community LSP support over [here](https://github.com/josh-perry/batteries-lsp-annotations) - I'm afraid I don't want these in the main repo as I don't use them.
 
 # License
 

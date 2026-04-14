@@ -264,7 +264,7 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
 		local delta = v[1]
 		if delta.x ~= math.huge then
 			local len = delta:length_squared()
-			if len < math.huge then
+			if len < best_len then
 				best_len = len
 				best = v
 			end

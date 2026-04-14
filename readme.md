@@ -44,15 +44,13 @@ See [below](#export-globals) for a discussion of the pros and cons of `export`.
 
 # Library Culture and Contributing
 
-`batteries` aims to be approachable to almost everyone, but I _do_ expect you to get your hands dirty. I'm very open to collaboration, and happy to talk through issues or shortcomings in good faith.
+`batteries` aims to be approachable to almost everyone writing lua, but I _do_ expect you to get your hands dirty, which includes reading the source for docs.
 
-Pull requests are welcome for anything - positive changes will be merged optimistically, and I'm happy to work with you to get anything sensible ready for inclusion.
+As of 2026 my time is much more limited and I'm less able to accept pull requests and less open to direct collaboration. You're welcome to fork, and I'm not completely closed to collaboration, but I'm not going to optimistically merge things at this time.
 
-If you have something "big" to contribute _please_ get in touch before starting work so we can make sure it fits. I'm quite open minded!
+`batteries` is moving on a more personal trajectory, and I am also considering reverting some changes that haven't sat all that well with me for years. Any changes will be balanced against community impact, as I know the library has started to be used more widely, but I'm not going to just ignore my own opinions either.
 
-If you've had a good look for the answer but something remains unclear, raise an issue and I'll address it. If you _haven't_ had a good look for the answer, checking the source _always_ helps!
-
-If you'd prefer to talk with me about `batteries` in real time, I'm often available on the love2d discord.
+If you'd like to talk with me about `batteries` in real time, I'm often available on the love2d discord.
 
 # Module Overview
 
@@ -83,15 +81,15 @@ General utility data structures and algorithms to speed you along your way.
 Modules to help work with spatial concepts.
 
 - [`intersect`](./intersect.lua) - 2d intersection routines, a bit sparse at the moment.
-- [`vec2`](./vec2.lua) - 2d vectors with method chaining, and garbage saving modifying operations. A bit of a mouthful at times, but you get used to it. (there's an issue discussing future solutions).
-- [`vec3`](./vec3.lua) - 3d vectors as above.
+- [`vec2`](./vec2.lua) - 2d vectors with method chaining, and garbage saving modifying operations. A bit of a mouthful at times, but you get used to it.
+- [`vec3`](./vec3.lua) - 3d vectors as above, less mature.
 
 **Special Interest:**
 
 These modules are probably only useful to some folks in some circumstances, or are under-polished for one reason or another.
 
-- [`async`](./async.lua) - Asynchronous/"Background" task management.
-- [`colour`](./colour.lua) - Colour conversion routines. Alias `color`.
+- [`async`](./async.lua) - Asynchronous/"Background" task management. Basically convenience around lua coroutines.
+- [`colour`](./colour.lua) - Colour conversion and encoding routines. Alias `color`.
 - [`manual_gc`](./manual_gc.lua) - Get GC out of your update/draw calls. Useful when trying to get accurate profiling information; moves "randomness" of GC. Requires you to think a bit about your garbage budgets though.
 - [`measure`](./measure.lua) - Benchmarking helpers - measure the time or memory taken to run some code.
 - [`make_pooled`](./make_pooled.lua) - add pooling/recycling capability to a class
@@ -113,11 +111,9 @@ Endless, of course :)
 	- `delta` - Detect and sync changes to objects.
 - Broadphase:
 	- Spatial simplification systems for different needs. Probably AABB or point insertion of data.
-	- `bucket_grid` - Dumb 2d bucket broadphase.
+	- `bucket_grid` or `spatial_hash` - Simple 2d bucket broadphase.
 	- `sweep_and_prune` - Popular for bullet hell games.
 	- `quadtree`/`octree` - Everyone's favourite ;)
-- UI
-	- Maybe adopt [partner](https://github.com/1bardesign/partner) in here, or something evolved from it.
 - Image
 	- Maybe adopt [chromatic](https://github.com/1bardesign/chromatic) in here, or something evolved from it.
 
@@ -135,7 +131,7 @@ You can, of course, use the separate modules on their own, either requiring indi
 
 I'd strongly recommend that if you find yourself frustrated with the above, stop and think why/if you really want to avoid globals for something intended to be commonly used across your entire codebase! Are you explicitly `require`ing `math` and `table` everywhere you use it too? Are you just as ideologically opposed to `require` being a global?
 
-You may wish to reconsider, and save yourself typing `batteries` a few hundred times :)
+You may wish to reconsider, and save yourself typing `batteries` many, many times :)
 
 ## Git Submodule or Static Install?
 

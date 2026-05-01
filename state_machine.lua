@@ -50,10 +50,10 @@ end
 function state_machine:_call(name, ...)
 	local state = self:current_state()
 	if state then
-		if type(state[name]) == "function" then
-			return state[name](state, ...)
-		elseif type(state) == "function" then
+		if type(state) == "function" then
 			return state(name, self, ...)
+		elseif type(state[name]) == "function" then
+			return state[name](state, ...)
 		end
 	end
 	return nil

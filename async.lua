@@ -153,7 +153,7 @@ end
 
 --add a function to run after a certain delay (in seconds)
 function async:add_timeout(f, delay)
-	self:call(function()
+	return self:call(function()
 		async.wait(delay)
 		f()
 	end)
@@ -163,7 +163,7 @@ end
 --note: not super useful currently unless you plan to destroy the whole async kernel
 --		as there's no way to remove tasks :)
 function async:add_interval(f, delay)
-	self:call(function()
+	return self:call(function()
 		while true do
 			async.wait(delay)
 			f()

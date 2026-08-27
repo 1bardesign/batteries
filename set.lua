@@ -64,6 +64,11 @@ function set:size()
 	return #self._ordered
 end
 
+--check if the set is empty or not
+function set:empty()
+	return self:size() == 0
+end
+
 --return a value from the set
 --index must be between 1 and size() inclusive
 --adding/removing invalidates indices

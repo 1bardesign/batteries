@@ -496,18 +496,33 @@ function tablex.collapse(t)
 end
 
 --extract values of a table into nested tables of a set length
---	extract({1, 2, 3, 4}, 2) -> {{1, 2}, {3, 4}}
 --	useful for working with "inlined" data in a more structured way
+--	extract({1, 2, 3, 4}, 2) -> {{1, 2}, {3, 4}}
 --	can use collapse (or functional.stitch) to reverse the process once you're done if needed
---	todo: support an ordered list of keys passed and extract them to names
+--	OR pass an ordered list of keys to return structured data
+--	extract({1, 2, 3, 4}, {"a", "b"}) -> {{a = 1, b = 2}, {a = 3, b = 4}}
 function tablex.extract(t, n)
 	assert:type(t, "table", "tablex.extract - t", 1)
-	assert:type(n, "number", "tablex.extract - n", 1)
 	local r = {}
-	for i = 1, #t, n do
-		r[i] = {}
-		for j = 1, n do
-			table.insert(r[i], t[i + j])
+	if type(n) == "table" then
+		--overlay dynamic: n is reassigned to be the length of the keys table
+		local keys = n
+		n = #keys
+		for i = 1, #t, n do
+			local e = {}
+			for j = 1, n do
+				e[keys[j]] = t[i + j - 1]
+			end
+			table.insert(r, e)
+		end
+	else
+		assert:type(n, "number", "tablex.extract - n", 1)
+		for i = 1, #t, n do
+			local e = {}
+			for j = 0, n - 1 do
+				table.insert(e, t[i + j])
+			end
+			table.insert(r, e)
 		end
 	end
 	return r

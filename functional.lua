@@ -553,4 +553,16 @@ function functional.find_match(t, f)
 	return nil
 end
 
+--used to wrap an existing function with before and after behaviour, while preserving the original function
+-- any of the functions can be present or not, which allows using this for initialisation as well as modification
+--	often used something like:
+--	t.update = functional.wrap(t.update, function(self, dt) print(dt) end)
+function functional.wrap(f, before, after)
+	return function(...)
+		if before then before(...) end
+		if f then f(...) end
+		if after then after(...) end
+	end
+end
+
 return functional
